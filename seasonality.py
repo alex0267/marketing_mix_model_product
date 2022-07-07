@@ -1,5 +1,5 @@
-""" All seasonality & events related features """
-import datetime_module as dt
+" All seasonality & events related features """
+import datetime as dt
 from datetime import timedelta
 from functools import partial
 from typing import List, Tuple, Union
@@ -8,7 +8,6 @@ import numpy as np
 import pandas as pd
 from dateutil.easter import easter
 
-import names as n
 #from matrix.st_response_model.model_settings import model_settings
 
 from datetime_module import (
@@ -202,13 +201,13 @@ def add_quarterly_seasonality(year_week: pd.Series, quarter: int) -> pd.DataFram
 
 
 def construct_seasonality_and_event_features(
-    features_df: pd.DataFrame,
-    relevant_features: List[str],
-    additional_events: Tuple[Tuple[str, Union[Tuple[int, int], None]]],
+    features_df: pd.DataFrame
+    #relevant_features = None: List[str],
+    #additional_events: Tuple[Tuple[str, Union[Tuple[int, int], None]]],
 ) -> pd.DataFrame:
 
     _FEATURE_BUILDERS = {
-        "christmas": partial(_is_week_between, week_start=48, week_end=53),
+        "christmas_season": partial(_is_week_between, week_start=48, week_end=53),
         "easter": _is_easter_year_week,
         "is_antepenultimate_week": partial(_is_n_week_before_last_week, n_before=2),
         "is_penultimate_week": partial(_is_n_week_before_last_week, n_before=1),
@@ -238,25 +237,26 @@ def construct_seasonality_and_event_features(
         "is_end_summer": partial(_is_week_between, week_start=32, week_end=34),
     }
 
-    additional_event_features = additional_events.keys()
+    #additional_event_features = additional_events.keys()
     features_df["week"] = features_df["year_week"] % 100
 
 
-    for feature in set(relevant_features).difference(n.MONTHS_LIST):
+    for feature in _FEATURE_BUILDERS:
 
-        if feature in additional_event_features:
-            weeks = [weeks for f, weeks in additional_events.items() if f == feature]
-            weeks = weeks.pop() if weeks else None
+        #if feature in additional_event_features:
+        #    weeks = [weeks for f, weeks in additional_events.items() if f == feature]
+        #    weeks = weeks.pop() if weeks else None
 
         if feature in _FEATURE_BUILDERS:
             features_df[feature] = _FEATURE_BUILDERS[feature](year_week=features_df[n.F_YEAR_WEEK])
-        else:
-            features_df[feature] = features_df["week"].between(*weeks, inclusive="both").astype(int)
+
+        #else:
+        #    features_df[feature] = features_df["week"].between(*weeks, inclusive="both").astype(int)
 
     #if set(relevant_features).intersection(n.MONTHS_LIST):
     #    features_df = add_monthly_seasonality(features_df)
 
     features_df = features_df.drop(columns={"week"})
 
-
     return features_df
+
