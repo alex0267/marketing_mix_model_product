@@ -17,6 +17,8 @@ def run():
         #additional_events=model_settings.SEASONALITY_VARIABLES_EVENTS,
     )
 
+    features_df.to_csv("seasonality_features.csv")
+
     return features_df
 
 run()

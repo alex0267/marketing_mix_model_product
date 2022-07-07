@@ -248,7 +248,7 @@ def construct_seasonality_and_event_features(
         #    weeks = weeks.pop() if weeks else None
 
         if feature in _FEATURE_BUILDERS:
-            features_df[feature] = _FEATURE_BUILDERS[feature](year_week=features_df[n.F_YEAR_WEEK])
+            features_df[feature] = _FEATURE_BUILDERS[feature](year_week=features_df["year_week"])
 
         #else:
         #    features_df[feature] = features_df["week"].between(*weeks, inclusive="both").astype(int)
