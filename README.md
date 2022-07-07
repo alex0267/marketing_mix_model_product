@@ -10,7 +10,7 @@ First Prototype of a bayesian marketing mix model via STAN
     │   ├── datetime_module.py
     │   └── names.py
     └── MMM_Model               #Executes the Bayesian Marketing Mix Model
-    └── AfterProcessing         #Calculates interpretable metrics in form of spending response curves per brand and touchpoint
+    └── AfterProcessing         #Calculates interpretable metrics in form of spending response curves per brand & touchpoint
 
 ## Implementation
 
