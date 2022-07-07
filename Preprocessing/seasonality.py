@@ -9,44 +9,34 @@ import pandas as pd
 from dateutil.easter import easter
 
 #from matrix.st_response_model.model_settings import model_settings
-
-from datetime_module import (
-    contains_month_day_in_year_week,
-    get_calendar_year_from_year_index,
-    get_monday_timestamp,
-    get_nb_weeks_in_year,
-    get_year_week_day_timestamp,
-    get_year_week_from_date,
-    parse_year_index,
-    to_isocalendar_year_week,
-)
+import datetime_module
 
 
 def _is_easter_year_week(year_week: pd.Series) -> pd.Series:
     week_easter = pd.to_datetime(year_week.floordiv(100).apply(easter))
-    week_easter = week_easter.apply(to_isocalendar_year_week)
+    week_easter = week_easter.apply(datetime_module.to_isocalendar_year_week)
     return (year_week == week_easter).astype(int)
 
 
 def _is_saint_patrick(year_week: pd.Series) -> pd.Series:
     """PRUK specific event"""
     saint_patrick_days = pd.Series(
-        [dt.datetime(year, 3, 17) for year in set(year_week.apply(get_calendar_year_from_year_index))]
+        [dt.datetime(year, 3, 17) for year in set(year_week.apply(datetime_module.get_calendar_year_from_year_index))]
     )
 
-    year_weeks_saint_patrick = saint_patrick_days.apply(to_isocalendar_year_week)
+    year_weeks_saint_patrick = saint_patrick_days.apply(datetime_module.to_isocalendar_year_week)
     return year_week.isin(year_weeks_saint_patrick).astype(int)
 
 
 def _is_pay_day_events(year_week: pd.Series) -> pd.Series:
     """PRJ specific event"""
-    contains_25th = partial(contains_month_day_in_year_week, day=25)
+    contains_25th = partial(datetime_module.contains_month_day_in_year_week, day=25)
     return year_week.apply(contains_25th).astype(int)
 
 
 def _is_first_week_of_the_month(year_week: pd.Series) -> pd.Series:
     """PR SPAIN specific event"""
-    is_first_week = partial(contains_month_day_in_year_week, day=1)
+    is_first_week = partial(datetime_module.contains_month_day_in_year_week, day=1)
     return year_week.apply(is_first_week).astype(int)
 
 
@@ -55,11 +45,11 @@ def _is_golden_week_holidays(year_week: pd.Series) -> pd.Series:
     days_golden_weeks = pd.Series(
         [
             dt.datetime(year, 4, 30) + timedelta(days=k)
-            for year in set(year_week.apply(get_calendar_year_from_year_index))
+            for year in set(year_week.apply(datetime_module.get_calendar_year_from_year_index))
             for k in range(8)
         ]
     )
-    year_weeks_golden_week = days_golden_weeks.apply(to_isocalendar_year_week)
+    year_weeks_golden_week = days_golden_weeks.apply(datetime_module.to_isocalendar_year_week)
     return year_week.isin(year_weeks_golden_week).astype(int)
 
 
@@ -113,19 +103,19 @@ def _is_st_patrick_off_nabca(year_week: pd.Series) -> pd.Series:
 
 
 def _is_second_week(year_week: pd.Series) -> pd.Series:
-    _, week = parse_year_index(year_index=year_week)
+    _, week = datetime_module.parse_year_index(year_index=year_week)
     second_week = (week == 2).astype(int)
     return second_week
 
 
 def _is_first_week2019_off_nabca(year_week: pd.Series) -> pd.Series:
-    year, week = parse_year_index(year_index=year_week)
+    year, week = datetime_module.parse_year_index(year_index=year_week)
     first_week2019 = ((week == 1) & (year == 2019)).astype(int)
     return first_week2019
 
 
 def _is_week52_2020_off_nabca(year_week: pd.Series) -> pd.Series:
-    year, week = parse_year_index(year_index=year_week)
+    year, week = datetime_module.parse_year_index(year_index=year_week)
     week52_2020 = ((week == 52) & (year == 2020)).astype(int)
     return week52_2020
 
@@ -142,11 +132,11 @@ def _thanksgiving(year_week: pd.Series) -> pd.Series:
 def _is_specific_date(year_week: pd.Series, month: int, day: int, year: int = None) -> pd.Series:
     if year is None:
         dates = pd.Series(
-            [dt.datetime(i, month, day) for i in set(year_week.apply(get_calendar_year_from_year_index))]
+            [dt.datetime(i, month, day) for i in set(year_week.apply(datetime_module.get_calendar_year_from_year_index))]
         )
     else:
         dates = pd.Series([dt.datetime(year, month, day)])
-    year_weeks_end_of_year = get_year_week_from_date(dates=dates)
+    year_weeks_end_of_year = datetime_module.get_year_week_from_date(dates=dates)
     return year_week.isin(year_weeks_end_of_year).astype(int)
 
 
@@ -154,11 +144,11 @@ def _is_end_of_year_week(year_week: pd.Series) -> pd.Series:
     last_days_of_year = pd.Series(
         [
             dt.datetime(i, 12, 31) - timedelta(days=k)
-            for i in set(year_week.apply(get_calendar_year_from_year_index))
+            for i in set(year_week.apply(datetime_module.get_calendar_year_from_year_index))
             for k in range(4)
         ]
     )
-    year_weeks_end_of_year = last_days_of_year.apply(to_isocalendar_year_week)
+    year_weeks_end_of_year = last_days_of_year.apply(datetime_module.to_isocalendar_year_week)
     return year_week.isin(year_weeks_end_of_year).astype(int)
 
 
@@ -170,13 +160,13 @@ def _is_week_between(year_week: pd.Series, week_start: int, week_end: int) -> pd
 def _is_n_week_before_last_week(year_week: pd.Series, n_before: int) -> pd.Series:
     """Flags weeks corresponding to n week before the last one of the year"""
     years, weeks = year_week // 100, year_week.mod(100)
-    nb_weeks_in_year = years.apply(get_nb_weeks_in_year)
+    nb_weeks_in_year = years.apply(datetime_module.get_nb_weeks_in_year)
     return (weeks == (nb_weeks_in_year - n_before)).astype(int)
 
 
 def _compute_week_in_month_cosinus(year_week: pd.Series) -> pd.Series:
     """gives a 'feeling' of the position of the Monday within the month."""
-    monday = year_week.apply(get_monday_timestamp)
+    monday = year_week.apply(datetime_module.get_monday_timestamp)
     week_in_month = np.cos(2 * np.pi * monday.dt.day / 31)
     return week_in_month
 
@@ -196,7 +186,7 @@ def add_monthly_seasonality(df: pd.DataFrame) -> pd.DataFrame:
 def add_quarterly_seasonality(year_week: pd.Series, quarter: int) -> pd.DataFrame:
     assert (quarter >= 1) and (quarter <= 4)
     quarter_first_week = 13 * (quarter - 1) + 1
-    _, weeks = parse_year_index(year_week)
+    _, weeks = datetime_module.parse_year_index(year_week)
     return weeks.between(quarter_first_week, quarter_first_week + 13).astype(int)
 
 
