@@ -2,6 +2,16 @@
 First Prototype of a bayesian marketing mix model via STAN
 
 ## Structure
+    .
+    ├── Data                    # Collection of data sources in the form of .csv-files
+    ├── Preprocessing           # Contains the data preparation pipeline, feature engineering and normalization
+    │   ├── main_preprocessing.py
+    │   ├── seasonality.py
+    │   ├── datetime_module.py
+    │   └── names.py
+    └── ...
+
+## Implementation
 
 ### Pre-processing
 Contains the data preparation pipeline.
