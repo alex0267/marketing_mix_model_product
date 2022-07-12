@@ -1,3 +1,19 @@
+'''
+Current status of development:
+OUT OF SCOPE FOR V01
+
+V02
+
+DONE
+/
+
+TO BE DONE:
+- Implement construct_price_competitors_feature
+- Construct mapping logic of PR brands to competition brands
+- ADVANCED: Implement compute_price_competitors_feature_as_discount
+
+'''
+
 # import logging
 #
 # import pandas as pd

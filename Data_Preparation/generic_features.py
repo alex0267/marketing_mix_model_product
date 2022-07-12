@@ -1,3 +1,13 @@
+'''
+Current status of development - V01:
+
+DONE
+- create_feature_as_gap_to_brand_reference_level
+
+TO BE DONE
+/
+
+'''
 
 from typing import Tuple
 

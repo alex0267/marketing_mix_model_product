@@ -1,3 +1,15 @@
+
+'''
+Current status of development - V01:
+
+DONE
+- Implemented basic price discount feature
+
+TO BE DONE
+/
+
+'''
+
 from typing import Optional
 import pandas as pd
 
@@ -53,6 +65,8 @@ def compute_price_discount_feature(
     # multiplication of columns *-1 to reverse the promotion logic
     # -> increasing ratio = increasing sales (by increasing promotion)
     sell_out_pr_agg_df[col_feature] = sell_out_pr_agg_df[col_feature] * (-1)
+
+    sell_out_pr_agg_df = sell_out_pr_agg_df[["YEAR_WEEK", "BRAND", "VOLUME_SO", "relative_gap_to_90th_price"]]
 
     return sell_out_pr_agg_df
 
