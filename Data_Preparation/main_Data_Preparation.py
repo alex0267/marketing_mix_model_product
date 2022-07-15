@@ -16,6 +16,9 @@ import promotion
 import pandas as pd
 import numpy as np
 import os
+import plot
+import yaml
+import normalization
 
 #get current working directory
 #print(os.getcwd())
@@ -41,7 +44,11 @@ def run():
     media_exec = media_exec_df[["YEAR_WEEK", "BRAND", "TOUCHPOINT", "SPEND"]]
     feature_df = feature_df.merge(media_exec, on=["YEAR_WEEK","BRAND"])
         #turn media variables into columns with primary key ['YEAR_WEEK','BRAND','TOUCHPOINT'] by SPEND
-    feature_df = feature_df.set_index(['YEAR_WEEK','BRAND','TOUCHPOINT'])['SPEND'].unstack().add_suffix('_SPEND').reset_index()
+    feature_df = feature_df.set_index(['YEAR_WEEK','BRAND','TOUCHPOINT'])['SPEND'].unstack().reset_index()
+
+    #plot data
+    #plot.touchpoint_spendings_per_brand(feature_df)
+    #plot.touchpoint_spendings(feature_df,media_exec["TOUCHPOINT"].unique())
 
     #calculate event & seasonality features AND merge
     seasonality_df = seasonality.construct_seasonality_and_event_features(unique_weeks)
@@ -52,15 +59,31 @@ def run():
     promotion_df = promotion_df.rename(columns={"VOLUME_SO": "TARGET_VOL_SO", "relative_gap_to_90th_price": "PROMOTION_FEATURE"})
     feature_df = feature_df.merge(promotion_df, on=["YEAR_WEEK","BRAND"])
 
+    #plot.touchpoint_spendings_per_brand(feature_df)
+
     #calculate competiton feature based on category
     #comp = testing.construct_price_competitors_feature(sell_out_competition_df)
 
-    #normalize data
+    #drop touchpoint fiona since it does not have definitions allocated
+    feature_df = feature_df.drop('fiona', axis=1)
 
-    # final output dataframe
-    # feature_df.to_csv("feature_df.csv")
-    feature_df.to_csv("feature_df.csv")
+    #load config file (yaml)
+    with open('../config/baseConfig.yaml', 'r') as file:
+        configurations = yaml.safe_load(file)
+
+    for touchpoint in configurations['TOUCHPOINTS']:
+
+        #define the type of normalization(s) to apply defined in config 'NORMALIZATION_STEPS_SPEND':
+        # First we apply the max/custom normalization
+        # Second we do the log transformation for each touchpoint
+        normalization_steps = configurations['NORMALIZATION_STEPS_TOUCHPOINTS'][touchpoint]
+
+        #send the column to the normalization file with all required parameters
+        feature_df[touchpoint] = normalization.normalize_feature(feature_df, normalization_steps, configurations, touchpoint)
 
     return feature_df
 
-run()
+feature_df = run()
+
+# final output dataframe
+feature_df.to_csv("feature_df.csv")

@@ -1,0 +1,64 @@
+
+#Current status of development - V01:
+#
+#DONE
+#-
+#
+#TO BE DONE
+#- Merge all user definable parameters from code to config file
+#  - channel in use
+#  - tochpoints in use
+#  - normalization settings
+#  - bayesian settings
+#  - ...
+
+TOUCHPOINTS:
+  - tom
+  - laura
+  - lisa
+  - mary
+  - jack
+#  - lucy - no data of lucy in touchpoint spendings
+  - marc
+  - alex
+#  - fiona - fiona is missing in the definitions but has allocated touchpoint spendings
+
+brand_to_shape_params:
+  tom:
+    threshold: 7000
+    saturation: 83000
+  laura:
+    threshold: 7000
+    saturation: 90000
+  lisa:
+    threshold: 5000
+    saturation: 120000
+  mary:
+    threshold: 3500
+    saturation: 100000
+  jack:
+    threshold: 3500
+    saturation: 90000
+  lucy:
+    threshold: 5000
+    saturation: 150000
+  marc:
+    threshold: 50000
+    saturation: 1000000
+  alex:
+    threshold: 15000
+    saturation: 350000
+
+#defining normalization steps of touchpoints
+NORMALIZATION_STEPS_TOUCHPOINTS:
+#  distribution_off: ['log', 'minus_mean', 'std']
+  tom: ['custom_normalization', 'log']
+  laura: ['custom_normalization', 'log']
+  lisa: ['custom_normalization', 'log']
+  mary: ['custom_normalization', 'log']
+  jack: ['custom_normalization', 'log']
+  lucy: ['max_across_brands', 'log']
+  marc: ['max_across_brands', 'log']
+  alex: ['max_across_brands', 'log']
+#  brand_experience: ['max_across_brands']
+#  off_trade_activation: ['max_across_brands']
