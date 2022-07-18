@@ -7,9 +7,10 @@
 #TO BE DONE
 #- Merge all user definable parameters from code to config file
 #  - channel in use
-#  - tochpoints in use
+#  - tuochpoints in use
 #  - normalization settings
 #  - bayesian settings
+#  - Seasonality
 #  - ...
 
 TOUCHPOINTS:
@@ -62,3 +63,21 @@ NORMALIZATION_STEPS_TOUCHPOINTS:
   alex: ['max_across_brands', 'log']
 #  brand_experience: ['max_across_brands']
 #  off_trade_activation: ['max_across_brands']
+
+
+#SEASONALITY_VARIABLES_BASE:
+#  - january
+#  - february
+#  - march
+#  - april
+#  - may
+#  - june
+#  - july
+#  - august
+#  - september
+#  - october
+#  - november
+#  - december
+#  - christmas
+#  - is_penultimate_week
+#  - is_year_end_week
