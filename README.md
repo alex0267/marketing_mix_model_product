@@ -17,7 +17,7 @@ First Prototype of a bayesian marketing mix model via STAN
 
 ## Implementation
 
-### Pre-processing
+### Data_Preparation
 Contains the data preparation pipeline.
 Processes data tables for feature creation and feature normalization. 
 
@@ -41,9 +41,9 @@ Supports datetime specific calculations in seasonality.py
 Module to standardize the column names in the code
 
 
-### MMM Model
+### Response_Model : MMM Model
 TO BE DEFINED
 
-### After-processing
+### Business_Output : After-processing
 TO BE DEFINED
 
