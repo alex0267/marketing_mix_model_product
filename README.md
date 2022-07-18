@@ -3,14 +3,17 @@ First Prototype of a bayesian marketing mix model via STAN
 
 ## Structure
     .
+    ├── Business_Output         # Calculates interpretable metrics in form of spending response curves per brand & touchpoint
+    ├── config                  # yaml config files
     ├── Data                    # Collection of data sources in the form of .csv-files
-    ├── PreProcessing           # Contains the data preparation pipeline, feature engineering and normalization
-    │   ├── main_preprocessing.py
+    ├── Data_Preparation        # Contains the data preparation pipeline, feature engineering and normalization
+    │   ├── main_Data_Preparation.py
     │   ├── seasonality.py
+    │   ├── promotion.py
+    │   ├── normalization.py
     │   ├── datetime_module.py
     │   └── names.py
-    └── MMM_Model               #Executes the Bayesian Marketing Mix Model
-    └── AfterProcessing         #Calculates interpretable metrics in form of spending response curves per brand & touchpoint
+    └── Response_Model          # Executes the Bayesian Marketing Mix Model
 
 ## Implementation
 
