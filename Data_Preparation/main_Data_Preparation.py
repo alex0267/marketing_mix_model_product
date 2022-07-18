@@ -73,7 +73,7 @@ def run():
 
     for touchpoint in configurations['TOUCHPOINTS']:
 
-        #define the type of normalization(s) to apply defined in config 'NORMALIZATION_STEPS_SPEND':
+        #define the type of normalization(s) to apply defined in config 'NORMALIZATION_STEPS_TOUCHPOINTS':
         # First we apply the max/custom normalization
         # Second we do the log transformation for each touchpoint
         normalization_steps = configurations['NORMALIZATION_STEPS_TOUCHPOINTS'][touchpoint]
