@@ -71,16 +71,22 @@ def run():
     with open('config/baseConfig.yaml', 'r') as file:
         configurations = yaml.safe_load(file)
 
-    for touchpoint in configurations['TOUCHPOINTS']:
+        #filter dataframe by brands in scope
+        feature_df = feature_df[feature_df['BRAND'].isin(configurations['BRANDS'])]
 
-        #define the type of normalization(s) to apply defined in config 'NORMALIZATION_STEPS_TOUCHPOINTS':
-        # First we apply the max/custom normalization
-        # Second we do the log transformation for each touchpoint
-        normalization_steps = configurations['NORMALIZATION_STEPS_TOUCHPOINTS'][touchpoint]
+        for touchpoint in configurations['TOUCHPOINTS']:
 
-        #send the column to the normalization file with all required parameters
-        feature_df[touchpoint] = Data_Preparation.normalization.normalize_feature(feature_df, normalization_steps, configurations, touchpoint)
+            #define the type of normalization(s) to apply defined in config 'NORMALIZATION_STEPS_TOUCHPOINTS':
+            # First we apply the max/custom normalization
+            # Second we do the log transformation for each touchpoint
+            normalization_steps = configurations['NORMALIZATION_STEPS_TOUCHPOINTS'][touchpoint]
 
+            #send the column to the normalization file with all required parameters
+            feature_df[touchpoint] = Data_Preparation.normalization.normalize_feature(feature_df, normalization_steps, configurations, touchpoint)
+
+        #normalize and log transform sales
+        feature_df['TARGET_VOL_SO'] = Data_Preparation.normalization.normalize_feature(feature_df, configurations['NORMALIZATION_STEPS_TARGET']['TARGET_VOL_SO'], configurations, 'TARGET_VOL_SO')
+    
     return feature_df
 
 

@@ -1,21 +1,24 @@
 import helper_functions.transformations
 import numpy as np
+import yaml
 
-def createDict(data, spendingsFrame):
-    df_mmm, sc_mmm = helper_functions.transformations.mean_log1p_trandform(data, ['sales'])
-    mu_touchpoints = spendingsFrame.mean().values
-    max_lag = 4
-    num_media = len(spendingsFrame.columns)
-    X_media = np.concatenate((np.zeros((max_lag-1, num_media)), np.array(spendingsFrame)),axis=0)
+def createDict(feature_df, max_lag):
+
+    with open('test_suite/baseConfig.yaml', 'r') as file:
+        configurations = yaml.safe_load(file)
+
+        num_media = len(configurations['TOUCHPOINTS'])
+
+        X_media = feature_df[configurations['TOUCHPOINTS']]
+        X_media = np.concatenate((np.zeros((max_lag-1, num_media)), np.array(X_media)),axis=0)
 
 
     stanDict = {
-        'N': len(data),
+        'N': len(feature_df),
         'max_lag': max_lag, 
         'num_media': num_media,
         'X_media': X_media, 
-        'mu_mdip': mu_touchpoints,
-        'y': df_mmm['sales'].values
+        'y': feature_df['sales'].values
     }
 
     return stanDict

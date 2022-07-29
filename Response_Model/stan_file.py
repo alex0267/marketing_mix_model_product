@@ -19,8 +19,6 @@ data {
   int<lower=0> num_media;
   // matrix of media variables
   matrix[N+max_lag-1, num_media] X_media;
-  // vector of media variables' mean
-  real mu_mdip[num_media];
 
 }
 parameters {
@@ -50,7 +48,7 @@ transformed parameters {
         lag_weights[max_lag-lag+1] <- pow(decay[media], (lag - 1 - peak[media]) ^ 2);
       }
     cum_effect <- Adstock(sub_col(X_media, nn, media, max_lag), lag_weights);
-    X_media_adstocked[nn, media] <- log1p(cum_effect/mu_mdip[media]);
+    X_media_adstocked[nn, media] <- log1p(cum_effect);
     }
   } 
 }

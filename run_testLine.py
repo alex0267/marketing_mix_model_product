@@ -1,6 +1,8 @@
 import test_suite.data_generation
 import test_suite.stan_dict
+import test_suite.data_preparation
 from Response_Model.main_Response_Model import ResponseModel
+
 
 #Run pipeline tasks:
 # - Data Preparation
@@ -9,6 +11,10 @@ from Response_Model.main_Response_Model import ResponseModel
 
 #Define test format
 
+#maximum number of weeks the touchpoint can influence sales
+max_lag = 4
+
+#touchpoint definition
 touchpoints = [
                {
                    'name':'touchpoint_2',
@@ -26,13 +32,19 @@ touchpoints = [
                 }
                ]
 
-#Create features and prepare data
+#Create features
 data, spendingsFrame = test_suite.data_generation.simulateTouchpoints(touchpoints,'_adstocked')
-stanDict = test_suite.stan_dict.createDict(data, spendingsFrame)
 
-#Train Bayesian Model
+
+#Prepare data
+feature_df = test_suite.data_preparation.normalize_data(data, spendingsFrame)
+
+#create stan dictionary
+stanDict = test_suite.stan_dict.createDict(feature_df, max_lag)
+
+#Initialize Model instance and Train Bayesian Model
 responseModel = ResponseModel(touchpoints, stanDict)
-responseModel.runModel(load=True)
+responseModel.runModel(load=False)
 
 
 

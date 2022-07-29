@@ -1,0 +1,34 @@
+
+
+TOUCHPOINTS:
+  - touchpoint_2
+  - touchpoint_3
+
+#defining normalization steps of touchpoints
+NORMALIZATION_STEPS_TOUCHPOINTS:
+
+  
+  touchpoint_2: ['max_across_brands']
+  touchpoint_3: ['max_across_brands']
+  
+
+#defining normalization steps of touchpoints
+NORMALIZATION_STEPS_SALES:
+  sales: ['max_across_brands', 'log']
+
+#SEASONALITY_VARIABLES_BASE:
+#  - january
+#  - february
+#  - march
+#  - april
+#  - may
+#  - june
+#  - july
+#  - august
+#  - september
+#  - october
+#  - november
+#  - december
+#  - christmas
+#  - is_penultimate_week
+#  - is_year_end_week

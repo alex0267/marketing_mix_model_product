@@ -13,6 +13,10 @@
 #  - Seasonality
 #  - ...
 
+#Brands in scope
+BRANDS:
+  - angry_cat
+
 TOUCHPOINTS:
   - tom
   - laura
@@ -20,7 +24,7 @@ TOUCHPOINTS:
   - mary
   - jack
 #  - lucy - no data of lucy in touchpoint spendings
-  - marc
+#  - marc
   - alex
 #  - fiona - fiona is missing in the definitions but has allocated touchpoint spendings
 
@@ -53,16 +57,24 @@ brand_to_shape_params:
 #defining normalization steps of touchpoints
 NORMALIZATION_STEPS_TOUCHPOINTS:
 #  distribution_off: ['log', 'minus_mean', 'std']
-  tom: ['custom_normalization', 'log']
-  laura: ['custom_normalization', 'log']
-  lisa: ['custom_normalization', 'log']
-  mary: ['custom_normalization', 'log']
-  jack: ['custom_normalization', 'log']
-  lucy: ['max_across_brands', 'log']
-  marc: ['max_across_brands', 'log']
-  alex: ['max_across_brands', 'log']
+# in the original, the log transformation is also applied here
+# this is ignored in V01 to facilitate the model
+# log transformation happens in the stan file
+  #tom: ['custom_normalization', 'log']
+
+  tom: ['custom_normalization']
+  laura: ['custom_normalization']
+  lisa: ['custom_normalization']
+  mary: ['custom_normalization']
+  jack: ['custom_normalization']
+  lucy: ['max_across_brands']
+  marc: ['max_across_brands']
+  alex: ['max_across_brands']
 #  brand_experience: ['max_across_brands']
 #  off_trade_activation: ['max_across_brands']
+
+NORMALIZATION_STEPS_TARGET:
+  TARGET_VOL_SO: ['max_across_brands', 'log']
 
 
 #SEASONALITY_VARIABLES_BASE:
