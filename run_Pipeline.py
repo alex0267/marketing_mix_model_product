@@ -26,7 +26,7 @@ stanDict = Response_Model.stanDict.createDict(feature_df, max_lag)
 print(stanDict)
 
 #Initialize Model instance and Train Bayesian Model
-responseModel = ResponseModel(0,stanDict, configurations)
+responseModel = ResponseModel(stanDict, configurations)
 responseModel.runModel(load=True)
 responseModel.extractParameters()
 

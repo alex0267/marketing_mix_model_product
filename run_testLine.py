@@ -2,6 +2,7 @@ import test_suite.data_generation
 import test_suite.stan_dict
 import test_suite.data_preparation
 from Response_Model.main_Response_Model import ResponseModel
+import yaml
 
 
 #Run pipeline tasks:
@@ -10,6 +11,10 @@ from Response_Model.main_Response_Model import ResponseModel
 # - Output Generation
 
 #Define test format
+
+#Define configurations to be used
+with open('test_suite/baseConfig.yaml', 'r') as file:
+            configurations = yaml.safe_load(file)
 
 #maximum number of weeks the touchpoint can influence sales
 max_lag = 4
@@ -43,9 +48,9 @@ feature_df = test_suite.data_preparation.normalize_data(data, spendingsFrame)
 stanDict = test_suite.stan_dict.createDict(feature_df, max_lag)
 
 #Initialize Model instance and Train Bayesian Model
-responseModel = ResponseModel(touchpoints, stanDict)
+responseModel = ResponseModel(stanDict, configurations)
 responseModel.runModel(load=False)
-
+responseModel.extractParameters()
 
 
 

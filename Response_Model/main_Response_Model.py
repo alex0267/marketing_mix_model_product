@@ -8,9 +8,8 @@ import yaml
 #Also contains the functions to estimate and extract parameters
 class ResponseModel:
 
-    def __init__(self,touchpoints, stanDict, configurations):
+    def __init__(self, stanDict, configurations):
         #define touchpoints and parameters (later replaced by yaml config files)
-        self.touchpoints = touchpoints
         self.max_length = 4
         self.stanDict = stanDict
         self.configurations = configurations
