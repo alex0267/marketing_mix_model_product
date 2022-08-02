@@ -19,15 +19,21 @@ def normalize_feature(
             normalized_feature = normalized_feature / scaling_factor
 
 
+        #application of mean
+        elif step == 'mean_across_brands':
+            scaling_factor = normalized_feature.mean()
+            normalized_feature = normalized_feature / scaling_factor
+        
         #application of max-based normalization
         elif step == 'max_across_brands':
             scaling_factor = normalized_feature.max()
             normalized_feature = normalized_feature / scaling_factor
 
 
-        #application of natural logarithm (ln(x)) to the series
-        elif step == 'log':
+        #application of natural logarithm (ln(x)) to the series +1
+        elif step == 'logp1':
             normalized_feature = np.log(normalized_feature + 1)
+
 
 
     return normalized_feature

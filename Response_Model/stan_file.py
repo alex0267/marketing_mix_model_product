@@ -1,4 +1,3 @@
-
 stan_code = '''
 
 functions {
@@ -19,6 +18,8 @@ data {
   int<lower=0> num_media;
   // matrix of media variables
   matrix[N+max_lag-1, num_media] X_media;
+  // matrix of seasonality variables
+  matrix[N,12] seasonality;
 
 }
 parameters {
@@ -26,8 +27,10 @@ parameters {
   real<lower=0> noise_var;
   // the intercept
   real tau;
-  // the coefficients for media variables and base sales
+  // the coefficients for media variables
   vector<lower=0>[num_media] beta;
+  // the coefficients for seasonality variables
+  vector[12] beta_seasonality;
   // the decay and peak parameter for the adstock transformation of
   // each media
   vector<lower=0,upper=1>[num_media] decay;
@@ -57,11 +60,15 @@ model {
   decay ~ beta(3,3);
   peak ~ uniform(0, ceil(max_lag/2));
   tau ~ normal(0, 5);
+  //definition of beta variables - generic for now including media betas
   for (i in 1 : num_media) {
     beta[i] ~ normal(1, 1);
   }
+  for (i in 1 : 12) {
+    beta_seasonality[i] ~ normal(1, 1);
+  }
   noise_var ~ inv_gamma(0.05, 0.05 * 0.01);
-  y ~ normal(tau + X_media_adstocked * beta, sqrt(noise_var));
+  y ~ normal(tau + X_media_adstocked * beta + seasonality*beta_seasonality, sqrt(noise_var));
 }
 
 '''

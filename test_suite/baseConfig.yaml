@@ -1,34 +1,36 @@
 
-
+#Definition of touchpoints and order of calling
 TOUCHPOINTS:
   - touchpoint_2
   - touchpoint_3
 
-#defining normalization steps of touchpoints
-NORMALIZATION_STEPS_TOUCHPOINTS:
-
-  
-  touchpoint_2: ['max_across_brands']
-  touchpoint_3: ['max_across_brands']
-  
-
-#defining normalization steps of touchpoints
-NORMALIZATION_STEPS_SALES:
-  sales: ['max_across_brands', 'log']
-
-#SEASONALITY_VARIABLES_BASE:
-#  - january
-#  - february
-#  - march
-#  - april
-#  - may
-#  - june
-#  - july
-#  - august
-#  - september
-#  - october
-#  - november
-#  - december
+SEASONALITY_VARIABLES_BASE:
+ - april
+ - august
+ - december
+ - february
+ - january
+ - july
+ - june
+ - march
+ - may
+ - november
+ - october
+ - september
 #  - christmas
 #  - is_penultimate_week
 #  - is_year_end_week
+
+#defining normalization steps of touchpoints
+#the normalization steps will follow the order below:
+NORMALIZATION_STEPS_TOUCHPOINTS:
+
+  touchpoint_2: ['mean_across_brands']
+  touchpoint_3: ['mean_across_brands']
+  
+
+#defining normalization steps of touchpoints
+#the normalization steps will follow the order below:
+NORMALIZATION_STEPS_SALES:
+  sales: ['mean_across_brands', 'logp1']
+
