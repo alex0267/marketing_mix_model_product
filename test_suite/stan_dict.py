@@ -2,7 +2,7 @@ import helper_functions.transformations
 import numpy as np
 import yaml
 
-def createDict(feature_df, controlFrame, max_lag):
+def createDict(feature_df, controlFrame, original_sales, max_lag):
 
     with open('test_suite/baseConfig.yaml', 'r') as file:
         configurations = yaml.safe_load(file)

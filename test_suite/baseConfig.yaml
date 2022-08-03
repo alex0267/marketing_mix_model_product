@@ -4,6 +4,7 @@ TOUCHPOINTS:
   - touchpoint_2
   - touchpoint_3
 
+#define seasonality variables - order due to data generation model
 SEASONALITY_VARIABLES_BASE:
  - april
  - august

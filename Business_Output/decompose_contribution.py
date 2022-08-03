@@ -22,11 +22,20 @@ def plotContribution(prediction, mean_sales):
     plt.show(block=True)
     plt.savefig('estimatedContribution.png')
 
-def decompose_absolute_contribution(responseModel, feature_df, original_sales, plot = False):
+def decompose_absolute_contribution(responseModel, feature_df, controlFrame, original_sales, plot = False):
 
-    print('dot')
-    print(original_sales/original_sales.mean())
-    print((np.dot(responseModel.stanDict['seasonality'],(responseModel.beta_seasonality)))*(original_sales/original_sales.mean()))
+    
+    # sales_mean_logp1 = feature_df['sales']
+    # seasonality_sales_mean_logp1 = sales_mean_logp1*(np.dot(responseModel.stanDict['seasonality'],(responseModel.beta_seasonality)))
+    # seasonality_sales_mean_p1 = np.exp(seasonality_sales_mean_logp1)
+    # seasonality_sales_mean = np.exp(seasonality_sales_mean_logp1)-1
+    # seasonality_sales = seasonality_sales_mean*original_sales.mean()
+
+
+    # original_sales = seasonality_sales
+    # target = pd.DataFrame(seasonality_sales_mean_p1).rename(columns={0:'sales'})
+
+    #print((np.dot(responseModel.stanDict['seasonality'],(responseModel.beta_seasonality)))*(original_sales/original_sales.mean()))
 
     #Adstock media variables according to estimated parameters
     media_adstocked = helper_functions.adstock_functions.adstock_transform(feature_df[responseModel.configurations['TOUCHPOINTS']], responseModel.configurations['TOUCHPOINTS'], responseModel.parameters)
@@ -40,7 +49,7 @@ def decompose_absolute_contribution(responseModel, feature_df, original_sales, p
 
     X = media_adstocked
 
-    #getting max()+1 normalized sales variable
+    #getting max()+1 normalized sales variable 
     target = pd.DataFrame(np.exp(responseModel.stanDict['y'])).rename(columns={0:'sales'})
 
 
@@ -48,18 +57,36 @@ def decompose_absolute_contribution(responseModel, feature_df, original_sales, p
     #we take the media_impressions (mean transformed)^Beta_i
     #x_Beta_matrix = X.apply(lambda x: x[:responseModel.num_media]**responseModel.beta[:responseModel.num_media], axis=1)
 
-    factor_df = pd.DataFrame(columns=responseModel.configurations['TOUCHPOINTS']+['intercept'])
+    factor_df = pd.DataFrame(columns=responseModel.configurations['TOUCHPOINTS']+['intercept']+responseModel.configurations['SEASONALITY_VARIABLES_BASE'])
     for i in range(responseModel.num_media):
         colname = responseModel.configurations['TOUCHPOINTS'][i]
         factor_df[colname] = X[colname] ** responseModel.beta[i]
+
+ 
+
+    #here the control model parameters come into play 
+    #First attempt with assumption: log(y/u+1) = B*log(adstock/u+1) + (B*dummy_month) + tau (with u = mean)
+    #Therefore we apply log(B*dummy_month)
+
+    # for i in range(len(responseModel.configurations['SEASONALITY_VARIABLES_BASE'])):
+    #     season = responseModel.configurations['SEASONALITY_VARIABLES_BASE'][i]
+    #     factor_df[colname] = np.log(controlFrame[season] * responseModel.parameters[season])
     
     factor_df['intercept'] = np.exp(responseModel.parameters['tau'])
+
+    # print('dot_here')
+    # print(factor_df.apply(np.prod, axis=1))
+    # print(np.dot(controlFrame,responseModel.beta_seasonality))
+    # print(factor_df.apply(np.prod, axis=1)*np.dot(controlFrame,responseModel.beta_seasonality))
     
     # 2. calculate the product of all factors -> y_pred
     # baseline = intercept * control factor = e^tau * X[13]^beta[13]
-    y_pred = factor_df.apply(np.prod, axis=1)
+    y_pred = factor_df.apply(np.prod, axis=1)*np.exp(np.dot(controlFrame,responseModel.beta_seasonality))
     factor_df['y_pred'], factor_df['y_true2'] = y_pred, target
     factor_df['baseline'] = factor_df[['intercept']].apply(np.prod, axis=1)
+
+    print('factors here')
+    print(factor_df)
 
     # 3. calculate each media factor's contribution
     # media contribution = total volume – volume upon removal of the media factor

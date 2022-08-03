@@ -1,5 +1,6 @@
 import test_suite.data_generation
 import test_suite.stan_dict
+import test_suite.stan_control_dict
 import test_suite.data_preparation
 import Business_Output.decompose_contribution
 from Response_Model.main_Response_Model import ResponseModel
@@ -74,23 +75,30 @@ touchpoints = [
 #Create features
 data, spendingsFrame, controlFrame = test_suite.data_generation.simulateTouchpoints(touchpoints,'_adstocked')
 
-#print('here')
 print(controlFrame)
-
-
 #Prepare data
 feature_df = test_suite.data_preparation.normalize_data(data, spendingsFrame)
 
+####### Create Control Model
 #create stan dictionary
-stanDict = test_suite.stan_dict.createDict(feature_df, controlFrame, max_lag)
+stanControlDict = test_suite.stan_control_dict.createDict(feature_df, controlFrame, data['sales'])
 
-#Initialize Model instance and Train Bayesian Model
-responseModel = ResponseModel(stanDict, configurations)
+print('normalized sales')
+print(feature_df['sales'])
+# responseModel.runControlModel(load=True)
+# responseModel.extractControlParameter()
+# responseModel.predictControlInfluence()
+
+####### Create Media Model
+stanDict = test_suite.stan_dict.createDict(feature_df, controlFrame, data['sales'], max_lag)
+
+#Initialize Model instance and Train Bayesian Model 
+responseModel = ResponseModel(stanDict, configurations, feature_df, controlFrame, data['sales'])
+
 responseModel.runModel(load=True)
 responseModel.extractParameters(printOut=True)
-print('here')
-print(responseModel.parameters)
-print(responseModel.beta_seasonality)
 
+print('control here')
+print(controlFrame)
 #calculate contribution decomposition via estimated parameters and original spendings/sales
-Business_Output.decompose_contribution.decompose_absolute_contribution(responseModel, feature_df, data['sales'], plot=True)
+Business_Output.decompose_contribution.decompose_absolute_contribution(responseModel, feature_df, controlFrame, data['sales'], plot=True)

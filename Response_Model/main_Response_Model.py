@@ -1,5 +1,6 @@
 import stan
 import Response_Model.stan_file
+import Response_Model.stan_control
 import model_savings
 import pandas as pd
 import yaml
@@ -8,37 +9,46 @@ import yaml
 #Also contains the functions to estimate and extract parameters
 class ResponseModel:
 
-    def __init__(self, stanDict, configurations):
+    def __init__(self, stanDict, configurations, feature_df, control_df, sales):
         #define touchpoints and parameters (later replaced by yaml config files)
         self.max_length = 4
+        self.stanDict = None
         self.stanDict = stanDict
         self.configurations = configurations
+
+        #data
+        self.feature_df = feature_df
+        self.control_df = control_df
+        self.sales = sales #raw sales (target) variable with no transformation
         
         #easy access variables
-        self.num_media = self.stanDict['num_media']
+        self.num_media = None
         self.beta = []
         self.beta_seasonality = []
 
         #contains the output estimated variables
         self.extractFrame = None  #contains the raw bayesian estimations
+        self.extractControlFrame = None
         self.parameters = None  #contains the summarized estimated parameters
+        self.controlParameters = None
 
     #extract parameters for each touchpoint
     def extractParameters(self, printOut=False):
         self.parameters = {}
+        self.num_media = self.stanDict['num_media']
 
         #Collect general model parameters and summarize in dictionary
         self.parameters['tau'] = self.extractFrame[f'tau'].mean(axis=0)
         self.parameters['noise_var'] = self.extractFrame['noise_var'].mean(axis=0)
         
         self.extractFrame.mean().to_csv('estimatedParameters.csv')
+        #print(self.extractFrame.mean())
 
         for i, season in enumerate(self.configurations['SEASONALITY_VARIABLES_BASE'],start = 1):
             #append to general parameters list
             self.parameters[season] = self.extractFrame[f'beta_seasonality.{i}'].mean(axis=0)
             #append to easy access beta_seasonality list
             self.beta_seasonality.append(self.extractFrame[f'beta_seasonality.{i}'].mean(axis=0))
-
 
         for i, touchpoint in enumerate(self.configurations['TOUCHPOINTS'],start = 1):
 
@@ -73,6 +83,30 @@ class ResponseModel:
                 #print(f"original:{touchpoint['P']}")
 
         return 0
+
+    def predictControlInfluence():
+        baseline = np.dot(control_df,self.beta_seasonality) + self.controlParameters['alpha']
+        self.baseline_sales = baseline * self.sales/self.sales.mean()
+        print(self.baseline_sales)
+
+    def extractControlParameter():
+
+        self.parameters['alpha'] = self.extractControlFrame['alpha'].mean(axis=0)
+
+        for i, season in enumerate(self.configurations['SEASONALITY_VARIABLES_BASE'],start = 1):
+            #append to general parameters list
+            self.parameters[season] = self.extractControlFrame[f'beta1.{i}'].mean(axis=0)
+            #append to easy access beta_seasonality list
+            self.beta_seasonality.append(self.extractControlFrame[f'beta1.{i}'].mean(axis=0))
+
+    def runControlModel (self, load =True):
+            if(load==False):
+                posterior = stan.build(Response_Model.stan_control.stan_control, data=self.stanControlDict)
+                fit = posterior.sample(num_chains=4, num_samples=1000)
+                self.extractControlFrame = fit.to_frame()
+                self.extractControlFrame.to_csv('model_savings/extractControl.csv')
+            else:
+                self.extractControlFrame = pd.read_csv('model_savings/extractControl.csv')
 
     def runModel(self, load=True):
 
