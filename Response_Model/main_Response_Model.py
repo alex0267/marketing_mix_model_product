@@ -1,6 +1,5 @@
 import stan
 import Response_Model.stan_file
-import Response_Model.stan_control
 import model_savings
 import pandas as pd
 import yaml
@@ -9,16 +8,15 @@ import yaml
 #Also contains the functions to estimate and extract parameters
 class ResponseModel:
 
-    def __init__(self, stanDict, configurations, feature_df, control_df, sales):
+    def __init__(self, stanDict, configurations, feature_df, sales):
         #define touchpoints and parameters (later replaced by yaml config files)
         self.max_length = 4
-        self.stanDict = None
         self.stanDict = stanDict
         self.configurations = configurations
 
         #data
         self.feature_df = feature_df
-        self.control_df = control_df
+        self.seasonality_df = stanDict['seasonality']
         self.sales = sales #raw sales (target) variable with no transformation
         
         #easy access variables
@@ -28,7 +26,6 @@ class ResponseModel:
 
         #contains the output estimated variables
         self.extractFrame = None  #contains the raw bayesian estimations
-        self.extractControlFrame = None
         self.parameters = None  #contains the summarized estimated parameters
         self.controlParameters = None
 
@@ -46,7 +43,7 @@ class ResponseModel:
 
         for i, season in enumerate(self.configurations['SEASONALITY_VARIABLES_BASE'],start = 1):
             #append to general parameters list
-            self.parameters[season] = self.extractFrame[f'beta_seasonality.{i}'].mean(axis=0)
+            self.parameters[f'{season}_beta'] = self.extractFrame[f'beta_seasonality.{i}'].mean(axis=0)
             #append to easy access beta_seasonality list
             self.beta_seasonality.append(self.extractFrame[f'beta_seasonality.{i}'].mean(axis=0))
 
@@ -58,12 +55,13 @@ class ResponseModel:
 
 
             #Collect per touchpoint parameters in dictionary
-            self.parameters[touchpoint] = {
+            self.parameters[f'{touchpoint}_adstock'] = {
                 'L': self.max_length,
                 'P': peak,
-                'D': decay,
-                'B': beta
+                'D': decay
             }
+
+            self.parameters[f'{touchpoint}_beta']  = beta
 
             #definition of easy access variable(s)
             self.beta.append(beta)
@@ -81,43 +79,25 @@ class ResponseModel:
                 #print(f"original:{touchpoint['D']}")
                 print(f"value peak:{peak}")
                 #print(f"original:{touchpoint['P']}")
+                print()
+        if (printOut == True):
+            for season in self.configurations['SEASONALITY_VARIABLES_BASE']:
+                print(f'beta_{season}: ')
+                print(self.parameters[f'{season}_beta'])
 
         return 0
 
-    def predictControlInfluence():
-        baseline = np.dot(control_df,self.beta_seasonality) + self.controlParameters['alpha']
-        self.baseline_sales = baseline * self.sales/self.sales.mean()
-        print(self.baseline_sales)
 
-    def extractControlParameter():
-
-        self.parameters['alpha'] = self.extractControlFrame['alpha'].mean(axis=0)
-
-        for i, season in enumerate(self.configurations['SEASONALITY_VARIABLES_BASE'],start = 1):
-            #append to general parameters list
-            self.parameters[season] = self.extractControlFrame[f'beta1.{i}'].mean(axis=0)
-            #append to easy access beta_seasonality list
-            self.beta_seasonality.append(self.extractControlFrame[f'beta1.{i}'].mean(axis=0))
-
-    def runControlModel (self, load =True):
-            if(load==False):
-                posterior = stan.build(Response_Model.stan_control.stan_control, data=self.stanControlDict)
-                fit = posterior.sample(num_chains=4, num_samples=1000)
-                self.extractControlFrame = fit.to_frame()
-                self.extractControlFrame.to_csv('model_savings/extractControl.csv')
-            else:
-                self.extractControlFrame = pd.read_csv('model_savings/extractControl.csv')
-
-    def runModel(self, load=True):
+    def runModel(self, name, load=True):
 
         if(load==False):
             posterior = stan.build(Response_Model.stan_file.stan_code, data=self.stanDict)
             fit = posterior.sample(num_chains=4, num_samples=1000)
             self.extractFrame = fit.to_frame()
-            self.extractFrame.to_csv('model_savings/extract.csv')
+            self.extractFrame.to_csv(f'model_savings/extract{name}.csv')
 
         else:
-            self.extractFrame = pd.read_csv('model_savings/extract.csv')
+            self.extractFrame = pd.read_csv(f'model_savings/extract{name}.csv')
         
 
         return 0

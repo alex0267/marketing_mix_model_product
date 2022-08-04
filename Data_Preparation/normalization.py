@@ -22,7 +22,12 @@ def normalize_feature(
         #application of mean
         elif step == 'mean_across_brands':
             scaling_factor = normalized_feature.mean()
-            normalized_feature = normalized_feature / scaling_factor
+            
+            #avoid creating NAN's for columns with 0 spendings
+            if(scaling_factor == 0):
+                normalized_feature = normalized_feature
+            else:
+                normalized_feature = normalized_feature / scaling_factor
         
         #application of max-based normalization
         elif step == 'max_across_brands':

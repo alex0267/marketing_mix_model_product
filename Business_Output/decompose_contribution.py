@@ -18,11 +18,11 @@ def plotContribution(prediction, mean_sales):
     
     data = pd.DataFrame(prediction*mean_sales)
     plt.figure()
-    plt.plot(data[:52], color="black")
+    plt.plot(data[:], color="black")
     plt.show(block=True)
     plt.savefig('estimatedContribution.png')
 
-def decompose_absolute_contribution(responseModel, feature_df, controlFrame, original_sales, plot = False):
+def decompose_absolute_contribution(responseModel, feature_df, original_sales, plot = False):
 
     
     # sales_mean_logp1 = feature_df['sales']
@@ -38,10 +38,12 @@ def decompose_absolute_contribution(responseModel, feature_df, controlFrame, ori
     #print((np.dot(responseModel.stanDict['seasonality'],(responseModel.beta_seasonality)))*(original_sales/original_sales.mean()))
 
     #Adstock media variables according to estimated parameters
+    #adstock(touchpoint_x, param = estimated_parameters_x)
     media_adstocked = helper_functions.adstock_functions.adstock_transform(feature_df[responseModel.configurations['TOUCHPOINTS']], responseModel.configurations['TOUCHPOINTS'], responseModel.parameters)
 
     
     #Normalize adstocked media via max accross brands with  +1
+    #(adstock(touchpoint_x, param = estimated_parameters_x))/mean + 1
     for touchpoint in responseModel.configurations['TOUCHPOINTS']:
         normalization_steps = responseModel.configurations['NORMALIZATION_STEPS_TOUCHPOINTS'][touchpoint]
         media_adstocked[touchpoint] = Data_Preparation.normalization.normalize_feature(media_adstocked, normalization_steps, responseModel.configurations, touchpoint)
@@ -49,9 +51,13 @@ def decompose_absolute_contribution(responseModel, feature_df, controlFrame, ori
 
     X = media_adstocked
 
+
+
     #getting max()+1 normalized sales variable 
     target = pd.DataFrame(np.exp(responseModel.stanDict['y'])).rename(columns={0:'sales'})
 
+    # print('target')
+    # print(responseModel.stanDict['y'])
 
     #calculation of x**Beta for the media variables and the control model variables (= basesales)
     #we take the media_impressions (mean transformed)^Beta_i
@@ -60,8 +66,7 @@ def decompose_absolute_contribution(responseModel, feature_df, controlFrame, ori
     factor_df = pd.DataFrame(columns=responseModel.configurations['TOUCHPOINTS']+['intercept']+responseModel.configurations['SEASONALITY_VARIABLES_BASE'])
     for i in range(responseModel.num_media):
         colname = responseModel.configurations['TOUCHPOINTS'][i]
-        factor_df[colname] = X[colname] ** responseModel.beta[i]
-
+        factor_df[colname] = X[colname] ** responseModel.parameters[f'{colname}_beta']
  
 
     #here the control model parameters come into play 
@@ -81,12 +86,12 @@ def decompose_absolute_contribution(responseModel, feature_df, controlFrame, ori
     
     # 2. calculate the product of all factors -> y_pred
     # baseline = intercept * control factor = e^tau * X[13]^beta[13]
-    y_pred = factor_df.apply(np.prod, axis=1)*np.exp(np.dot(controlFrame,responseModel.beta_seasonality))
+    y_pred = factor_df.apply(np.prod, axis=1)*np.exp(np.dot(responseModel.seasonality_df,responseModel.beta_seasonality))
     factor_df['y_pred'], factor_df['y_true2'] = y_pred, target
     factor_df['baseline'] = factor_df[['intercept']].apply(np.prod, axis=1)
 
-    print('factors here')
-    print(factor_df)
+    # print('factors here')
+    # print(factor_df)
 
     # 3. calculate each media factor's contribution
     # media contribution = total volume – volume upon removal of the media factor
@@ -103,9 +108,10 @@ def decompose_absolute_contribution(responseModel, feature_df, controlFrame, ori
     mc_df['mc_true'] = mc_df['y_true2'] - mc_df['baseline']
     # predicted total media contribution is slightly different from true total media contribution
     # scale each media factor’s contribution by removing the delta volume proportionally
-    mc_df['mc_delta'] =  mc_df['mc_pred'] - mc_df['mc_true']
-    for col in responseModel.configurations['TOUCHPOINTS']:
-        mc_df[col] = mc_df[col] - mc_df['mc_delta']*mc_df[col]/mc_df['mc_pred']
+
+    # mc_df['mc_delta'] =  mc_df['mc_pred'] - mc_df['mc_true']
+    # for col in responseModel.configurations['TOUCHPOINTS']:
+    #     mc_df[col] = mc_df[col] - mc_df['mc_delta']*mc_df[col]/mc_df['mc_pred']
 
     # 5. scale mc_df based on original sales
     mc_df['sales'] = target
@@ -133,6 +139,8 @@ def decompose_absolute_contribution(responseModel, feature_df, controlFrame, ori
     #Plot the error if wanted
     if(plot == True):
         plotContribution(mc_df['mc_pred'],original_sales.mean())
+    plt.plot(compareFrame['pred'])
+    plt.savefig('sales.png')
 
     return mc_df
 

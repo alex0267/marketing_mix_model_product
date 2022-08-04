@@ -38,7 +38,7 @@ def adstock_transform(media, touchpoints, parameters):
     media_adstocked = pd.DataFrame()
     for i,touchpoint in enumerate(touchpoints):
 
-        L, P, D = parameters[touchpoint]['L'], parameters[touchpoint]['P'], parameters[touchpoint]['D']
+        L, P, D = parameters[f'{touchpoint}_adstock']['L'], parameters[f'{touchpoint}_adstock']['P'], parameters[f'{touchpoint}_adstock']['D']
 
         adstocked = apply_adstock(media[touchpoint], L, P, D)
         media_adstocked[touchpoint] = adstocked

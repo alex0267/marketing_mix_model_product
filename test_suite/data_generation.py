@@ -84,6 +84,9 @@ def simulateTouchpoints(touchpoints, format):
 
       #percentual noise parameter (as SD of basesales)
       noise_factor = touchpoint['noise_percentage']*baseline
+
+      #set seed to reproduce error for each iteration
+      np.random.seed(42)
       
       data['base_1_adstocked'] = base_1 + np.random.normal(0,noise_factor,weeks)
 
@@ -140,10 +143,13 @@ def simulateTouchpoints(touchpoints, format):
       #target model with "to_predict" beta variables
     data['sales'] = data['sales'] + data[f"{touchpoint['name']}{format}"]*touchpoint['beta']
 
-  print('DATA HERE')
-  print(data)
+
+  # print('DATA HERE')
+  # print(data)
   #add noise
   #data['sales'] = data['sales'] + np.random.normal(0,500,weeks)
+
+  controlFrame['promotion'] = 1
 
   #show
   plt.plot(data['sales'][:subplot], color='orange')

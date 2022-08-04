@@ -22,6 +22,9 @@ SEASONALITY_VARIABLES_BASE:
 #  - is_penultimate_week
 #  - is_year_end_week
 
+CONTROL_VARIABLES_BASE:
+  - promotion
+
 #defining normalization steps of touchpoints
 #the normalization steps will follow the order below:
 NORMALIZATION_STEPS_TOUCHPOINTS:
