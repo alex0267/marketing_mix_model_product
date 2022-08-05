@@ -2,9 +2,11 @@ import test_suite.data_generation
 import test_suite.stan_dict
 import test_suite.data_preparation
 import Business_Output.decompose_contribution
+import helper_functions.hill_function
 from Response_Model.main_Response_Model import ResponseModel
 import yaml
 import numpy as np
+import matplotlib.pyplot as plt
 
 #Run pipeline tasks:
 # - Data Preparation
@@ -71,22 +73,21 @@ touchpoints = [
                 }
                ]
 
-#Create features
+# Create features
 data, spendingsFrame, controlFrame = test_suite.data_generation.simulateTouchpoints(touchpoints,'_adstocked')
 
-# print(controlFrame)
-#Prepare data
+
+# Prepare data
 feature_df = test_suite.data_preparation.normalize_data(data, spendingsFrame)
-# print('feature')
-# print(feature_df)
+
 
 #Create dictionary
-stanDict = test_suite.stan_dict.createDict(feature_df, controlFrame, data['sales'], max_lag)
+stanDict = test_suite.stan_dict.createDict(feature_df, controlFrame, data['sales'], spendingsFrame, max_lag)
 
 #Initialize Model instance and Train Bayesian Model 
 responseModel = ResponseModel(stanDict, configurations, feature_df, data['sales'])
 
-responseModel.runModel(name ='test_diff_touchpoints', load=True)
+responseModel.runModel(name ='test_diff_touchpoints', load=False)
 responseModel.extractParameters(printOut=True)
 
 #calculate contribution decomposition via estimated parameters and original spendings/sales

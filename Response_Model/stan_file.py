@@ -20,6 +20,8 @@ data {
   matrix[N+max_lag-1, num_media] X_media;
   // matrix of seasonality variables
   matrix[N,12] seasonality;
+  // list of mean values of media (raw data)
+  vector [num_media] media_mean;
 
 }
 parameters {
@@ -51,7 +53,7 @@ transformed parameters {
         lag_weights[max_lag-lag+1] <- pow(decay[media], (lag - 1 - peak[media]) ^ 2);
       }
     cum_effect <- Adstock(sub_col(X_media, nn, media, max_lag), lag_weights);
-    X_media_adstocked[nn, media] <- log1p(cum_effect);
+    X_media_adstocked[nn, media] <- log1p(cum_effect/media_mean[media]);
     }
   } 
 }
