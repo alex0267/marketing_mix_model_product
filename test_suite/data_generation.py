@@ -2,7 +2,10 @@ import math
 import matplotlib.pyplot as plt
 import pandas as pd
 import helper_functions.adstock_functions as adstock_functions
+import helper_functions.hill_function
+import Data_Preparation.normalization
 import numpy as np
+import yaml
 
 def createIndex():
   week = pd.Series([x+1 for x in range(48)]*3)
@@ -48,6 +51,9 @@ def createIndex():
 
 
 def simulateTouchpoints(touchpoints, format):
+
+  with open('test_suite/baseConfig.yaml', 'r') as file:
+            configurations = yaml.safe_load(file)
 
   controlFrame = createIndex()
 
@@ -123,28 +129,103 @@ def simulateTouchpoints(touchpoints, format):
 
       #plt.plot(spendingsFrame['touchpoint_2'][:subplot], color='blue')
       plt.plot(data["touchpoint_2_adstocked"][:subplot], color='green')
+  
+      data["touchpoint_2_normalized"] = Data_Preparation.normalization.normalize_feature(data["touchpoint_2_adstocked"] , configurations['NORMALIZATION_STEPS_TOUCHPOINTS'][touchpoint ['name']], configurations, touchpoint ['name'])
+      
+      dt = data["touchpoint_2_normalized"]
+      print('tp2')
+      print(dt.mean())
+      print(dt.min())
+      print(dt.max())
+      #hill_transformed_touchpoint = helper_functions.hill_function.hill_function(normalized_touchpoint, touchpoint['S'], touchpoint['H'])
+
+
 
     if(touchpoint ['name']=="touchpoint_3"):
-      #Define touchpoint as pointed periodic spending throughout the year (copy of touchpoint_2 with different period)
-      touchpoint_3 = []
+      #Define touchpoint as pointed periodic spending throughout the year
+      touchpoint_2 = []
       for x in range(weeks):
-        if x%26 == 0: touchpoint_3.append(baseSalesCoefficient)
-        else: touchpoint_3.append(0)
+        if x%26 == 0: touchpoint_2.append(baseSalesCoefficient)
+        else: touchpoint_2.append(0)
 
       #touchpoint definitions
-      spendingsFrame["touchpoint_3"] = touchpoint_3
+      spendingsFrame["touchpoint_3"] = touchpoint_2
 
       data["touchpoint_3_adstocked"] = adstock_functions.apply_adstock(spendingsFrame["touchpoint_3"],touchpoint['L'], touchpoint['P'], touchpoint['D'])
 
+      #plt.plot(spendingsFrame['touchpoint_2'][:subplot], color='blue')
+      plt.plot(data["touchpoint_3_adstocked"][:subplot], color='green')
+  
+      data["touchpoint_3_normalized"] = Data_Preparation.normalization.normalize_feature(data["touchpoint_3_adstocked"] , configurations['NORMALIZATION_STEPS_TOUCHPOINTS'][touchpoint ['name']], configurations, touchpoint ['name'])
+      
+      dt = data["touchpoint_3_normalized"]
+      print('tp2')
+      print(dt.mean())
+      print(dt.min())
+      print(dt.max())
+      # print('DATA HERE')
+
+
+
+    if(touchpoint ['name']=="touchpoint_4"):
+      #Define touchpoint that has some semi random distribution patterns and periodic distribution patterns
+      #Hill feature: spendings are relatively distributed in size providing a range of possible reference points for the hill estimation
+      #Initial idea: this touchpoint is supposed to be covering the entire range of a hill distribution
+
+      #define weeks in scope
+      base_weeks = [2,5,7,10,15,18,20] 
+
+      #  = list(map(lambda x: x*2.5+max(a_list), a_list))
+
+      touchpoint_4 = []
+      for x in range(weeks):
+        
+        touchpoint_4.append(0)
+        #some short term periodic medium-sized touchpoint investments - middle-end of curve (depends on overcut with other investments)
+        if x in np.arange(0, 157, 5).tolist(): 
+          touchpoint_4[x] = touchpoint_4[x] + baseSalesCoefficient*2
+        #some short term periodic low-end touchpoint investments - begin-middle of curve
+        if x%4 == 0: 
+          touchpoint_4[x] = touchpoint_4[x] + baseSalesCoefficient
+        if x in [56,57,58,105,106,107]: 
+          touchpoint_4[x] = touchpoint_4[x] + baseSalesCoefficient*2
+
+        #some long term periodic high-end touchpoint  - end of curve
+        if x%26 == 0: 
+          touchpoint_4[x] = touchpoint_4[x] + baseSalesCoefficient*3.5
+      
+      print((touchpoint_4))
+      
+
+      #touchpoint definitions
+      spendingsFrame["touchpoint_4"] = touchpoint_4
+
+      data["touchpoint_4_adstocked"] = adstock_functions.apply_adstock(spendingsFrame["touchpoint_4"],touchpoint['L'], touchpoint['P'], touchpoint['D'])
+
       #plt.plot(spendingsFrame['touchpoint_3'][:subplot], color='red')
-      plt.plot(data["touchpoint_3_adstocked"][:subplot], color='pink')
+      plt.plot(data["touchpoint_4_adstocked"][:subplot], color='pink')
+
+      #print(data["touchpoint_3_adstocked"])
+
+      data["touchpoint_4_normalized"] = Data_Preparation.normalization.normalize_feature(data["touchpoint_4_adstocked"] , configurations['NORMALIZATION_STEPS_TOUCHPOINTS'][touchpoint ['name']], configurations, touchpoint ['name'])
+      
+      dt = data["touchpoint_4_normalized"]
+      print('tp3')
+      print(dt.mean())
+      print(dt.min())
+      print(dt.max())
+
+      d = pd.DataFrame([data["touchpoint_4_adstocked"],data["touchpoint_4_normalized"] ])
+      d.to_csv('comp.csv')
+
+
+
 
 
       #target model with "to_predict" beta variables
     data['sales'] = data['sales'] + data[f"{touchpoint['name']}{format}"]*touchpoint['beta']
 
-
-  # print('DATA HERE')
+ 
   # print(data)
   #add noise
   #data['sales'] = data['sales'] + np.random.normal(0,500,weeks)

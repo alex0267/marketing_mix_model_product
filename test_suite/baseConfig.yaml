@@ -3,6 +3,7 @@
 TOUCHPOINTS:
   - touchpoint_2
   - touchpoint_3
+  - touchpoint_4
 
 #define seasonality variables - order due to data generation model
 SEASONALITY_VARIABLES_BASE:
@@ -31,6 +32,7 @@ NORMALIZATION_STEPS_TOUCHPOINTS:
 
   touchpoint_2: ['mean_across_brands']
   touchpoint_3: ['mean_across_brands']
+  touchpoint_4: ['mean_across_brands']
   
 
 #defining normalization steps of touchpoints

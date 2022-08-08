@@ -7,8 +7,12 @@ def normalize_feature(
         normalization_params_feature,
         column_feature
 ) -> pd.Series:
-
-    normalized_feature = feature_df[column_feature].copy()
+    
+    #define different types 
+    if isinstance(feature_df, pd.Series):
+        normalized_feature = feature_df.copy()
+    else:
+        normalized_feature = feature_df[column_feature].copy()
 
     #iterate through all normalization steps and change column based on parameters
     for step in normalization_steps:

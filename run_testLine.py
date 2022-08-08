@@ -60,8 +60,10 @@ touchpoints = [
                    'name':'touchpoint_2',
                    'beta':1.3 ,
                    'L':4,
-                   'P':1,
-                   'D':0.4
+                   'P':2,
+                   'D':0.9,
+                   'S':1,
+                   'H':1
                 },
                 {
                    'control_var':False,
@@ -69,7 +71,19 @@ touchpoints = [
                    'beta':1.3 ,
                    'L':4,
                    'P':2,
-                   'D':0.9
+                   'D':0.9,
+                   'S':1,
+                   'H':1
+                },
+                                {
+                   'control_var':False,
+                   'name':'touchpoint_4',
+                   'beta':1.3 ,
+                   'L':4,
+                   'P':2,
+                   'D':0.9,
+                   'S':1,
+                   'H':1
                 }
                ]
 
@@ -77,9 +91,18 @@ touchpoints = [
 data, spendingsFrame, controlFrame = test_suite.data_generation.simulateTouchpoints(touchpoints,'_adstocked')
 
 
+rangeHill = np.arange(0, 3, 0.1).tolist()
+
+# data = [x for x in (rangeHill)]
+
+hill = helper_functions.hill_function.hill_function(rangeHill, 5,2)
+
+plt.plot(rangeHill, hill)
+plt.savefig('hill2.png')
+
+'''
 # Prepare data
 feature_df = test_suite.data_preparation.normalize_data(data, spendingsFrame)
-
 
 #Create dictionary
 stanDict = test_suite.stan_dict.createDict(feature_df, controlFrame, data['sales'], spendingsFrame, max_lag)
@@ -92,3 +115,4 @@ responseModel.extractParameters(printOut=True)
 
 #calculate contribution decomposition via estimated parameters and original spendings/sales
 Business_Output.decompose_contribution.decompose_absolute_contribution(responseModel, feature_df, data['sales'], plot=True)
+'''
