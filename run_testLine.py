@@ -75,32 +75,32 @@ touchpoints = [
                    'S':1,
                    'H':1
                 },
-                                {
-                   'control_var':False,
-                   'name':'touchpoint_4',
-                   'beta':1.3 ,
-                   'L':4,
-                   'P':2,
-                   'D':0.9,
-                   'S':1,
-                   'H':1
-                }
+               #                  {
+               #     'control_var':False,
+               #     'name':'touchpoint_4,
+               #     'beta':1.3 ,
+               #     'L':4,
+               #     'P':2,
+               #     'D':0.9,
+               #     'S':0.8,
+               #     'H':2
+               #  }
                ]
 
 # Create features
 data, spendingsFrame, controlFrame = test_suite.data_generation.simulateTouchpoints(touchpoints,'_adstocked')
 
 
-rangeHill = np.arange(0, 3, 0.1).tolist()
+# rangeHill = np.arange(0, 3.7, 0.1).tolist()
 
 # data = [x for x in (rangeHill)]
 
-hill = helper_functions.hill_function.hill_function(rangeHill, 5,2)
+# hill = helper_functions.hill_function.hill_function(rangeHill, 0.8,2)
 
-plt.plot(rangeHill, hill)
-plt.savefig('hill2.png')
+# plt.plot(rangeHill, hill)
+# plt.savefig('hill2.png')
 
-'''
+
 # Prepare data
 feature_df = test_suite.data_preparation.normalize_data(data, spendingsFrame)
 
@@ -114,5 +114,4 @@ responseModel.runModel(name ='test_diff_touchpoints', load=False)
 responseModel.extractParameters(printOut=True)
 
 #calculate contribution decomposition via estimated parameters and original spendings/sales
-Business_Output.decompose_contribution.decompose_absolute_contribution(responseModel, feature_df, data['sales'], plot=True)
-'''
+Business_Output.decompose_contribution.decompose_absolute_contribution(responseModel, spendingsFrame, data['sales'], plot=True)

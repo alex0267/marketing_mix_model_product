@@ -8,9 +8,10 @@ def createDict(feature_df, controlData, original_sales,spendingsFrame, max_lag):
         configurations = yaml.safe_load(file)
 
         num_media = len(configurations['TOUCHPOINTS'])
-        media_mean = np.array(spendingsFrame[configurations['TOUCHPOINTS']].mean())
+        media_mean = np.array(spendingsFrame[configurations['TOUCHPOINTS']].max())
         print(media_mean)
-        X_media = feature_df[configurations['TOUCHPOINTS']]
+        # X_media = feature_df[configurations['TOUCHPOINTS']]
+        X_media = spendingsFrame[configurations['TOUCHPOINTS']]
         X_media = np.concatenate((np.zeros((max_lag-1, num_media)), np.array(X_media)),axis=0)
 
         seasonalityFrame = controlData[configurations['SEASONALITY_VARIABLES_BASE']]

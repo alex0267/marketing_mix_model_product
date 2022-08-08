@@ -165,8 +165,6 @@ def simulateTouchpoints(touchpoints, format):
       print(dt.max())
       # print('DATA HERE')
 
-
-
     if(touchpoint ['name']=="touchpoint_4"):
       #Define touchpoint that has some semi random distribution patterns and periodic distribution patterns
       #Hill feature: spendings are relatively distributed in size providing a range of possible reference points for the hill estimation
@@ -207,10 +205,15 @@ def simulateTouchpoints(touchpoints, format):
 
       #print(data["touchpoint_3_adstocked"])
 
+      #normalize data to prepare for hill transformation
       data["touchpoint_4_normalized"] = Data_Preparation.normalization.normalize_feature(data["touchpoint_4_adstocked"] , configurations['NORMALIZATION_STEPS_TOUCHPOINTS'][touchpoint ['name']], configurations, touchpoint ['name'])
       
+      #hill transformation
+      data["touchpoint_4_shaped"] = helper_functions.hill_function.hill_function(data["touchpoint_4_normalized"], touchpoint['S'], touchpoint['H'])
+
+      #de-normalize for sales calculation
       dt = data["touchpoint_4_normalized"]
-      print('tp3')
+      print('tp4')
       print(dt.mean())
       print(dt.min())
       print(dt.max())
