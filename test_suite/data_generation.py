@@ -7,6 +7,28 @@ import Data_Preparation.normalization
 import numpy as np
 import yaml
 
+def hillConversion(data, touchpoint, configurations):
+
+  #normalize data & mutliply by 10 to get 0-10 range
+  data_normalized = Data_Preparation.normalization.normalize_feature(data , configurations['NORMALIZATION_STEPS_TOUCHPOINTS'][touchpoint ['name']], configurations, touchpoint ['name'])
+  data_scaled = data_normalized*5
+      
+  #hill transformation of normalized data
+  data_shaped = helper_functions.hill_function.hill_function(data_scaled, touchpoint['S'], touchpoint['H'])
+
+  #calculating the coefficient of y/x of the respective hill transformation
+  #we double the normalized data since:
+  #-> y = x*5 on a 0-10 scale 
+  #-> Therefore, all x mappings are only half the size 
+  #-> coefficient_of_growth = y/x*2
+  coefficient = ((data_shaped/data_normalized*2))
+
+  #scale the adstocked information according to the hill transformation
+  touchpoint_shaped = coefficient*data
+
+  return touchpoint_shaped
+
+
 def createIndex():
   week = pd.Series([x+1 for x in range(48)]*3)
   Y1 = pd.Series([f'Y{1}' for x in range(48)])
@@ -76,9 +98,9 @@ def simulateTouchpoints(touchpoints, format):
       #define monthly seasonality influence
       #beta always 1 since direct influence unlike sales (defined via the factor parameter)
       #can be done for any month
-      data[f'{touchpoint["name"]}_adstocked'] = controlFrame[touchpoint['name']]*touchpoint['factor']
+      data[f'{touchpoint["name"]}{format}'] = controlFrame[touchpoint['name']]*touchpoint['factor']
 
-      plt.plot(data[f'{touchpoint["name"]}_adstocked'][:subplot], color='blue')
+      plt.plot(data[f'{touchpoint["name"]}{format}'][:subplot], color='blue')
 
     if(touchpoint['name']=="base_1"):
       #define constant baseline sales independent from marketing activities
@@ -94,9 +116,9 @@ def simulateTouchpoints(touchpoints, format):
       #set seed to reproduce error for each iteration
       np.random.seed(42)
       
-      data['base_1_adstocked'] = base_1 + np.random.normal(0,noise_factor,weeks)
+      data[f'base_1{format}'] = base_1 + np.random.normal(0,noise_factor,weeks)
 
-      plt.plot(data['base_1_adstocked'][:subplot], color='brown')
+      plt.plot(data[f'base_1{format}'][:subplot], color='brown')
     
     if(touchpoint['name']=="base_2"):
       #Define touchpoint as sinusodial wave across the entire year
@@ -110,9 +132,9 @@ def simulateTouchpoints(touchpoints, format):
       sin_wave = np.sin(time_col_pi)
       
       #Sinusodial sales - does not get adstocked but fits the definition
-      data['base_2_adstocked'] = (sin_wave+2)*baseSalesCoefficient + np.random.normal(0,500,weeks)
+      data[f'base_2{format}'] = (sin_wave+2)*baseSalesCoefficient + np.random.normal(0,500,weeks)
 
-      plt.plot(data['base_2_adstocked'][:subplot], color='brown')
+      plt.plot(data[f'base_2{format}'][:subplot], color='brown')
       
        
     if(touchpoint ['name']=="touchpoint_2"):
@@ -145,25 +167,28 @@ def simulateTouchpoints(touchpoints, format):
       #Define touchpoint as pointed periodic spending throughout the year
       touchpoint_2 = []
       for x in range(weeks):
-        if x%26 == 0: touchpoint_2.append(baseSalesCoefficient)
-        else: touchpoint_2.append(0)
+
+        touchpoint_2.append(0)
+        if x%4 == 0: 
+          touchpoint_2[x] = touchpoint_2[x] + baseSalesCoefficient
+        if x%26 == 0: 
+          touchpoint_2[x] = touchpoint_2[x] + baseSalesCoefficient*1.5
 
       #touchpoint definitions
       spendingsFrame["touchpoint_3"] = touchpoint_2
 
+      #apply adstock
       data["touchpoint_3_adstocked"] = adstock_functions.apply_adstock(spendingsFrame["touchpoint_3"],touchpoint['L'], touchpoint['P'], touchpoint['D'])
-
-      #plt.plot(spendingsFrame['touchpoint_2'][:subplot], color='blue')
       plt.plot(data["touchpoint_3_adstocked"][:subplot], color='green')
   
-      data["touchpoint_3_normalized"] = Data_Preparation.normalization.normalize_feature(data["touchpoint_3_adstocked"] , configurations['NORMALIZATION_STEPS_TOUCHPOINTS'][touchpoint ['name']], configurations, touchpoint ['name'])
+      #apply shape
+      data["touchpoint_3_shaped"] = hillConversion(data["touchpoint_3_adstocked"],touchpoint, configurations)
+      plt.plot(data["touchpoint_3_shaped"][:subplot], color='black')
       
-      dt = data["touchpoint_3_normalized"]
-      print('tp2')
-      print(dt.mean())
-      print(dt.min())
-      print(dt.max())
       # print('DATA HERE')
+
+      #apply shape to spendings
+
 
     if(touchpoint ['name']=="touchpoint_4"):
       #Define touchpoint that has some semi random distribution patterns and periodic distribution patterns
@@ -173,8 +198,7 @@ def simulateTouchpoints(touchpoints, format):
       #define weeks in scope
       base_weeks = [2,5,7,10,15,18,20] 
 
-      #  = list(map(lambda x: x*2.5+max(a_list), a_list))
-
+      #define touchpoint spendings
       touchpoint_4 = []
       for x in range(weeks):
         
@@ -192,34 +216,16 @@ def simulateTouchpoints(touchpoints, format):
         if x%26 == 0: 
           touchpoint_4[x] = touchpoint_4[x] + baseSalesCoefficient*3.5
       
-      print((touchpoint_4))
-      
-
-      #touchpoint definitions
+      #append to general spendings dataframe
       spendingsFrame["touchpoint_4"] = touchpoint_4
 
+      #adstock spendings
       data["touchpoint_4_adstocked"] = adstock_functions.apply_adstock(spendingsFrame["touchpoint_4"],touchpoint['L'], touchpoint['P'], touchpoint['D'])
-
-      #plt.plot(spendingsFrame['touchpoint_3'][:subplot], color='red')
       plt.plot(data["touchpoint_4_adstocked"][:subplot], color='pink')
 
-      #print(data["touchpoint_3_adstocked"])
-
-      #normalize data to prepare for hill transformation
-      data["touchpoint_4_normalized"] = Data_Preparation.normalization.normalize_feature(data["touchpoint_4_adstocked"] , configurations['NORMALIZATION_STEPS_TOUCHPOINTS'][touchpoint ['name']], configurations, touchpoint ['name'])
-      
-      #hill transformation
-      data["touchpoint_4_shaped"] = helper_functions.hill_function.hill_function(data["touchpoint_4_normalized"], touchpoint['S'], touchpoint['H'])
-
-      #de-normalize for sales calculation
-      dt = data["touchpoint_4_normalized"]
-      print('tp4')
-      print(dt.mean())
-      print(dt.min())
-      print(dt.max())
-
-      d = pd.DataFrame([data["touchpoint_4_adstocked"],data["touchpoint_4_normalized"] ])
-      d.to_csv('comp.csv')
+      #apply shape to spendings
+      data["touchpoint_4_shaped"] = hillConversion(data["touchpoint_4_adstocked"],touchpoint, configurations)
+      plt.plot(data["touchpoint_4_shaped"][:subplot], color='red')
 
 
 
@@ -238,7 +244,7 @@ def simulateTouchpoints(touchpoints, format):
   #show
   plt.plot(data['sales'][:subplot], color='orange')
   plt.show()
-  plt.savefig('data_generation.png')
+  plt.savefig('data_generation_2.png')
 
   #return data - sales with respective adstocked spendings & influence parameters
   #return spendingsFrame - direct spendings per touchpoint

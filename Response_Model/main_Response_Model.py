@@ -31,6 +31,7 @@ class ResponseModel:
 
     #extract parameters for each touchpoint
     def extractParameters(self, printOut=False):
+        pd.DataFrame(self.extractFrame.mean(axis=0)).to_csv('extractFrame.csv')
         self.parameters = {}
         self.num_media = self.stanDict['num_media']
 
@@ -60,6 +61,13 @@ class ResponseModel:
                 'P': peak,
                 'D': decay
             }
+
+            # #Collect per touchpoint parameters in dictionary
+            # self.parameters[f'{touchpoint}_adstock'] = {
+            #     'L': self.max_length,
+            #     'P': peak,
+            #     'D': decay
+            # }
 
             self.parameters[f'{touchpoint}_beta']  = beta
 

@@ -5,6 +5,10 @@ functions {
   real Adstock(vector t, row_vector weights) {
     return dot_product(t, weights) / sum(weights);
   }
+
+  real Shape(real t, real H, real S) {
+    return ((t^S) / (H^S+t^S));
+  }
 }
 
 data {
@@ -21,7 +25,7 @@ data {
   // matrix of seasonality variables
   matrix[N,12] seasonality;
   // list of mean values of media (raw data)
-  vector [num_media] media_mean;
+  vector [num_media] media_norm;
 
 }
 parameters {
@@ -37,11 +41,21 @@ parameters {
   // each media
   vector<lower=0,upper=1>[num_media] decay;
   vector<lower=0,upper=ceil(max_lag/2)>[num_media] peak;
+  //Shape parameter
+  vector<lower=0,upper=10>[num_media] H; //Half saturation point
+  vector<lower=0,upper=10>[num_media] S; //slope parameter
+
 }
 
 transformed parameters {
   // the cumulative media effect after adstock
   real cum_effect;
+  // the shape effect after cumulation of adstock
+  real shape_effect;
+  real normalized_data;
+  real coefficient;
+  real touchpoint_shaped;
+
   // matrix of media variables after adstock
   matrix[N, num_media] X_media_adstocked;
 
@@ -52,8 +66,15 @@ transformed parameters {
       for (lag in 1 : max_lag) {
         lag_weights[max_lag-lag+1] <- pow(decay[media], (lag - 1 - peak[media]) ^ 2);
       }
+
     cum_effect <- Adstock(sub_col(X_media, nn, media, max_lag), lag_weights);
-    X_media_adstocked[nn, media] <- log1p(cum_effect/media_mean[media]);
+    normalized_data <- cum_effect/media_norm[media]
+    shape_effect <- Shape((normalized_data)*5,H[media], S[media]);
+    coefficient <- shape_effect/normalized_data*2
+
+    touchpoint_shaped <- coefficient*cum_effect
+
+    X_media_adstocked[nn, media] <- log1p(touchpoint_shaped/media_norm[media]);
     }
   } 
 }
@@ -61,6 +82,8 @@ transformed parameters {
 model {
   decay ~ beta(3,3);
   peak ~ uniform(0, ceil(max_lag/2));
+  S ~ normal(0, 1);
+  H ~ normal(0, 1);
   tau ~ normal(0, 5);
   //definition of beta variables - generic for now including media betas
   for (i in 1 : num_media) {

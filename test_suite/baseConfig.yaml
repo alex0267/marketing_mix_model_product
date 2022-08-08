@@ -1,9 +1,9 @@
 
 #Definition of touchpoints and order of calling
 TOUCHPOINTS:
-  - touchpoint_2
+  # - touchpoint_2
   - touchpoint_3
-  # - touchpoint_4
+  - touchpoint_4
 
 #define seasonality variables - order due to data generation model
 SEASONALITY_VARIABLES_BASE:
@@ -30,9 +30,9 @@ CONTROL_VARIABLES_BASE:
 #the normalization steps will follow the order below:
 NORMALIZATION_STEPS_TOUCHPOINTS:
 
-  touchpoint_2: ['max_across_brands']
+  # touchpoint_2: ['max_across_brands']
   touchpoint_3: ['max_across_brands']
-  # touchpoint_4: ['mean_across_brands']
+  touchpoint_4: ['max_across_brands']
   
 
 #defining normalization steps of touchpoints

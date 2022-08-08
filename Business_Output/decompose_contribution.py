@@ -41,7 +41,6 @@ def decompose_absolute_contribution(responseModel, feature_df, original_sales, p
     #adstock(touchpoint_x, param = estimated_parameters_x)
     media_adstocked = helper_functions.adstock_functions.adstock_transform(feature_df[responseModel.configurations['TOUCHPOINTS']], responseModel.configurations['TOUCHPOINTS'], responseModel.parameters)
 
-    print(media_adstocked)
     #Normalize adstocked media via max accross brands with  +1
     #(adstock(touchpoint_x, param = estimated_parameters_x))/mean + 1
     for touchpoint in responseModel.configurations['TOUCHPOINTS']:
@@ -49,7 +48,6 @@ def decompose_absolute_contribution(responseModel, feature_df, original_sales, p
         media_adstocked[touchpoint] = Data_Preparation.normalization.normalize_feature(media_adstocked, normalization_steps, responseModel.configurations, touchpoint)
         media_adstocked[touchpoint] = media_adstocked[touchpoint] + 1
 
-    print(media_adstocked)
     X = media_adstocked
 
 
