@@ -67,14 +67,15 @@ transformed parameters {
         lag_weights[max_lag-lag+1] <- pow(decay[media], (lag - 1 - peak[media]) ^ 2);
       }
 
-    cum_effect <- Adstock(sub_col(X_media, nn, media, max_lag), lag_weights);
-    normalized_data <- cum_effect/media_norm[media]
-    shape_effect <- Shape((normalized_data)*5,H[media], S[media]);
-    coefficient <- shape_effect/normalized_data*2
+      cum_effect <- Adstock(sub_col(X_media, nn, media, max_lag), lag_weights);
+      normalized_data <- cum_effect/media_norm[media];
 
-    touchpoint_shaped <- coefficient*cum_effect
+      shape_effect <- Shape((normalized_data)*5,H[media], S[media]);
+      coefficient <- shape_effect/(normalized_data);
 
-    X_media_adstocked[nn, media] <- log1p(touchpoint_shaped/media_norm[media]);
+      touchpoint_shaped <- coefficient*cum_effect;
+
+      X_media_adstocked[nn, media] <- log1p(touchpoint_shaped/media_norm[media]);
     }
   } 
 }
@@ -82,8 +83,7 @@ transformed parameters {
 model {
   decay ~ beta(3,3);
   peak ~ uniform(0, ceil(max_lag/2));
-  S ~ normal(0, 1);
-  H ~ normal(0, 1);
+
   tau ~ normal(0, 5);
   //definition of beta variables - generic for now including media betas
   for (i in 1 : num_media) {

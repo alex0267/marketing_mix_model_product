@@ -2,32 +2,34 @@ import math
 import matplotlib.pyplot as plt
 import pandas as pd
 import helper_functions.adstock_functions as adstock_functions
-import helper_functions.hill_function
 import Data_Preparation.normalization
+import helper_functions.hill_function
 import numpy as np
 import yaml
 
-def hillConversion(data, touchpoint, configurations):
+#Definition of conversion process from Adstocked_media to Shaped_media
+def hillConversion(data, touchpoint, configurations, media_norm):
 
-  #normalize data & mutliply by 10 to get 0-10 range
-  data_normalized = Data_Preparation.normalization.normalize_feature(data , configurations['NORMALIZATION_STEPS_TOUCHPOINTS'][touchpoint ['name']], configurations, touchpoint ['name'])
+  #normalize data & mutliply by 5 to get 0-5 range
+  data_normalized = data/media_norm
   data_scaled = data_normalized*5
+  name = touchpoint['name']
+  data_scaled.to_excel(f'{name}_scaled_org.xlsx')
       
   #hill transformation of normalized data
   data_shaped = helper_functions.hill_function.hill_function(data_scaled, touchpoint['S'], touchpoint['H'])
 
   #calculating the coefficient of y/x of the respective hill transformation
   #we double the normalized data since:
-  #-> y = x*5 on a 0-10 scale 
+  #-> y = x*5 on a 0-10 range (definition limit for H of Shape function - user defined) 
   #-> Therefore, all x mappings are only half the size 
   #-> coefficient_of_growth = y/x*2
-  coefficient = ((data_shaped/data_normalized*2))
+  coefficient = ((data_shaped/data_normalized))
 
   #scale the adstocked information according to the hill transformation
   touchpoint_shaped = coefficient*data
 
   return touchpoint_shaped
-
 
 def createIndex():
   week = pd.Series([x+1 for x in range(48)]*3)
@@ -92,6 +94,7 @@ def simulateTouchpoints(touchpoints, format):
   spendingsFrame = pd.DataFrame()
   data['sales'] =[0 for x in range(weeks)]
 
+#Iterate through all touchpoints that have been chosen to be included in the data generation process
   for touchpoint in touchpoints:
     
     if(touchpoint['control_var']=='month'):
@@ -100,7 +103,7 @@ def simulateTouchpoints(touchpoints, format):
       #can be done for any month
       data[f'{touchpoint["name"]}{format}'] = controlFrame[touchpoint['name']]*touchpoint['factor']
 
-      plt.plot(data[f'{touchpoint["name"]}{format}'][:subplot], color='blue')
+      #plt.plot(data[f'{touchpoint["name"]}{format}'][:subplot], color='blue')
 
     if(touchpoint['name']=="base_1"):
       #define constant baseline sales independent from marketing activities
@@ -118,10 +121,11 @@ def simulateTouchpoints(touchpoints, format):
       
       data[f'base_1{format}'] = base_1 + np.random.normal(0,noise_factor,weeks)
 
-      plt.plot(data[f'base_1{format}'][:subplot], color='brown')
+      #plt.plot(data[f'base_1{format}'][:subplot], color='brown')
     
     if(touchpoint['name']=="base_2"):
       #Define touchpoint as sinusodial wave across the entire year
+      
       #sin def
       for x in range(weeks):
         step = x+1
@@ -150,40 +154,35 @@ def simulateTouchpoints(touchpoints, format):
       data["touchpoint_2_adstocked"] = adstock_functions.apply_adstock(spendingsFrame["touchpoint_2"],touchpoint['L'], touchpoint['P'], touchpoint['D'])
 
       #plt.plot(spendingsFrame['touchpoint_2'][:subplot], color='blue')
-      plt.plot(data["touchpoint_2_adstocked"][:subplot], color='green')
+      #plt.plot(data["touchpoint_2_adstocked"][:subplot], color='green')
   
-      data["touchpoint_2_normalized"] = Data_Preparation.normalization.normalize_feature(data["touchpoint_2_adstocked"] , configurations['NORMALIZATION_STEPS_TOUCHPOINTS'][touchpoint ['name']], configurations, touchpoint ['name'])
       
-      dt = data["touchpoint_2_normalized"]
-      print('tp2')
-      print(dt.mean())
-      print(dt.min())
-      print(dt.max())
-      #hill_transformed_touchpoint = helper_functions.hill_function.hill_function(normalized_touchpoint, touchpoint['S'], touchpoint['H'])
-
-
 
     if(touchpoint ['name']=="touchpoint_3"):
       #Define touchpoint as pointed periodic spending throughout the year
-      touchpoint_2 = []
+      touchpoint_3 = []
       for x in range(weeks):
 
-        touchpoint_2.append(0)
+        touchpoint_3.append(0)
         if x%4 == 0: 
-          touchpoint_2[x] = touchpoint_2[x] + baseSalesCoefficient
+          touchpoint_3[x] = touchpoint_3[x] + baseSalesCoefficient
         if x%26 == 0: 
-          touchpoint_2[x] = touchpoint_2[x] + baseSalesCoefficient*1.5
+          touchpoint_3[x] = touchpoint_3[x] + baseSalesCoefficient*1.5
 
       #touchpoint definitions
-      spendingsFrame["touchpoint_3"] = touchpoint_2
+      spendingsFrame["touchpoint_3"] = touchpoint_3
 
       #apply adstock
       data["touchpoint_3_adstocked"] = adstock_functions.apply_adstock(spendingsFrame["touchpoint_3"],touchpoint['L'], touchpoint['P'], touchpoint['D'])
-      plt.plot(data["touchpoint_3_adstocked"][:subplot], color='green')
+      #plt.plot(data["touchpoint_3_adstocked"][:subplot], color='green')
   
       #apply shape
-      data["touchpoint_3_shaped"] = hillConversion(data["touchpoint_3_adstocked"],touchpoint, configurations)
-      plt.plot(data["touchpoint_3_shaped"][:subplot], color='black')
+      # print('T3 normal')
+      # print((data["touchpoint_3_adstocked"]/spendingsFrame["touchpoint_3"].max())*5)
+
+      data["touchpoint_3_shaped"] = hillConversion(data["touchpoint_3_adstocked"],touchpoint, configurations, spendingsFrame["touchpoint_3"].max())
+      
+      #plt.plot(data["touchpoint_3_shaped"][:subplot], color='black')
       
       # print('DATA HERE')
 
@@ -221,11 +220,11 @@ def simulateTouchpoints(touchpoints, format):
 
       #adstock spendings
       data["touchpoint_4_adstocked"] = adstock_functions.apply_adstock(spendingsFrame["touchpoint_4"],touchpoint['L'], touchpoint['P'], touchpoint['D'])
-      plt.plot(data["touchpoint_4_adstocked"][:subplot], color='pink')
+      #plt.plot(data["touchpoint_4_adstocked"][:subplot], color='pink')
 
       #apply shape to spendings
-      data["touchpoint_4_shaped"] = hillConversion(data["touchpoint_4_adstocked"],touchpoint, configurations)
-      plt.plot(data["touchpoint_4_shaped"][:subplot], color='red')
+      data["touchpoint_4_shaped"] = hillConversion(data["touchpoint_4_adstocked"],touchpoint, configurations, spendingsFrame["touchpoint_4"].max())
+      #plt.plot(data["touchpoint_4_shaped"][:subplot], color='red')
 
 
 
@@ -235,14 +234,11 @@ def simulateTouchpoints(touchpoints, format):
     data['sales'] = data['sales'] + data[f"{touchpoint['name']}{format}"]*touchpoint['beta']
 
  
-  # print(data)
-  #add noise
-  #data['sales'] = data['sales'] + np.random.normal(0,500,weeks)
 
   controlFrame['promotion'] = 1
 
   #show
-  plt.plot(data['sales'][:subplot], color='orange')
+  #plt.plot(data['sales'][:subplot], color='orange')
   plt.show()
   plt.savefig('data_generation_2.png')
 

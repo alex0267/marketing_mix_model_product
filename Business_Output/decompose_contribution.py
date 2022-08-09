@@ -1,9 +1,9 @@
 import helper_functions.adstock_functions
 import helper_functions.transformations
+import helper_functions.hill_function
 import Data_Preparation.normalization
 import numpy as np
 import pandas as pd
-
 import matplotlib
 # matplotlib.use("TkAgg")
 #https://pyimagesearch.com/2015/08/24/resolved-matplotlib-figures-not-showing-up-or-displaying/
@@ -14,49 +14,43 @@ from matplotlib import pyplot as plt
 # Decompose sales to media channels' contribution
 # Each media channel's contribution = total sales - sales upon removal the channel    
 
-def plotContribution(prediction, mean_sales):
+def plotContribution(prediction, max_sales):
     
-    data = pd.DataFrame(prediction*mean_sales)
+    data = pd.DataFrame(prediction*max_sales)
     plt.figure()
     plt.plot(data[:], color="black")
     plt.show(block=True)
-    plt.savefig('estimatedContribution.png')
+    plt.savefig('estimatedContribution2.png')
 
-def decompose_absolute_contribution(responseModel, feature_df, original_sales, plot = False):
+def decompose_absolute_contribution(responseModel, feature_df, original_sales, data,plot = False):
 
-    
-    # sales_mean_logp1 = feature_df['sales']
-    # seasonality_sales_mean_logp1 = sales_mean_logp1*(np.dot(responseModel.stanDict['seasonality'],(responseModel.beta_seasonality)))
-    # seasonality_sales_mean_p1 = np.exp(seasonality_sales_mean_logp1)
-    # seasonality_sales_mean = np.exp(seasonality_sales_mean_logp1)-1
-    # seasonality_sales = seasonality_sales_mean*original_sales.mean()
-
-
-    # original_sales = seasonality_sales
-    # target = pd.DataFrame(seasonality_sales_mean_p1).rename(columns={0:'sales'})
-
-    #print((np.dot(responseModel.stanDict['seasonality'],(responseModel.beta_seasonality)))*(original_sales/original_sales.mean()))
 
     #Adstock media variables according to estimated parameters
     #adstock(touchpoint_x, param = estimated_parameters_x)
     media_adstocked = helper_functions.adstock_functions.adstock_transform(feature_df[responseModel.configurations['TOUCHPOINTS']], responseModel.configurations['TOUCHPOINTS'], responseModel.parameters)
+    print('adstocked')
+    print(media_adstocked)
+
+    
+    #media_shaped = media_adstocked
+    media_shaped = helper_functions.hill_function.hill_transform(media_adstocked,responseModel)
+
+    plt.plot(media_shaped['touchpoint_4'], color='green')
+    plt.plot(data['touchpoint_4_shaped'], color= 'orange')
+    plt.savefig('testfig.png')
 
     #Normalize adstocked media via max accross brands with  +1
     #(adstock(touchpoint_x, param = estimated_parameters_x))/mean + 1
     for touchpoint in responseModel.configurations['TOUCHPOINTS']:
         normalization_steps = responseModel.configurations['NORMALIZATION_STEPS_TOUCHPOINTS'][touchpoint]
-        media_adstocked[touchpoint] = Data_Preparation.normalization.normalize_feature(media_adstocked, normalization_steps, responseModel.configurations, touchpoint)
-        media_adstocked[touchpoint] = media_adstocked[touchpoint] + 1
+        media_shaped[touchpoint] = Data_Preparation.normalization.normalize_feature(media_shaped, normalization_steps, responseModel.configurations, touchpoint)
+        media_shaped[touchpoint] = media_shaped[touchpoint] + 1
 
-    X = media_adstocked
-
-
+    X = media_shaped
 
     #getting max()+1 normalized sales variable 
     target = pd.DataFrame(np.exp(responseModel.stanDict['y'])).rename(columns={0:'sales'})
 
-    # print('target')
-    # print(responseModel.stanDict['y'])
 
     #calculation of x**Beta for the media variables and the control model variables (= basesales)
     #we take the media_impressions (mean transformed)^Beta_i
@@ -67,21 +61,9 @@ def decompose_absolute_contribution(responseModel, feature_df, original_sales, p
         colname = responseModel.configurations['TOUCHPOINTS'][i]
         factor_df[colname] = X[colname] ** responseModel.parameters[f'{colname}_beta']
  
-
-    #here the control model parameters come into play 
-    #First attempt with assumption: log(y/u+1) = B*log(adstock/u+1) + (B*dummy_month) + tau (with u = mean)
-    #Therefore we apply log(B*dummy_month)
-
-    # for i in range(len(responseModel.configurations['SEASONALITY_VARIABLES_BASE'])):
-    #     season = responseModel.configurations['SEASONALITY_VARIABLES_BASE'][i]
-    #     factor_df[colname] = np.log(controlFrame[season] * responseModel.parameters[season])
     
     factor_df['intercept'] = np.exp(responseModel.parameters['tau'])
 
-    # print('dot_here')
-    # print(factor_df.apply(np.prod, axis=1))
-    # print(np.dot(controlFrame,responseModel.beta_seasonality))
-    # print(factor_df.apply(np.prod, axis=1)*np.dot(controlFrame,responseModel.beta_seasonality))
     
     # 2. calculate the product of all factors -> y_pred
     # baseline = intercept * control factor = e^tau * X[13]^beta[13]
@@ -89,8 +71,6 @@ def decompose_absolute_contribution(responseModel, feature_df, original_sales, p
     factor_df['y_pred'], factor_df['y_true2'] = y_pred, target
     factor_df['baseline'] = factor_df[['intercept']].apply(np.prod, axis=1)
 
-    # print('factors here')
-    # print(factor_df)
 
     # 3. calculate each media factor's contribution
     # media contribution = total volume – volume upon removal of the media factor
@@ -108,6 +88,7 @@ def decompose_absolute_contribution(responseModel, feature_df, original_sales, p
     # predicted total media contribution is slightly different from true total media contribution
     # scale each media factor’s contribution by removing the delta volume proportionally
 
+    #Delta was excluded from the calculation since it distorts the actual predictive power of the model
     # mc_df['mc_delta'] =  mc_df['mc_pred'] - mc_df['mc_true']
     # for col in responseModel.configurations['TOUCHPOINTS']:
     #     mc_df[col] = mc_df[col] - mc_df['mc_delta']*mc_df[col]/mc_df['mc_pred']
@@ -136,10 +117,18 @@ def decompose_absolute_contribution(responseModel, feature_df, original_sales, p
     print((sum(abs(compareFrame['sales']-compareFrame['pred'])))/len(compareFrame))
 
     #Plot the error if wanted
-    if(plot == True):
-        plotContribution(mc_df['mc_pred'],original_sales.mean())
-    plt.plot(compareFrame['pred'])
-    plt.savefig('sales.png')
+    # plt.plot(compareFrame['sales'],  color='blue')
+    # plt.plot(compareFrame['pred'],  color='green')
+    # print('comp')
+    # print(compareFrame['sales'])
+    # print(compareFrame['pred'])
+
+    # if(plot == True):
+    #     plotContribution(mc_df['mc_pred'],original_sales.max())
+    # plt.plot(compareFrame['pred'],  color='red')
+    #plt.plot(compareFrame['sales'])
+
+    plt.savefig('sales2.png')
 
     return mc_df
 

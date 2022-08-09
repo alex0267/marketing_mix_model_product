@@ -62,12 +62,14 @@ class ResponseModel:
                 'D': decay
             }
 
-            # #Collect per touchpoint parameters in dictionary
-            # self.parameters[f'{touchpoint}_adstock'] = {
-            #     'L': self.max_length,
-            #     'P': peak,
-            #     'D': decay
-            # }
+            slope = self.extractFrame[f'S.{i}'].mean(axis=0)
+            half = self.extractFrame[f'H.{i}'].mean(axis=0)
+
+            #Collect per touchpoint parameters in dictionary
+            self.parameters[f'{touchpoint}_shape'] = {
+                'S': slope,
+                'H': half
+            }
 
             self.parameters[f'{touchpoint}_beta']  = beta
 
@@ -84,10 +86,13 @@ class ResponseModel:
                 print()
                 print("adstock_touchpoint")
                 print(f"value decay:{decay}")
-                #print(f"original:{touchpoint['D']}")
                 print(f"value peak:{peak}")
-                #print(f"original:{touchpoint['P']}")
                 print()
+                print("shape_touchpoint")
+                print(f"value slope:{slope}")
+                print(f"value half:{half}")
+                print()
+
         if (printOut == True):
             for season in self.configurations['SEASONALITY_VARIABLES_BASE']:
                 print(f'beta_{season}: ')
