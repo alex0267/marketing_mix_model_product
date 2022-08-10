@@ -1,7 +1,7 @@
 import test_suite.data_generation
 import test_suite.stan_dict
 import test_suite.data_preparation
-import Business_Output.decompose_contribution
+import Business_Output.main_Business_Output
 import helper_functions.hill_function
 from Response_Model.main_Response_Model import ResponseModel
 import yaml
@@ -108,36 +108,23 @@ feature_df = test_suite.data_preparation.normalize_data(data, spendingsFrame)
 
 #Create dictionary
 
-stanDict = test_suite.stan_dict.createDict(feature_df, controlFrame, data['sales'], spendingsFrame, max_lag)
+
 
 #Initialize Model instance and Train Bayesian Model 
-responseModel = ResponseModel(stanDict, configurations, feature_df, data['sales'])
+responseModel = ResponseModel(spendingsFrame = spendingsFrame, 
+                              controlFrame = controlFrame,
+                              configurations = configurations, 
+                              data_normalized = feature_df, 
+                              target = data['sales'])
 
-#first shape test: 'test_diff_touchpoints'
-#second shape test: 'test_shape_2'
-   #resuts in parameters of shape that are comparable to the true shape parameters
-   #However, relatively inaccurate
+stanDict = test_suite.stan_dict.createDict(responseModel, max_lag)
 
-#third shape test: 'test_shape_3'
-   #results in weird shape parameters
-   #However, relatively high accuracy??
-   #Not clear what changed from 2 to 3 (some transformation definitions in stan file)
 
-#third shape test: 'test_shape_4'
-   #Changed to _shaped -> error in data generation until here
-#fourth shape test: 'test_shape_5'
-   #Without *2
-
-#test_shape_5
-   #change prior from N (0,1) to ()
-
-#test_shape_6
-   #change of tp_3 from S:3.5, H:5,2 to 3 , 1.9
-
-#test_shape_7
-   #only kept TP_4
+responseModel.stanDict = stanDict
 responseModel.runModel(name ='test_shape_7', load=True)
 responseModel.extractParameters(printOut=True)
 
 #calculate contribution decomposition via estimated parameters and original spendings/sales
-Business_Output.decompose_contribution.decompose_absolute_contribution(responseModel, spendingsFrame, data['sales'],data, plot=True)
+Business_Output.main_Business_Output.createBusinessOutputs(responseModel = responseModel,
+                                                         spendingsFrame = spendingsFrame)
+

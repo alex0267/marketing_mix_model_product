@@ -23,16 +23,16 @@ def hill_function(adstocked_spending, S, H):
 
 #Definition of conversion process from Adstocked_media to Shaped_media
 #After estimation transformation
-def hill_transform(data, responseModel):
+def hill_transform(data, scope, parameters, configurations):
 
     media_shaped = pd.DataFrame()
-    for i,touchpoint in enumerate(responseModel.configurations['TOUCHPOINTS']):
+    for i,touchpoint in enumerate(scope):
 
         #Return estimated parameters from dictionary
-        S,H = responseModel.parameters[f'{touchpoint}_shape']['S'], responseModel.parameters[f'{touchpoint}_shape']['H']
+        S,H = parameters[f'{touchpoint}_shape']['S'], parameters[f'{touchpoint}_shape']['H']
         
         #normalize data & mutliply by 5 to get 0-5 range
-        data_normalized = Data_Preparation.normalization.normalize_feature(data[touchpoint] , responseModel.configurations['NORMALIZATION_STEPS_TOUCHPOINTS'][touchpoint], responseModel.configurations, touchpoint)
+        data_normalized = Data_Preparation.normalization.normalize_feature(data[touchpoint] , configurations['NORMALIZATION_STEPS_TOUCHPOINTS'][touchpoint], configurations, touchpoint)
         data_scaled = data_normalized*5
         data_scaled.to_excel(f'{touchpoint}_scaled_est.xlsx')
             

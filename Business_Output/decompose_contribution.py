@@ -1,6 +1,7 @@
 import helper_functions.adstock_functions
 import helper_functions.transformations
 import helper_functions.hill_function
+import Business_Output.applyParameters
 import Data_Preparation.normalization
 import numpy as np
 import pandas as pd
@@ -22,55 +23,22 @@ def plotContribution(prediction, max_sales):
     plt.show(block=True)
     plt.savefig('estimatedContribution2.png')
 
-def decompose_absolute_contribution(responseModel, feature_df, original_sales, data,plot = False):
 
 
-    #Adstock media variables according to estimated parameters
-    #adstock(touchpoint_x, param = estimated_parameters_x)
-    media_adstocked = helper_functions.adstock_functions.adstock_transform(feature_df[responseModel.configurations['TOUCHPOINTS']], responseModel.configurations['TOUCHPOINTS'], responseModel.parameters)
-    print('adstocked')
-    print(media_adstocked)
+def decompose_absolute_contribution(responseModel, spendingsFrame, plot = False):
 
-    
-    #media_shaped = media_adstocked
-    media_shaped = helper_functions.hill_function.hill_transform(media_adstocked,responseModel)
-
-    plt.plot(media_shaped['touchpoint_4'], color='green')
-    plt.plot(data['touchpoint_4_shaped'], color= 'orange')
-    plt.savefig('testfig.png')
-
-    #Normalize adstocked media via max accross brands with  +1
-    #(adstock(touchpoint_x, param = estimated_parameters_x))/mean + 1
-    for touchpoint in responseModel.configurations['TOUCHPOINTS']:
-        normalization_steps = responseModel.configurations['NORMALIZATION_STEPS_TOUCHPOINTS'][touchpoint]
-        media_shaped[touchpoint] = Data_Preparation.normalization.normalize_feature(media_shaped, normalization_steps, responseModel.configurations, touchpoint)
-        media_shaped[touchpoint] = media_shaped[touchpoint] + 1
-
-    X = media_shaped
+    #apply parameters with responseModel
+    factor_df, y_pred = Business_Output.applyParameters.applyParametersToData(raw_data = spendingsFrame, 
+                                            parameters = responseModel.parameters,
+                                            configurations = responseModel.configurations,
+                                            scope = responseModel.configurations['TOUCHPOINTS'],
+                                            seasonality_df = responseModel.seasonality_df,
+                                            seasonality_beta = responseModel.beta_seasonality)
 
     #getting max()+1 normalized sales variable 
     target = pd.DataFrame(np.exp(responseModel.stanDict['y'])).rename(columns={0:'sales'})
 
-
-    #calculation of x**Beta for the media variables and the control model variables (= basesales)
-    #we take the media_impressions (mean transformed)^Beta_i
-    #x_Beta_matrix = X.apply(lambda x: x[:responseModel.num_media]**responseModel.beta[:responseModel.num_media], axis=1)
-
-    factor_df = pd.DataFrame(columns=responseModel.configurations['TOUCHPOINTS']+['intercept']+responseModel.configurations['SEASONALITY_VARIABLES_BASE'])
-    for i in range(responseModel.num_media):
-        colname = responseModel.configurations['TOUCHPOINTS'][i]
-        factor_df[colname] = X[colname] ** responseModel.parameters[f'{colname}_beta']
- 
-    
-    factor_df['intercept'] = np.exp(responseModel.parameters['tau'])
-
-    
-    # 2. calculate the product of all factors -> y_pred
-    # baseline = intercept * control factor = e^tau * X[13]^beta[13]
-    y_pred = factor_df.apply(np.prod, axis=1)*np.exp(np.dot(responseModel.seasonality_df,responseModel.beta_seasonality))
     factor_df['y_pred'], factor_df['y_true2'] = y_pred, target
-    factor_df['baseline'] = factor_df[['intercept']].apply(np.prod, axis=1)
-
 
     # 3. calculate each media factor's contribution
     # media contribution = total volume – volume upon removal of the media factor
