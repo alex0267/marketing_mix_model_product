@@ -74,7 +74,7 @@ def createIndex():
   return df
 
 
-def simulateTouchpoints(touchpoints, format):
+def simulateTouchpoints(touchpoints, format, plot = False):
 
   with open('test_suite/baseConfig.yaml', 'r') as file:
             configurations = yaml.safe_load(file)
@@ -103,7 +103,8 @@ def simulateTouchpoints(touchpoints, format):
       #can be done for any month
       data[f'{touchpoint["name"]}{format}'] = controlFrame[touchpoint['name']]*touchpoint['factor']
 
-      #plt.plot(data[f'{touchpoint["name"]}{format}'][:subplot], color='blue')
+      if plot == True:
+        plt.plot(data[f'{touchpoint["name"]}{format}'][:subplot], color='blue')
 
     if(touchpoint['name']=="base_1"):
       #define constant baseline sales independent from marketing activities
@@ -120,8 +121,8 @@ def simulateTouchpoints(touchpoints, format):
       np.random.seed(42)
       
       data[f'base_1{format}'] = base_1 + np.random.normal(0,noise_factor,weeks)
-
-      #plt.plot(data[f'base_1{format}'][:subplot], color='brown')
+      if plot == True:
+        plt.plot(data[f'base_1{format}'][:subplot], color='brown')
     
     if(touchpoint['name']=="base_2"):
       #Define touchpoint as sinusodial wave across the entire year
@@ -138,7 +139,8 @@ def simulateTouchpoints(touchpoints, format):
       #Sinusodial sales - does not get adstocked but fits the definition
       data[f'base_2{format}'] = (sin_wave+2)*baseSalesCoefficient + np.random.normal(0,500,weeks)
 
-      plt.plot(data[f'base_2{format}'][:subplot], color='brown')
+      if plot == True:
+        plt.plot(data[f'base_2{format}'][:subplot], color='brown')
       
        
     if(touchpoint ['name']=="touchpoint_2"):
@@ -153,8 +155,9 @@ def simulateTouchpoints(touchpoints, format):
 
       data["touchpoint_2_adstocked"] = adstock_functions.apply_adstock(spendingsFrame["touchpoint_2"],touchpoint['L'], touchpoint['P'], touchpoint['D'])
 
-      #plt.plot(spendingsFrame['touchpoint_2'][:subplot], color='blue')
-      #plt.plot(data["touchpoint_2_adstocked"][:subplot], color='green')
+      if plot == True:
+        # plt.plot(spendingsFrame['touchpoint_2'][:subplot], color='blue')
+        plt.plot(data["touchpoint_2_adstocked"][:subplot], color='green')
   
       
 
@@ -174,7 +177,6 @@ def simulateTouchpoints(touchpoints, format):
 
       #apply adstock
       data["touchpoint_3_adstocked"] = adstock_functions.apply_adstock(spendingsFrame["touchpoint_3"],touchpoint['L'], touchpoint['P'], touchpoint['D'])
-      #plt.plot(data["touchpoint_3_adstocked"][:subplot], color='green')
   
       #apply shape
       # print('T3 normal')
@@ -182,7 +184,9 @@ def simulateTouchpoints(touchpoints, format):
 
       data["touchpoint_3_shaped"] = hillConversion(data["touchpoint_3_adstocked"],touchpoint, configurations, spendingsFrame["touchpoint_3"].max())
       
-      #plt.plot(data["touchpoint_3_shaped"][:subplot], color='black')
+      if plot == True:
+        plt.plot(data["touchpoint_3_adstocked"][:subplot], color='green')
+        plt.plot(data["touchpoint_3_shaped"][:subplot], color='black')
       
       # print('DATA HERE')
 
@@ -220,11 +224,14 @@ def simulateTouchpoints(touchpoints, format):
 
       #adstock spendings
       data["touchpoint_4_adstocked"] = adstock_functions.apply_adstock(spendingsFrame["touchpoint_4"],touchpoint['L'], touchpoint['P'], touchpoint['D'])
-      #plt.plot(data["touchpoint_4_adstocked"][:subplot], color='pink')
+      
 
       #apply shape to spendings
       data["touchpoint_4_shaped"] = hillConversion(data["touchpoint_4_adstocked"],touchpoint, configurations, spendingsFrame["touchpoint_4"].max())
-      #plt.plot(data["touchpoint_4_shaped"][:subplot], color='red')
+      
+      if plot == True:
+        plt.plot(data["touchpoint_4_adstocked"][:subplot], color='pink')
+        plt.plot(data["touchpoint_4_shaped"][:subplot], color='red')
 
 
 
@@ -238,9 +245,9 @@ def simulateTouchpoints(touchpoints, format):
   controlFrame['promotion'] = 1
 
   #show
-  #plt.plot(data['sales'][:subplot], color='orange')
-  plt.show()
-  plt.savefig('data_generation_2.png')
+  if plot==True:
+    plt.plot(data['sales'][:subplot], color='orange')
+    plt.savefig('data_generation.png')
 
   #return data - sales with respective adstocked spendings & influence parameters
   #return spendingsFrame - direct spendings per touchpoint

@@ -65,30 +65,30 @@ touchpoints = [
                #     'S':1,
                #     'H':1
                #  },
-               #  {
-               #     'control_var':False,
-               #     'name':'touchpoint_3',
-               #     'beta':1.3 ,
-               #     'L':4,
-               #     'P':2,
-               #     'D':0.9,
-               #     'S':3,
-               #     'H':1.9
-               #  },
                 {
                    'control_var':False,
-                   'name':'touchpoint_4',
+                   'name':'touchpoint_3',
                    'beta':1.3 ,
                    'L':4,
                    'P':2,
                    'D':0.9,
-                   'S':0.7,
-                   'H':9.4
-                }
+                   'S':3,
+                   'H':1.9
+                },
+               #  {
+               #     'control_var':False,
+               #     'name':'touchpoint_4',
+               #     'beta':1.3 ,
+               #     'L':4,
+               #     'P':2,
+               #     'D':0.9,
+               #     'S':0.7,
+               #     'H':9.4
+               #  }
                ]
 
 # Create features
-data, spendingsFrame, controlFrame = test_suite.data_generation.simulateTouchpoints(touchpoints,'_shaped')
+data, spendingsFrame, controlFrame = test_suite.data_generation.simulateTouchpoints(touchpoints,'_shaped',plot = False)
 
 print(data)
 
@@ -122,9 +122,12 @@ responseModel = ResponseModel(spendingsFrame = spendingsFrame,
 stanDict = test_suite.stan_dict.createDict(responseModel, max_lag)
 responseModel.stanDict = stanDict
 
+#tp_4 shaped model: test_shape_7
+
+
    #train bayesian Model
-responseModel.runModel(name ='test_shape_7', load=True)
-responseModel.extractParameters(printOut=False)
+responseModel.runModel(name ='tp_3_shaped_model', load=True)
+responseModel.extractParameters(printOut=True)
 
 #calculate contribution decomposition via estimated parameters and original spendings/sales
 Business_Output.main_Business_Output.createBusinessOutputs(responseModel = responseModel,

@@ -46,7 +46,8 @@ class ResponseCurve:
         return spendings, changedSpendings.sum()
         
     def simulateSales(self, spendings):
-        
+        # plt.plot(spendings)
+        # plt.savefig('test.png')
         #extract sales predictions from changed spendingsFrame
         factor_df, y_pred = Business_Output.applyParameters.applyParametersToData(raw_data = spendings,
                                                             original_spendings = self.responseModel.spendingsFrame.copy(),
@@ -78,8 +79,8 @@ class ResponseCurve:
         
         lift = sum(prediction - self.prediction[0.0])/spendings_sum
         #lift = sum(prediction - self.prediction[0.0])
+        #lift = sum(prediction)
         
-
 
         return lift
 
@@ -98,7 +99,8 @@ class ResponseCurve:
 
 
         for lift in self.configurations['SPEND_UPLIFT_TO_TEST']:
-            spendings, spendings_sum = self.changeSpendings(touchpoint = 'touchpoint_4', lift=lift)
+        #for lift in [0.0]:
+            spendings, spendings_sum = self.changeSpendings(touchpoint = 'touchpoint_3', lift=lift)
             prediction = self.simulateSales(spendings)
 
             print(lift)
@@ -109,9 +111,9 @@ class ResponseCurve:
             self.prediction[lift] = prediction
             self.lift[lift] = self.calculateLift(prediction, spendings_sum)
 
-        self.calculateROAS()
+        #self.calculateROAS()
         self.plotResponseCurve()
-        #self.plotPredictions(2.6)
+        #self.plotPredictions(0.0)
 
         
 
