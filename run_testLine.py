@@ -104,9 +104,10 @@ print(data)
 
 
 # Prepare data
-feature_df = test_suite.data_preparation.normalize_data(data, spendingsFrame)
+feature_df = test_suite.data_preparation.normalize_data(spendingsFrame, target = data['sales'])
 
-#Create dictionary
+print('spendings')
+print(spendingsFrame)
 
 
 
@@ -117,12 +118,13 @@ responseModel = ResponseModel(spendingsFrame = spendingsFrame,
                               data_normalized = feature_df, 
                               target = data['sales'])
 
+   #Create dictionary
 stanDict = test_suite.stan_dict.createDict(responseModel, max_lag)
-
-
 responseModel.stanDict = stanDict
+
+   #train bayesian Model
 responseModel.runModel(name ='test_shape_7', load=True)
-responseModel.extractParameters(printOut=True)
+responseModel.extractParameters(printOut=False)
 
 #calculate contribution decomposition via estimated parameters and original spendings/sales
 Business_Output.main_Business_Output.createBusinessOutputs(responseModel = responseModel,

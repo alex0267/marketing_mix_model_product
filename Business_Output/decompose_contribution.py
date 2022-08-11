@@ -28,12 +28,14 @@ def plotContribution(prediction, max_sales):
 def decompose_absolute_contribution(responseModel, spendingsFrame, plot = False):
 
     #apply parameters with responseModel
-    factor_df, y_pred = Business_Output.applyParameters.applyParametersToData(raw_data = spendingsFrame, 
+    factor_df, y_pred = Business_Output.applyParameters.applyParametersToData(raw_data = spendingsFrame,
+                                            original_spendings=spendingsFrame, 
                                             parameters = responseModel.parameters,
                                             configurations = responseModel.configurations,
                                             scope = responseModel.configurations['TOUCHPOINTS'],
                                             seasonality_df = responseModel.seasonality_df,
                                             seasonality_beta = responseModel.beta_seasonality)
+
 
     #getting max()+1 normalized sales variable 
     target = pd.DataFrame(np.exp(responseModel.stanDict['y'])).rename(columns={0:'sales'})
@@ -85,8 +87,17 @@ def decompose_absolute_contribution(responseModel, spendingsFrame, plot = False)
     print((sum(abs(compareFrame['sales']-compareFrame['pred'])))/len(compareFrame))
 
     #Plot the error if wanted
-    # plt.plot(compareFrame['sales'],  color='blue')
-    # plt.plot(compareFrame['pred'],  color='green')
+    # print('org')
+    # print()
+
+    #compare results on sales scale
+
+    sales_prediction = (y_pred-1)*responseModel.target.max()
+    # plt.plot((compareFrame['sales']-1)*responseModel.target.max(),  color='blue')
+    # plt.plot(sales_prediction,  color='green')
+
+
+
     # print('comp')
     # print(compareFrame['sales'])
     # print(compareFrame['pred'])
@@ -98,7 +109,7 @@ def decompose_absolute_contribution(responseModel, spendingsFrame, plot = False)
 
     plt.savefig('sales2.png')
 
-    return mc_df
+    return mc_df, sales_prediction
 
 # calculate media contribution percentage - NOT TESTED YET
 def calc_media_contrib_pct(mc_df, media_vars, sales_col='sales', period=52):
