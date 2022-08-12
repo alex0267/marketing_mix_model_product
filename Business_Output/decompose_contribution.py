@@ -25,11 +25,11 @@ def plotContribution(prediction, max_sales):
 
 
 
-def decompose_absolute_contribution(responseModel, spendingsFrame, plot = False):
+def decompose_absolute_contribution(responseModel, plot = False):
 
     #apply parameters with responseModel
-    factor_df, y_pred = Business_Output.applyParameters.applyParametersToData(raw_data = spendingsFrame,
-                                            original_spendings=spendingsFrame, 
+    factor_df, y_pred = Business_Output.applyParameters.applyParametersToData(raw_data = responseModel.spendingsFrame,
+                                            original_spendings=responseModel.spendingsFrame, 
                                             parameters = responseModel.parameters,
                                             configurations = responseModel.configurations,
                                             scope = responseModel.configurations['TOUCHPOINTS'],
