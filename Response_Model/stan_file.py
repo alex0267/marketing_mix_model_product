@@ -81,6 +81,7 @@ transformed parameters {
 }
 
 model {
+  //priors
   decay ~ beta(3,3);
   peak ~ uniform(0, ceil(max_lag/2));
 
@@ -93,6 +94,8 @@ model {
     beta_seasonality[i] ~ normal(1, 1);
   }
   noise_var ~ inv_gamma(0.05, 0.05 * 0.01);
+
+  //formula
   y ~ normal(tau + X_media_adstocked * beta + seasonality*beta_seasonality, sqrt(noise_var));
 }
 

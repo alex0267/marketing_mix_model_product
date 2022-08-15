@@ -5,6 +5,8 @@ TOUCHPOINTS:
   - touchpoint_3
   - touchpoint_4
 
+TARGET: sales
+
 #define seasonality variables - order due to data generation model
 SEASONALITY_VARIABLES_BASE:
  - april

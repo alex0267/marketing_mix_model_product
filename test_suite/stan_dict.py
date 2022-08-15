@@ -14,7 +14,7 @@ def createDict(responseModel, max_lag):
     X_media = responseModel.spendingsFrame[configurations['TOUCHPOINTS']]
     X_media = np.concatenate((np.zeros((max_lag-1, num_media)), np.array(X_media)),axis=0)
 
-
+    print()
     stanDict = {
         'N': len(responseModel.data_normalized),
         'max_lag': max_lag, 
@@ -23,7 +23,7 @@ def createDict(responseModel, max_lag):
         'media_norm': media_norm,
         'seasonality': np.array(responseModel.seasonality_df),
         'control': np.array(responseModel.otherControl_df),
-        'y': responseModel.data_normalized['sales'].values
+        'y': responseModel.data_normalized[configurations['TARGET']].values
     }
 
     return stanDict

@@ -73,15 +73,22 @@ class ResponseCurve:
     def plotResponseCurve(self, touchpoint):
 
         plt.plot(self.lift.keys(),self.lift.values())
-        plt.savefig(f'responseCurve_{touchpoint}.png')
+        plt.savefig(f'responseCurve_2_{touchpoint}.png')
 
 
     def calculateLift(self, prediction, spendings_sum):
 
-        
-        #lift = sum(prediction - self.prediction[0.0])/spendings_sum
+        #calculate response curve based on 0 spendings prediction
+        #might be subject to two errors but shows direct impact of touchpoint spendings
+        # lift = sum(prediction - self.prediction[0.0])/spendings_sum
+
+        #calculate response curve based on 0 difference between 
+        #might be subject to two errors but shows direct impact of touchpoint spendings
+        lift = sum(prediction)/spendings_sum
+
+
         #lift = sum(prediction - self.prediction[0.0])
-        lift = sum(prediction)
+        # lift = sum(prediction)
         
 
         return lift

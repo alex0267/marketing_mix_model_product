@@ -111,18 +111,19 @@ pd.DataFrame(result).T.to_excel('result.xlsx')
 # data, spendingsFrame, controlFrame = test_suite.data_generation.simulateTouchpoints(touchpoints,'_shaped',baseSalesCoefficient_tp3=10000, plot = False)
 # print(data['sales'][0:52].sum())
 
-data, spendingsFrame, controlFrame = test_suite.data_generation.simulateTouchpoints(touchpoints,'_shaped', plot = False)
+data, spendingsFrame, controlFrame = test_suite.data_generation.simulateTouchpoints(touchpoints,'_shaped',plot = False)
    
-
-
 # Prepare data
 feature_df = test_suite.data_preparation.normalize_data(spendingsFrame, target = data['sales'])
 
+seasonality_df = controlFrame[configurations['SEASONALITY_VARIABLES_BASE']]
+control_df = controlFrame[configurations['CONTROL_VARIABLES_BASE']]
 
 
 #Initialize Model instance and Train Bayesian Model 
 responseModel = ResponseModel(spendingsFrame = spendingsFrame, 
-                              controlFrame = controlFrame,
+                              controlFrame = control_df,
+                              seasonalityFrame = seasonality_df,
                               configurations = configurations, 
                               data_normalized = feature_df, 
                               target = data['sales'])
@@ -131,14 +132,20 @@ responseModel = ResponseModel(spendingsFrame = spendingsFrame,
 stanDict = test_suite.stan_dict.createDict(responseModel, max_lag)
 responseModel.stanDict = stanDict
 
+print('standict')
+print(stanDict)
+
+
+
 #tp_4 shaped model: test_shape_7
 #tp_3 shaped model: tp_3_shaped_model
 #tp_3 & tp_4 shaped model: tp_3_tp_4_shaped_model
 
 
    #train bayesian Model
-responseModel.runModel(name ='tp_3_tp_4_shaped_model', load=True)
+responseModel.runModel(name ='test', load=False)
 responseModel.extractParameters(printOut=True)
-
+'''
 #calculate contribution decomposition via estimated parameters and original spendings/sales
 Business_Output.main_Business_Output.createBusinessOutputs(responseModel = responseModel)
+'''

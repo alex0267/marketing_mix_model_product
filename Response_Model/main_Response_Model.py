@@ -8,15 +8,15 @@ import yaml
 #Also contains the functions to estimate and extract parameters
 class ResponseModel:
 
-    def __init__(self, spendingsFrame, controlFrame, configurations, data_normalized, target):
+    def __init__(self, spendingsFrame, controlFrame, seasonalityFrame, configurations, data_normalized, target):
         #define touchpoints and parameters (later replaced by yaml config files)
         self.max_length = 4
         self.configurations = configurations
 
         #data
         self.data_normalized = data_normalized
-        self.seasonality_df = controlFrame[configurations['SEASONALITY_VARIABLES_BASE']]
-        self.otherControl_df = controlFrame[configurations['CONTROL_VARIABLES_BASE']]
+        self.seasonality_df = seasonalityFrame
+        self.otherControl_df = controlFrame
         self.target = target #raw sales (target) variable with no transformation
         self.spendingsFrame = spendingsFrame #raw touchpoint spending data
         
@@ -110,7 +110,7 @@ class ResponseModel:
 
         if(load==False):
             posterior = stan.build(Response_Model.stan_file.stan_code, data=self.stanDict)
-            fit = posterior.sample(num_chains=4, num_samples=1000)
+            fit = posterior.sample(num_chains=4, num_samples=1000, verbose=True)
             self.extractFrame = fit.to_frame()
             self.extractFrame.to_csv(f'model_savings/extract{name}.csv')
 
