@@ -135,8 +135,6 @@ responseModel.stanDict = stanDict
 print('standict')
 print(stanDict)
 
-
-
 #tp_4 shaped model: test_shape_7
 #tp_3 shaped model: tp_3_shaped_model
 #tp_3 & tp_4 shaped model: tp_3_tp_4_shaped_model

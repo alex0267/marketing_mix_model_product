@@ -1,4 +1,5 @@
 import stan
+import pandas as pd
 
 schools_code = """
     data {
@@ -26,7 +27,8 @@ schools_data = {"J": 8,
 
 
 posterior = stan.build(schools_code, data=schools_data)
-fit = posterior.sample(num_chains=4, num_samples=1000, verbose=True)
+fit = posterior.sample(num_chains=4, num_samples=1000)
+print(fit)
 extractFrame = fit.to_frame()
 
 
