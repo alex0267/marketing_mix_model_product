@@ -5,8 +5,6 @@
 
 import numpy as np
 import pandas as pd
-import Data_Preparation.normalization
-
 
 #Definition of Hill function (raw mathematical formulation)
 def hill_function(adstocked_spending, S, H):

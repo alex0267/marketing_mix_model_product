@@ -62,7 +62,7 @@ class ResponseCurve:
         prediction = (y_pred-1)*self.responseModel.target.max()
         
         #cut the prediction frame to only include change window + after-change window (incl. after effects)
-        prediction = prediction[self.start: self.start + self.window + self.responseModel.max_length]
+        prediction = prediction[self.start: self.start + self.window + self.responseModel.max_lag]
         
         return prediction
 

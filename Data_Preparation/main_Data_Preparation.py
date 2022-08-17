@@ -16,7 +16,7 @@ import pandas as pd
 import numpy as np
 import os
 import yaml
-import Data_Preparation.normalization
+import helper_functions.normalization
 
 #get current working directory
 #print(os.getcwd())
@@ -79,28 +79,15 @@ def run():
     seasonality_df = seasonality_df[configurations['SEASONALITY_VARIABLES_BASE']]
 
 
-    feature_df_normalized = pd.DataFrame()
-
     #define raw spendings dataframe
     spendings_df = feature_df[configurations['TOUCHPOINTS']]
     
 
-    for touchpoint in configurations['TOUCHPOINTS']:
-
-        #define the type of normalization(s) to apply defined in config 'NORMALIZATION_STEPS_TOUCHPOINTS':
-        # First we apply the max/custom normalization
-        # Second we do the log transformation for each touchpoint
-        normalization_steps = configurations['NORMALIZATION_STEPS_TOUCHPOINTS'][touchpoint]
-
-        #send the column to the normalization file with all required parameters
-        feature_df_normalized[touchpoint] = Data_Preparation.normalization.normalize_feature(feature_df, normalization_steps, configurations, touchpoint)
-
-    target_raw = feature_df['TARGET_VOL_SO']
+    #define target
+    target_raw = feature_df[configurations['TARGET']]
     
-    #normalize and log transform sales
-    feature_df_normalized['TARGET_VOL_SO'] = Data_Preparation.normalization.normalize_feature(feature_df, configurations['NORMALIZATION_STEPS_TARGET']['TARGET_VOL_SO'], configurations, 'TARGET_VOL_SO')
     
-    return spendings_df, feature_df,feature_df_normalized, seasonality_df, promotion_df, target_raw
+    return spendings_df, feature_df, seasonality_df, promotion_df, target_raw
 
 
 # final output dataframe

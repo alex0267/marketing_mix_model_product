@@ -20,7 +20,8 @@ data {
   // matrix of media variables
   matrix[N+max_lag-1, num_media] X_media;
   // matrix of seasonality variables
-  matrix[N,12] seasonality;
+  int<lower=0> num_seasons;
+  matrix[N,num_seasons] seasonality;
   // list of mean values of media (raw data)
   vector [num_media] media_norm;
 }
@@ -32,7 +33,7 @@ parameters {
   // the coefficients for media variables
   vector<lower=0>[num_media] beta;
   // the coefficients for seasonality variables
-  vector[12] beta_seasonality;
+  vector[num_seasons] beta_seasonality;
   // the decay and peak parameter for the adstock transformation of
   // each media
   vector<lower=0,upper=1>[num_media] decay;
@@ -82,7 +83,7 @@ model {
   for (i in 1 : num_media) {
     beta[i] ~ normal(1, 1);
   }
-  for (i in 1 : 12) {
+  for (i in 1 : num_seasons) {
     beta_seasonality[i] ~ normal(1, 1);
   }
   noise_var ~ inv_gamma(0.05, 0.05 * 0.01);
