@@ -15,17 +15,17 @@
 
 #Brands in scope
 BRANDS:
-  - angry_cat
+  - fast_duck
 
 TOUCHPOINTS:
   - tom
-  # - laura
-  # - lisa - no spendings for angry cat
-  # - mary
-  # - jack
+  - laura
+  - lisa
+  - mary
+  - jack
 #  - lucy - lucy is not defined in the SPEND_MEDIA_EXECUTION_MAPPING
-  # - marc - no spendings for angry cat
-  # - alex
+  - marc
+  - alex
 #  - fiona - fiona is missing in the definitions but has allocated touchpoint spendings
 
 TARGET: TARGET_VOL_SO

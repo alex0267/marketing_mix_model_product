@@ -1,9 +1,8 @@
 import Data_Preparation.main_Data_Preparation
 import Response_Model.main_Response_Model
 import Response_Model.stanDict
-import stan
 from Response_Model.main_Response_Model import ResponseModel
-import Business_Output.decompose_contribution
+import Business_Output.main_Business_Output
 import yaml
 
 import pandas as pd
@@ -24,7 +23,6 @@ spendings_df, feature_df, feature_df_normalized, seasonality_df, promotion_df, t
 feature_df_normalized.to_csv('feature_df_norm.csv')
 
 
-
 # Initialize Model instance and Train Bayesian Model 
 responseModel = ResponseModel(spendingsFrame = spendings_df, 
                               controlFrame = promotion_df,
@@ -38,20 +36,22 @@ responseModel = ResponseModel(spendingsFrame = spendings_df,
 stanDict = Response_Model.stanDict.createDict(responseModel, max_lag)
 responseModel.stanDict = stanDict
 
+# for key in stanDict.keys():
+#    print(key)
+#    print(stanDict[key])
+#    if type(stanDict[key]) is not int:
+#       print('shape')
+#       print((stanDict[key]).shape)
+
+
+
+#model savings
+#true_data_adstocked_shaped_v01 - angry cat model
+#true_data_adstocked_shaped_fast_duck - fast_duck model
 
  #train bayesian Model
-responseModel.runModel(name ='true_data_adstocked_shaped_v01', load=False)
+responseModel.runModel(name ='true_data_adstocked_shaped_fast_duck', load=True)
 responseModel.extractParameters(printOut=True)
 
-'''
-#Initialize Model instance and Train Bayesian Model
-responseModel = ResponseModel(stanDict, configurations, feature_df, target_raw)
-responseModel.runModel(name ='real_data', load=True)
-responseModel.extractParameters(printOut=True)
-
-#calculate contribution decomposition via estimated parameters and original spendings/sales
-Business_Output.decompose_contribution.decompose_absolute_contribution(responseModel, feature_df, target_raw, plot=False)
-
-
-
-'''
+# #calculate contribution decomposition via estimated parameters and original spendings/sales
+Business_Output.main_Business_Output.createBusinessOutputs(responseModel = responseModel)

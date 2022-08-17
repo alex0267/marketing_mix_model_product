@@ -8,6 +8,9 @@ import yaml
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
+import os
+os.environ["CC"] = "gcc-11"
+os.environ["CXX"] = "g++-11"
 
 #Run pipeline tasks:
 # - Data Preparation
@@ -132,8 +135,12 @@ responseModel = ResponseModel(spendingsFrame = spendingsFrame,
 stanDict = test_suite.stan_dict.createDict(responseModel, max_lag)
 responseModel.stanDict = stanDict
 
-print('standict')
-print(stanDict)
+# for key in stanDict.keys():
+#    print(key)
+#    print(stanDict[key])
+#    if type(stanDict[key]) is not int:
+#       print('shape')
+#       print((stanDict[key]).shape)
 
 #tp_4 shaped model: test_shape_7
 #tp_3 shaped model: tp_3_shaped_model
@@ -142,7 +149,7 @@ print(stanDict)
 
    #train bayesian Model
 responseModel.runModel(name ='test', load=False)
-responseModel.extractParameters(printOut=True)
+# responseModel.extractParameters(printOut=True)
 '''
 #calculate contribution decomposition via estimated parameters and original spendings/sales
 Business_Output.main_Business_Output.createBusinessOutputs(responseModel = responseModel)

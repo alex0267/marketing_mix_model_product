@@ -5,32 +5,6 @@ import helper_functions
 #use the estimated parameters to combine with model to calculate sales prediction
 
 def applyParametersToData(raw_data,original_spendings, parameters, configurations, scope, seasonality_df, seasonality_beta):
-    #Adstock media variables according to estimated parameters
-    #adstock(touchpoint_x, param = estimated_parameters_x)
-
-    #define parameters to simulate perfect prediction for responseCurve
-    # parameters = {}
-    # parameters[f'touchpoint_3_adstock'] = {
-    #             'L': 4,
-    #             'P': 2,
-    #             'D': 0.9
-    #         }
-
-    # parameters[f'touchpoint_3_shape'] = {
-    #         'S': 3,
-    #         'H': 1.9
-    #     }
-
-    # parameters[f'touchpoint_4_adstock'] = {
-    #         'L': 4,
-    #         'P': 2,
-    #         'D': 0.9
-    #     }
-
-    # parameters[f'touchpoint_4_shape'] = {
-    #         'S': 0.7,
-    #         'H': 9.4
-    #     }
 
 
     media_adstocked = helper_functions.adstock_functions.adstock_transform(media = raw_data[scope],
@@ -64,8 +38,6 @@ def applyParametersToData(raw_data,original_spendings, parameters, configuration
     #x_Beta_matrix = X.apply(lambda x: x[:responseModel.num_media]**responseModel.beta[:responseModel.num_media], axis=1)
 
     factor_df = pd.DataFrame(columns=scope+['intercept']+configurations['SEASONALITY_VARIABLES_BASE'])
-    
-
    
     for touchpoint in scope:
         factor_df[touchpoint] = X[touchpoint] ** parameters[f'{touchpoint}_beta']

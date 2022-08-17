@@ -67,9 +67,11 @@ def run():
 
     #filter dataframe by brands in scope
     feature_df = feature_df[feature_df['BRAND'].isin(configurations['BRANDS'])]
+    feature_df.reset_index(drop=True, inplace=True)
 
     #filter promotion_df to fit scope
     promotion_df = promotion_df[promotion_df['BRAND'].isin(configurations['BRANDS'])]
+    promotion_df.reset_index(drop=True, inplace=True)
     promotion_df = promotion_df[configurations['CONTROL_VARIABLES_BASE']]
 
 
@@ -81,7 +83,7 @@ def run():
 
     #define raw spendings dataframe
     spendings_df = feature_df[configurations['TOUCHPOINTS']]
-
+    
 
     for touchpoint in configurations['TOUCHPOINTS']:
 

@@ -109,8 +109,12 @@ class ResponseModel:
     def runModel(self, name, load=True):
 
         if(load==False):
+            print(Response_Model.stan_file.stan_code)
+            print()
+            print('dict')
+            print(self.stanDict)
             posterior = stan.build(Response_Model.stan_file.stan_code, data=self.stanDict)
-            fit = posterior.sample(num_chains=4, num_samples=1000, verbose=True)
+            fit = posterior.sample(num_chains=4, num_samples=1000)
             self.extractFrame = fit.to_frame()
             self.extractFrame.to_csv(f'model_savings/extract{name}.csv')
 

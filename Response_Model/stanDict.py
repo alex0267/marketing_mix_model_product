@@ -26,7 +26,7 @@ def createDict(responseModel, max_lag):
         'X_media': X_media,
         'media_norm': media_norm,
         'seasonality': np.array(responseModel.seasonality_df),
-        'control': np.array(responseModel.otherControl_df),
+        # 'control': np.array(responseModel.otherControl_df),
         'y': responseModel.data_normalized['TARGET_VOL_SO'].values
     }
 

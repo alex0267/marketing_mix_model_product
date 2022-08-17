@@ -33,7 +33,8 @@ class ResponseCurve:
         
         #select to be changed window
         originalSpendingsInWindow = self.responseModel.spendingsFrame[touchpoint].loc[self.start: self.start+self.window]
-
+        # print('window')
+        # print(originalSpendingsInWindow)
         #save original spendings as metric
         self.original_spendings = originalSpendingsInWindow.sum()
         #apply change
@@ -70,21 +71,28 @@ class ResponseCurve:
         plt.plot(self.prediction[lift], color='green')
         plt.savefig('predictionComp.png')
 
-    def plotResponseCurve(self, touchpoint):
-
+    def plotResponseCurve(self, touchpoint, absolute):
+        
         plt.plot(self.lift.keys(),self.lift.values())
-        plt.savefig(f'responseCurve_2_{touchpoint}.png')
+
+        if (absolute == True):
+            plt.savefig(f'responseCurve_2_{touchpoint}_absolute.png')
+        else:
+            plt.savefig(f'responseCurve_2_{touchpoint}_relative.png')
 
 
-    def calculateLift(self, prediction, spendings_sum):
+    def calculateLift(self, prediction, spendings_sum, absolute):
 
         #calculate response curve based on 0 spendings prediction
         #might be subject to two errors but shows direct impact of touchpoint spendings
         # lift = sum(prediction - self.prediction[0.0])/spendings_sum
 
-        #calculate response curve based on 0 difference between 
-        #might be subject to two errors but shows direct impact of touchpoint spendings
-        lift = sum(prediction)/spendings_sum
+        if (absolute == True):
+            lift = sum(prediction)
+        else:
+            #calculate response curve based on 0 difference between 
+            #might be subject to two errors but shows direct impact of touchpoint spendings
+            lift = sum(prediction)/spendings_sum
 
 
         #lift = sum(prediction - self.prediction[0.0])
@@ -100,31 +108,39 @@ class ResponseCurve:
 
         self.ROAS = sum(self.original_prediction-self.prediction[0.0])/self.spendings[1.0]
 
-    def run(self, plot = False):
+    def run(self, plot = False, absolute=True):
 
         self.spendings = {}
         self.prediction = {}
         self.lift = {}
-        #for touchpoint in self.responseModel.configurations['TOUCHPOINTS']:
+        # for touchpoint in self.responseModel.configurations['TOUCHPOINTS']:
 
         for lift in self.configurations['SPEND_UPLIFT_TO_TEST']:
         #for lift in [0.0]:
-            spendings, spendings_sum = self.changeSpendings(touchpoint = 'touchpoint_4', lift=lift)
+            spendings, spendings_sum = self.changeSpendings(touchpoint = 'marc', lift=lift)
             prediction = self.simulateSales(spendings)
 
             
             # print(prediction.sum())
             # print(spendings_sum)
 
+
             self.spendings[lift] = spendings_sum
             self.prediction[lift] = prediction
-            self.lift[lift] = self.calculateLift(prediction, spendings_sum)
+            self.lift[lift] = self.calculateLift(prediction, spendings_sum, absolute)
+
+            # print('sum')
+            # print(spendings_sum)
+            # print('pred')
+            # print(prediction)
+            # print('lift')
+            # print(self.lift[lift])
 
             #self.calculateROAS()
-            if (plot==True):
-                self.plotResponseCurve('touchpoint_4')
-            #self.plotPredictions(0.0)
-        #pd.DataFrame([self.lift]).to_excel('tp3.xlsx')
+            if (plot==False):
+                self.plotResponseCurve('marc', absolute)
+                #self.plotPredictions(0.0)
+            #pd.DataFrame([self.lift]).to_excel('tp3.xlsx')
 
         
 
