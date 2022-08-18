@@ -19,8 +19,8 @@ class ResponseModel:
         self.spendingsFrame = spendingsFrame #raw touchpoint spending data
 
         #define data normalized
-        self.spendingsFrame_norm = helper_functions.normalization(self.spendingsFrame, self.configurations['NORMALIZATION_STEPS_TOUCHPOINTS'], self.configurations)
-        self.target_norm = helper_functions.normalization(self.target, self.configurations['NORMALIZATION_STEPS_TARGET'], self.configurations)
+        self.spendingsFrame_norm = helper_functions.normalization.normalize_feature(self.spendingsFrame, self.responseModelConfig['NORMALIZATION_STEPS_TOUCHPOINTS'], self.responseModelConfig)
+        self.target_norm = helper_functions.normalization.normalize_feature(self.target, self.responseModelConfig['NORMALIZATION_STEPS_TARGET'], self.responseModelConfig)
         
         #easy access variables
         self.num_media = None
@@ -61,7 +61,7 @@ class ResponseModel:
             'seasonality': np.array(self.seasonality_df),
             # 'num_control': len(self.configurations['CONTROL_VARIABLES_BASE']),
             # 'control': np.array(responseModel.otherControl_df),
-            'y': self.data_normalized[self.configurations['TARGET']].values
+            'y': self.target_norm.values
         }
 
 
@@ -94,7 +94,7 @@ class ResponseModel:
 
             #Collect per touchpoint parameters in dictionary
             self.parameters[f'{touchpoint}_adstock'] = {
-                'L': self.max_lag,
+                'L': self.responseModelConfig['max_lag'],
                 'P': peak,
                 'D': decay
             }
@@ -130,10 +130,10 @@ class ResponseModel:
                 print(f"value half:{half}")
                 print()
 
-
-                for season in self.configurations['SEASONALITY_VARIABLES_BASE']:
-                    print(f'beta_{season}: ')
-                    print(self.parameters[f'{season}_beta'])
+        if (printOut == True):
+            for season in self.configurations['SEASONALITY_VARIABLES_BASE']:
+                print(f'beta_{season}: ')
+                print(self.parameters[f'{season}_beta'])
 
         return 0
 

@@ -27,6 +27,8 @@ with open('test_suite/baseConfig.yaml', 'r') as file:
 with open('test_suite/responseModelConfig.yaml', 'r') as file:
             responseModelConfig = yaml.safe_load(file)
 
+with open('test_suite/responseCurveConfig.yaml', 'r') as file:
+      responseCurveConfig = yaml.safe_load(file)
 
 #touchpoint definition
 touchpoints = [
@@ -118,12 +120,10 @@ pd.DataFrame(result).T.to_excel('result.xlsx')
 
 data, spendingsFrame, controlFrame = test_suite.data_generation.simulateTouchpoints(touchpoints,'_shaped',plot = False)
 
-print(helper_functions.normalization.normalize_feature(spendingsFrame, configurations['NORMALIZATION_STEPS_TOUCHPOINTS'], configurations))
+# print(helper_functions.normalization.normalize_feature(spendingsFrame['touchpoint_3'], configurations['NORMALIZATION_STEPS_TOUCHPOINTS'], configurations))
 
-'''
+
 # Prepare data
-feature_df = test_suite.data_preparation.normalize_data(spendingsFrame, target = data['sales'])
-
 seasonality_df = controlFrame[configurations['SEASONALITY_VARIABLES_BASE']]
 control_df = controlFrame[configurations['CONTROL_VARIABLES_BASE']]
 
@@ -151,10 +151,10 @@ responseModel = ResponseModel(spendingsFrame = spendingsFrame,
 #tp_3 & tp_4 shaped model: tp_3_tp_4_shaped_model
 
    #train bayesian Model
-responseModel.runModel(name ='test', load=False)
-# responseModel.extractParameters(printOut=True)
+responseModel.runModel(name ='test', load=True)
+responseModel.extractParameters(printOut=True)
 
 #calculate contribution decomposition via estimated parameters and original spendings/sales
-# Business_Output.main_Business_Output.createBusinessOutputs(responseModel = responseModel)
+Business_Output.main_Business_Output.createBusinessOutputs(responseModel = responseModel, 
+                                                           responseCurveConfig = responseCurveConfig)
 
-'''

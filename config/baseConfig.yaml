@@ -52,66 +52,6 @@ CONTROL_VARIABLES_BASE:
 #  - is_penultimate_week
 #  - is_year_end_week
 
-#specific parameters for threshold definitions - out of scope for v01
-brand_to_shape_params:
-  tom:
-    threshold: 7000
-    saturation: 83000
-  laura:
-    threshold: 7000
-    saturation: 90000
-  lisa:
-    threshold: 5000
-    saturation: 120000
-  mary:
-    threshold: 3500
-    saturation: 100000
-  jack:
-    threshold: 3500
-    saturation: 90000
-  lucy:
-    threshold: 5000
-    saturation: 150000
-  marc:
-    threshold: 50000
-    saturation: 1000000
-  alex:
-    threshold: 15000
-    saturation: 350000
 
-#defining normalization steps of touchpoints
-NORMALIZATION_STEPS_TOUCHPOINTS:
-  tom: ['max_across_brands']
-  laura: ['max_across_brands']
-  lisa: ['max_across_brands']
-  mary: ['max_across_brands']
-  jack: ['max_across_brands']
-  lucy: ['max_across_brands']
-  marc: ['max_across_brands']
-  alex: ['max_across_brands']
-
-
-
-
-#  distribution_off: ['log', 'minus_mean', 'std']
-# in the original, the log transformation is also applied here
-# this is ignored in V01 to facilitate the model
-# log transformation happens in the stan file
-  #tom: ['custom_normalization', 'log']
-
-  # tom: ['custom_normalization']
-  # laura: ['custom_normalization']
-  # lisa: ['custom_normalization']
-  # mary: ['custom_normalization']
-  # jack: ['custom_normalization']
-  # lucy: ['max_across_brands']
-  # marc: ['max_across_brands']
-  # alex: ['max_across_brands']
-#  brand_experience: ['max_across_brands']
-#  off_trade_activation: ['max_across_brands']
-
-NORMALIZATION_STEPS_TARGET:
-  TARGET_VOL_SO: ['max_across_brands', 'logp1']
-  # TARGET_VOL_SO: ['max_across_brands', 'log']
 
 

@@ -38,8 +38,6 @@ def normalize(normalized_feature, normalization_steps, configurations):
         elif step == 'logp1':
             normalized_feature = np.log(normalized_feature + 1)
 
-
-
     return normalized_feature
 
 
@@ -66,7 +64,7 @@ def normalize_feature(
         for column in df:
             normalized_features.append(normalize(df[column], normalization_steps[column], configurations))
         
-        return pd.DataFrame(normalized_features)
+        return pd.DataFrame(normalized_features).T
 
 
     

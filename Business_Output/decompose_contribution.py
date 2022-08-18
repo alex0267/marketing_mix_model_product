@@ -31,6 +31,7 @@ def decompose_absolute_contribution(responseModel, plot = False):
                                             original_spendings=responseModel.spendingsFrame, 
                                             parameters = responseModel.parameters,
                                             configurations = responseModel.configurations,
+                                            responseModelConfig= responseModel.responseModelConfig,
                                             scope = responseModel.configurations['TOUCHPOINTS'],
                                             seasonality_df = responseModel.seasonality_df,
                                             seasonality_beta = responseModel.beta_seasonality)
