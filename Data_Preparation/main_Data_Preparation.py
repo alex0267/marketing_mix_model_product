@@ -9,8 +9,6 @@ TO BE DONE
 - Check whether all brands are there for all weeks
 '''
 
-
-
 import Data_Preparation.seasonality
 import Data_Preparation.promotion
 #import testing
@@ -37,14 +35,19 @@ def run():
     #define basic feature table
     feature_df = sell_out_df[["YEAR_WEEK","BRAND"]]
 
+    
+
     #clean out empty brand rows
     feature_df.dropna(subset=["BRAND"], inplace=True)
 
     #add media execution variables AND merge
     media_exec = media_exec_df[["YEAR_WEEK", "BRAND", "TOUCHPOINT", "SPEND"]]
+
     feature_df = feature_df.merge(media_exec, on=["YEAR_WEEK","BRAND"])
         #turn media variables into columns with primary key ['YEAR_WEEK','BRAND','TOUCHPOINT'] by SPEND
     feature_df = feature_df.set_index(['YEAR_WEEK','BRAND','TOUCHPOINT'])['SPEND'].unstack().reset_index()
+
+    
 
     #plot data
     #plot.touchpoint_spendings_per_brand(feature_df)
@@ -74,6 +77,9 @@ def run():
         #filter dataframe by brands in scope
         feature_df = feature_df[feature_df['BRAND'].isin(configurations['BRANDS'])]
 
+        print(feature_df.sum())
+
+
         for touchpoint in configurations['TOUCHPOINTS']:
 
             #define the type of normalization(s) to apply defined in config 'NORMALIZATION_STEPS_TOUCHPOINTS':
@@ -84,10 +90,11 @@ def run():
             #send the column to the normalization file with all required parameters
             feature_df[touchpoint] = Data_Preparation.normalization.normalize_feature(feature_df, normalization_steps, configurations, touchpoint)
 
+        target_raw = feature_df['TARGET_VOL_SO']
         #normalize and log transform sales
         feature_df['TARGET_VOL_SO'] = Data_Preparation.normalization.normalize_feature(feature_df, configurations['NORMALIZATION_STEPS_TARGET']['TARGET_VOL_SO'], configurations, 'TARGET_VOL_SO')
     
-    return feature_df
+    return feature_df, target_raw
 
 
 # final output dataframe

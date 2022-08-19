@@ -23,11 +23,34 @@ TOUCHPOINTS:
   - lisa
   - mary
   - jack
-#  - lucy - no data of lucy in touchpoint spendings
-#  - marc
+#  - lucy - lucy is not defined in the SPEND_MEDIA_EXECUTION_MAPPING
+  - marc
   - alex
 #  - fiona - fiona is missing in the definitions but has allocated touchpoint spendings
 
+SEASONALITY_VARIABLES_BASE:
+ - IS_JANUARY
+ - IS_FEBRUARY
+ - IS_MARCH
+ - IS_APRIL
+ - IS_MAY
+ - IS_JUNE
+ - IS_JULY
+ - IS_AUGUST
+ - IS_SEPTEMBER
+ - IS_OCTOBER
+ - IS_NOVEMBER
+ - IS_DECEMBER
+#  - is_last_week
+
+CONTROL_VARIABLES_BASE:
+ - PROMOTION_FEATURE
+
+#  - christmas
+#  - is_penultimate_week
+#  - is_year_end_week
+
+#specific parameters for threshold definitions - out of scope for v01
 brand_to_shape_params:
   tom:
     threshold: 7000
@@ -56,40 +79,37 @@ brand_to_shape_params:
 
 #defining normalization steps of touchpoints
 NORMALIZATION_STEPS_TOUCHPOINTS:
+  tom: ['mean_across_brands']
+  laura: ['mean_across_brands']
+  lisa: ['mean_across_brands']
+  mary: ['mean_across_brands']
+  jack: ['mean_across_brands']
+  lucy: ['mean_across_brands']
+  marc: ['mean_across_brands']
+  alex: ['mean_across_brands']
+
+
+
+
 #  distribution_off: ['log', 'minus_mean', 'std']
 # in the original, the log transformation is also applied here
 # this is ignored in V01 to facilitate the model
 # log transformation happens in the stan file
   #tom: ['custom_normalization', 'log']
 
-  tom: ['custom_normalization']
-  laura: ['custom_normalization']
-  lisa: ['custom_normalization']
-  mary: ['custom_normalization']
-  jack: ['custom_normalization']
-  lucy: ['max_across_brands']
-  marc: ['max_across_brands']
-  alex: ['max_across_brands']
+  # tom: ['custom_normalization']
+  # laura: ['custom_normalization']
+  # lisa: ['custom_normalization']
+  # mary: ['custom_normalization']
+  # jack: ['custom_normalization']
+  # lucy: ['max_across_brands']
+  # marc: ['max_across_brands']
+  # alex: ['max_across_brands']
 #  brand_experience: ['max_across_brands']
 #  off_trade_activation: ['max_across_brands']
 
 NORMALIZATION_STEPS_TARGET:
-  TARGET_VOL_SO: ['max_across_brands', 'log']
+  TARGET_VOL_SO: ['mean_across_brands', 'logp1']
+  # TARGET_VOL_SO: ['max_across_brands', 'log']
 
 
-#SEASONALITY_VARIABLES_BASE:
-#  - january
-#  - february
-#  - march
-#  - april
-#  - may
-#  - june
-#  - july
-#  - august
-#  - september
-#  - october
-#  - november
-#  - december
-#  - christmas
-#  - is_penultimate_week
-#  - is_year_end_week

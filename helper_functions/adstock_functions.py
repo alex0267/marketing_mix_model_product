@@ -26,24 +26,23 @@ def apply_adstock(x, L, P, D):
     adstocked_x = np.array(adstocked_x)
     return adstocked_x
 
-def adstock_transform(df, md_cols, adstock_params):
+def adstock_transform(media, touchpoints, parameters):
     '''
     params:
-    df: original data
-    md_cols: list, media variables to be transformed
-    adstock_params: dict, 
-        e.g., {'sem': {'L': 8, 'P': 0, 'D': 0.1}, 'dm': {'L': 4, 'P': 1, 'D': 0.7}}
+    media: original data
+    touchpints: list, media variables to be transformed
+    parameters: dict
     returns: 
     adstocked df
     '''
-    md_df = pd.DataFrame()
-    for md_col in md_cols:
-        #L, P, D = adstock_params[md]['L'], adstock_params[md]['P'], adstock_params[md]['D']
-        L, P, D = adstock_params[md_col]['L'], adstock_params[md_col]['P'], adstock_params[md_col]['D']
+    media_adstocked = pd.DataFrame()
+    for i,touchpoint in enumerate(touchpoints):
 
-        xa = apply_adstock(df[md_col].values, L, P, D)
-        md_df[md_col] = xa
-    return md_df
+        L, P, D = parameters[f'{touchpoint}_adstock']['L'], parameters[f'{touchpoint}_adstock']['P'], parameters[f'{touchpoint}_adstock']['D']
+
+        adstocked = apply_adstock(media[touchpoint], L, P, D)
+        media_adstocked[touchpoint] = adstocked
+    return media_adstocked
 
 #tp_2 = apply_adstock(data["touchpoint_2"], 4, 2, 0.9)
 #tp_2 = apply_adstock(data["touchpoint"], 4, 4, 0.6)
