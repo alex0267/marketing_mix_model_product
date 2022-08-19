@@ -31,7 +31,11 @@ def hill_transform(data, raw_data, scope, parameters, responseModelConfig):
         S,H = parameters[f'{touchpoint}_shape']['S'], parameters[f'{touchpoint}_shape']['H']
         
         #normalize data & mutliply by 5 to get 0-5 range
-        data_normalized = helper_functions.normalization.normalize_feature(data[touchpoint], responseModelConfig['NORMALIZATION_STEPS_TOUCHPOINTS'], responseModelConfig)
+        data_normalized = helper_functions.normalization.normalize_feature(feature_df = data[touchpoint],
+                                                                           norm_data = raw_data[touchpoint],
+                                                                           normalization_steps = responseModelConfig['NORMALIZATION_STEPS_TOUCHPOINTS'], 
+                                                                           configurations = responseModelConfig)
+
 
         # data_normalized = data[touchpoint]/raw_data[touchpoint].max()
         data_scaled = data_normalized*5
@@ -44,7 +48,7 @@ def hill_transform(data, raw_data, scope, parameters, responseModelConfig):
         #-> y = x*5 on a 0-10 range (definition limit for H of Shape function - user defined) 
         #-> Therefore, all x mappings are only half the size 
         #-> coefficient_of_growth = y/x*2
-        coefficient = ((data_shaped/data_normalized))
+        coefficient = (data_shaped/data_normalized)
 
         #scale the adstocked information according to the hill transformation
         touchpoint_shaped = coefficient*data[touchpoint]

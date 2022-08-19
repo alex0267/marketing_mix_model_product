@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 
 
-def normalize(normalized_feature, normalization_steps, configurations):
+def normalize(normalized_feature, norm_data, normalization_steps, configurations):
 
     #iterate through all normalization steps and change column based on parameters
     for step in normalization_steps:
@@ -16,8 +16,9 @@ def normalize(normalized_feature, normalization_steps, configurations):
 
         #application of mean
         elif step == 'mean_across_brands':
-            scaling_factor = normalized_feature.mean()
-            
+            #define norming based on input
+            scaling_factor = norm_data.mean()
+ 
             #avoid creating NAN's for columns with 0 spendings
             if(scaling_factor == 0):
                 normalized_feature = normalized_feature
@@ -26,7 +27,8 @@ def normalize(normalized_feature, normalization_steps, configurations):
         
         #application of max-based normalization
         elif step == 'max_across_brands':
-            scaling_factor = normalized_feature.max()
+            #define norming based on input
+            scaling_factor = norm_data.max()
 
             if(scaling_factor == 0):
                 normalized_feature = normalized_feature
@@ -41,17 +43,23 @@ def normalize(normalized_feature, normalization_steps, configurations):
     return normalized_feature
 
 
-
 def normalize_feature(
         feature_df,
+        norm_data,
         normalization_steps,
         configurations
 ):
-    
+    '''
+    The normalization process can be implemented for one or multiple columns
+    In case the normalization is done via a variable norm e.g. max of touchpoint spendings the column that the norm will be based on must be passed
+    The normalization steps refer to the order of execution of normalization
+    The configurations are passed since reference to other parts of the responseModelConfig might be necesserary (MAKE OPTIONAL)
+    '''
+    print(norm_data)
     #define process if only one column is passed (pd.Series)
     if isinstance(feature_df, pd.Series):
         df = feature_df.copy()
-        normalized_feature = normalize(df, normalization_steps[df.name], configurations)
+        normalized_feature = normalize(df,norm_data, normalization_steps[df.name], configurations)
 
         return normalized_feature
 
@@ -62,7 +70,7 @@ def normalize_feature(
         normalized_features = []
 
         for column in df:
-            normalized_features.append(normalize(df[column], normalization_steps[column], configurations))
+            normalized_features.append(normalize(df[column],norm_data[column], normalization_steps[column], configurations))
         
         return pd.DataFrame(normalized_features).T
 

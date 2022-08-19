@@ -11,6 +11,7 @@ def applyParametersToData(raw_data,original_spendings, parameters, configuration
                                                                          touchpoints = scope,
                                                                          parameters=parameters)
 
+
     #media_shaped = media_adstocked
     media_shaped = helper_functions.hill_function.hill_transform(data = media_adstocked,
                                                         raw_data = original_spendings,
@@ -26,7 +27,6 @@ def applyParametersToData(raw_data,original_spendings, parameters, configuration
     #Normalize adstocked media via max accross brands with  +1
     #(adstock(touchpoint_x, param = estimated_parameters_x))/mean + 1
     for touchpoint in scope:
-        normalization_steps = responseModelConfig['NORMALIZATION_STEPS_TOUCHPOINTS'][touchpoint]
         media_shaped[touchpoint] = media_shaped[touchpoint]/original_spendings[touchpoint].max()
         media_shaped[touchpoint] = media_shaped[touchpoint] + 1
 

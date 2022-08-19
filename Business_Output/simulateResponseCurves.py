@@ -77,9 +77,9 @@ class ResponseCurve:
         plt.plot(self.lift.keys(),self.lift.values())
 
         if (absolute == True):
-            plt.savefig(f'responseCurve_2_{touchpoint}_absolute.png')
+            plt.savefig(f'responseCurve_3_{touchpoint}_absolute.png')
         else:
-            plt.savefig(f'responseCurve_2_{touchpoint}_relative.png')
+            plt.savefig(f'responseCurve_3_{touchpoint}_relative.png')
 
 
     def calculateLift(self, prediction, spendings_sum, absolute):
@@ -109,7 +109,7 @@ class ResponseCurve:
 
         self.ROAS = sum(self.original_prediction-self.prediction[0.0])/self.spendings[1.0]
 
-    def run(self, plot = False, absolute=False):
+    def run(self, plot, absolute):
 
         self.spendings = {}
         self.prediction = {}
@@ -118,7 +118,7 @@ class ResponseCurve:
 
         for lift in self.configurations['SPEND_UPLIFT_TO_TEST']:
         #for lift in [0.0]:
-            spendings, spendings_sum = self.changeSpendings(touchpoint = 'touchpoint_4', lift=lift)
+            spendings, spendings_sum = self.changeSpendings(touchpoint = 'touchpoint_3', lift=lift)
             prediction = self.simulateSales(spendings)
 
             
@@ -138,8 +138,8 @@ class ResponseCurve:
             # print(self.lift[lift])
 
             #self.calculateROAS()
-            if (plot==False):
-                self.plotResponseCurve('touchpoint_4', absolute)
+            if (plot==True):
+                self.plotResponseCurve('touchpoint_3', absolute)
                 #self.plotPredictions(0.0)
             #pd.DataFrame([self.lift]).to_excel('tp3.xlsx')
 

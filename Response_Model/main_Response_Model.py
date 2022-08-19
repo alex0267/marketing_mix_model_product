@@ -19,8 +19,8 @@ class ResponseModel:
         self.spendingsFrame = spendingsFrame #raw touchpoint spending data
 
         #define data normalized
-        self.spendingsFrame_norm = helper_functions.normalization.normalize_feature(self.spendingsFrame, self.responseModelConfig['NORMALIZATION_STEPS_TOUCHPOINTS'], self.responseModelConfig)
-        self.target_norm = helper_functions.normalization.normalize_feature(self.target, self.responseModelConfig['NORMALIZATION_STEPS_TARGET'], self.responseModelConfig)
+        self.spendingsFrame_norm = helper_functions.normalization.normalize_feature(self.spendingsFrame,self.spendingsFrame, self.responseModelConfig['NORMALIZATION_STEPS_TOUCHPOINTS'], self.responseModelConfig)
+        self.target_norm = helper_functions.normalization.normalize_feature(self.target,self.target, self.responseModelConfig['NORMALIZATION_STEPS_TARGET'], self.responseModelConfig)
         
         #easy access variables
         self.num_media = None
