@@ -1,12 +1,16 @@
 import test_suite.data_generation
 import test_suite.stan_dict
 import test_suite.data_preparation
-import Business_Output.decompose_contribution
+import Business_Output.main_Business_Output
 import helper_functions.hill_function
 from Response_Model.main_Response_Model import ResponseModel
 import yaml
 import numpy as np
 import matplotlib.pyplot as plt
+import pandas as pd
+import os
+os.environ["CC"] = "gcc-11"
+os.environ["CXX"] = "g++-11"
 
 #Run pipeline tasks:
 # - Data Preparation
@@ -65,16 +69,16 @@ touchpoints = [
                #     'S':1,
                #     'H':1
                #  },
-               #  {
-               #     'control_var':False,
-               #     'name':'touchpoint_3',
-               #     'beta':1.3 ,
-               #     'L':4,
-               #     'P':2,
-               #     'D':0.9,
-               #     'S':3,
-               #     'H':1.9
-               #  },
+                {
+                   'control_var':False,
+                   'name':'touchpoint_3',
+                   'beta':1.3 ,
+                   'L':4,
+                   'P':2,
+                   'D':0.9,
+                   'S':3,
+                   'H':1.9
+                },
                 {
                    'control_var':False,
                    'name':'touchpoint_4',
@@ -88,56 +92,65 @@ touchpoints = [
                ]
 
 # Create features
-data, spendingsFrame, controlFrame = test_suite.data_generation.simulateTouchpoints(touchpoints,'_shaped')
-
-print(data)
-
-# rangeHill = np.arange(0, 10.1, 0.1).tolist()
-
-# data = [x for x in (rangeHill)]
-
-# hill = helper_functions.hill_function.hill_function(rangeHill, 1.3,3.5)
 
 
-# plt.plot(rangeHill, hill)
-# plt.savefig('hill2.png')
+#Simulate true response curves
+'''
+#iterate through lift options (avoid Nan for first by making number close to 0)
+lifts = [0.0001, 0.2, 0.4, 0.6, 0.8, 1.0,
+ 1.2, 1.4, 1.6, 1.8, 2.0,
+ 2.2, 2.4, 2.6, 2.8, 3.0,
+ 3.2, 3.4, 3.6, 3.8]
 
+result = []
+for lift in lifts:
+   data, spendingsFrame, controlFrame = test_suite.data_generation.simulateTouchpoints(touchpoints,'_shaped',baseSalesCoefficient_tp4=10000*lift, plot = False)
+   result.append(data['sales'][0:52].sum())
+pd.DataFrame(result).T.to_excel('result.xlsx')
+'''
+   # print(data['sales'][0:52].sum())
+#print(data)
 
+# data, spendingsFrame, controlFrame = test_suite.data_generation.simulateTouchpoints(touchpoints,'_shaped',baseSalesCoefficient_tp3=10000, plot = False)
+# print(data['sales'][0:52].sum())
+
+data, spendingsFrame, controlFrame = test_suite.data_generation.simulateTouchpoints(touchpoints,'_shaped',plot = False)
+   
 # Prepare data
-feature_df = test_suite.data_preparation.normalize_data(data, spendingsFrame)
+feature_df = test_suite.data_preparation.normalize_data(spendingsFrame, target = data['sales'])
 
-#Create dictionary
+seasonality_df = controlFrame[configurations['SEASONALITY_VARIABLES_BASE']]
+control_df = controlFrame[configurations['CONTROL_VARIABLES_BASE']]
 
-stanDict = test_suite.stan_dict.createDict(feature_df, controlFrame, data['sales'], spendingsFrame, max_lag)
 
 #Initialize Model instance and Train Bayesian Model 
-responseModel = ResponseModel(stanDict, configurations, feature_df, data['sales'])
+responseModel = ResponseModel(spendingsFrame = spendingsFrame, 
+                              controlFrame = control_df,
+                              seasonalityFrame = seasonality_df,
+                              configurations = configurations, 
+                              data_normalized = feature_df, 
+                              target = data['sales'])
 
-#first shape test: 'test_diff_touchpoints'
-#second shape test: 'test_shape_2'
-   #resuts in parameters of shape that are comparable to the true shape parameters
-   #However, relatively inaccurate
+   #Create dictionary
+stanDict = test_suite.stan_dict.createDict(responseModel, max_lag)
+responseModel.stanDict = stanDict
 
-#third shape test: 'test_shape_3'
-   #results in weird shape parameters
-   #However, relatively high accuracy??
-   #Not clear what changed from 2 to 3 (some transformation definitions in stan file)
+# for key in stanDict.keys():
+#    print(key)
+#    print(stanDict[key])
+#    if type(stanDict[key]) is not int:
+#       print('shape')
+#       print((stanDict[key]).shape)
 
-#third shape test: 'test_shape_4'
-   #Changed to _shaped -> error in data generation until here
-#fourth shape test: 'test_shape_5'
-   #Without *2
+#tp_4 shaped model: test_shape_7
+#tp_3 shaped model: tp_3_shaped_model
+#tp_3 & tp_4 shaped model: tp_3_tp_4_shaped_model
 
-#test_shape_5
-   #change prior from N (0,1) to ()
 
-#test_shape_6
-   #change of tp_3 from S:3.5, H:5,2 to 3 , 1.9
-
-#test_shape_7
-   #only kept TP_4
-responseModel.runModel(name ='test_shape_7', load=True)
-responseModel.extractParameters(printOut=True)
-
+   #train bayesian Model
+responseModel.runModel(name ='test', load=False)
+# responseModel.extractParameters(printOut=True)
+'''
 #calculate contribution decomposition via estimated parameters and original spendings/sales
-Business_Output.decompose_contribution.decompose_absolute_contribution(responseModel, spendingsFrame, data['sales'],data, plot=True)
+Business_Output.main_Business_Output.createBusinessOutputs(responseModel = responseModel)
+'''

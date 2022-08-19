@@ -2,7 +2,7 @@ import Data_Preparation.normalization
 import yaml
 import pandas as pd
 
-def normalize_data(data, spendingsFrame):
+def normalize_data(spendingsFrame, target = None):
 
 
     with open('test_suite/baseConfig.yaml', 'r') as file:
@@ -19,7 +19,9 @@ def normalize_data(data, spendingsFrame):
             #send the column to the normalization file with all required parameters
             feature_df[touchpoint] = Data_Preparation.normalization.normalize_feature(spendingsFrame, normalization_steps, configurations, touchpoint)
         
+        
         #normalize and log transform sales
-        feature_df['sales'] = Data_Preparation.normalization.normalize_feature(data, configurations['NORMALIZATION_STEPS_SALES']['sales'], configurations, 'sales')
+        if target is not None:
+            feature_df['sales'] = Data_Preparation.normalization.normalize_feature(target, configurations['NORMALIZATION_STEPS_SALES']['sales'], configurations, 'sales')
 
     return feature_df

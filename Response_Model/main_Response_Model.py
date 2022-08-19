@@ -8,16 +8,17 @@ import yaml
 #Also contains the functions to estimate and extract parameters
 class ResponseModel:
 
-    def __init__(self, stanDict, configurations, feature_df, sales):
+    def __init__(self, spendingsFrame, controlFrame, seasonalityFrame, configurations, data_normalized, target):
         #define touchpoints and parameters (later replaced by yaml config files)
         self.max_length = 4
-        self.stanDict = stanDict
         self.configurations = configurations
 
         #data
-        self.feature_df = feature_df
-        self.seasonality_df = stanDict['seasonality']
-        self.sales = sales #raw sales (target) variable with no transformation
+        self.data_normalized = data_normalized
+        self.seasonality_df = seasonalityFrame
+        self.otherControl_df = controlFrame
+        self.target = target #raw sales (target) variable with no transformation
+        self.spendingsFrame = spendingsFrame #raw touchpoint spending data
         
         #easy access variables
         self.num_media = None
@@ -29,6 +30,10 @@ class ResponseModel:
         self.parameters = None  #contains the summarized estimated parameters
         self.controlParameters = None
 
+        #Define stan dictionary used for the stan model
+        self.stanDict = None
+
+    
     #extract parameters for each touchpoint
     def extractParameters(self, printOut=False):
         pd.DataFrame(self.extractFrame.mean(axis=0)).to_csv('extractFrame.csv')
@@ -104,6 +109,10 @@ class ResponseModel:
     def runModel(self, name, load=True):
 
         if(load==False):
+            print(Response_Model.stan_file.stan_code)
+            print()
+            print('dict')
+            print(self.stanDict)
             posterior = stan.build(Response_Model.stan_file.stan_code, data=self.stanDict)
             fit = posterior.sample(num_chains=4, num_samples=1000)
             self.extractFrame = fit.to_frame()

@@ -15,7 +15,7 @@
 
 #Brands in scope
 BRANDS:
-  - angry_cat
+  - fast_duck
 
 TOUCHPOINTS:
   - tom
@@ -27,6 +27,8 @@ TOUCHPOINTS:
   - marc
   - alex
 #  - fiona - fiona is missing in the definitions but has allocated touchpoint spendings
+
+TARGET: TARGET_VOL_SO
 
 SEASONALITY_VARIABLES_BASE:
  - IS_JANUARY
@@ -79,14 +81,14 @@ brand_to_shape_params:
 
 #defining normalization steps of touchpoints
 NORMALIZATION_STEPS_TOUCHPOINTS:
-  tom: ['mean_across_brands']
-  laura: ['mean_across_brands']
-  lisa: ['mean_across_brands']
-  mary: ['mean_across_brands']
-  jack: ['mean_across_brands']
-  lucy: ['mean_across_brands']
-  marc: ['mean_across_brands']
-  alex: ['mean_across_brands']
+  tom: ['max_across_brands']
+  laura: ['max_across_brands']
+  lisa: ['max_across_brands']
+  mary: ['max_across_brands']
+  jack: ['max_across_brands']
+  lucy: ['max_across_brands']
+  marc: ['max_across_brands']
+  alex: ['max_across_brands']
 
 
 
@@ -109,7 +111,7 @@ NORMALIZATION_STEPS_TOUCHPOINTS:
 #  off_trade_activation: ['max_across_brands']
 
 NORMALIZATION_STEPS_TARGET:
-  TARGET_VOL_SO: ['mean_across_brands', 'logp1']
+  TARGET_VOL_SO: ['max_across_brands', 'logp1']
   # TARGET_VOL_SO: ['max_across_brands', 'log']
 
 

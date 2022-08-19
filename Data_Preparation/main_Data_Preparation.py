@@ -35,8 +35,6 @@ def run():
     #define basic feature table
     feature_df = sell_out_df[["YEAR_WEEK","BRAND"]]
 
-    
-
     #clean out empty brand rows
     feature_df.dropna(subset=["BRAND"], inplace=True)
 
@@ -47,11 +45,6 @@ def run():
         #turn media variables into columns with primary key ['YEAR_WEEK','BRAND','TOUCHPOINT'] by SPEND
     feature_df = feature_df.set_index(['YEAR_WEEK','BRAND','TOUCHPOINT'])['SPEND'].unstack().reset_index()
 
-    
-
-    #plot data
-    #plot.touchpoint_spendings_per_brand(feature_df)
-    #plot.touchpoint_spendings(feature_df,media_exec["TOUCHPOINT"].unique())
 
     #calculate event & seasonality features AND merge
     seasonality_df = Data_Preparation.seasonality.construct_seasonality_and_event_features(unique_weeks)
@@ -61,8 +54,6 @@ def run():
     promotion_df = Data_Preparation.promotion.compute_price_discount_feature(sell_out_df, quantile_reference=0.9)
     promotion_df = promotion_df.rename(columns={"VOLUME_SO": "TARGET_VOL_SO", "relative_gap_to_90th_price": "PROMOTION_FEATURE"})
     feature_df = feature_df.merge(promotion_df, on=["YEAR_WEEK","BRAND"])
-
-    #plot.touchpoint_spendings_per_brand(feature_df)
 
     #calculate competiton feature based on category
     #comp = testing.construct_price_competitors_feature(sell_out_competition_df)
@@ -74,27 +65,42 @@ def run():
     with open('config/baseConfig.yaml', 'r') as file:
         configurations = yaml.safe_load(file)
 
-        #filter dataframe by brands in scope
-        feature_df = feature_df[feature_df['BRAND'].isin(configurations['BRANDS'])]
+    #filter dataframe by brands in scope
+    feature_df = feature_df[feature_df['BRAND'].isin(configurations['BRANDS'])]
+    feature_df.reset_index(drop=True, inplace=True)
 
-        print(feature_df.sum())
+    #filter promotion_df to fit scope
+    promotion_df = promotion_df[promotion_df['BRAND'].isin(configurations['BRANDS'])]
+    promotion_df.reset_index(drop=True, inplace=True)
+    promotion_df = promotion_df[configurations['CONTROL_VARIABLES_BASE']]
 
 
-        for touchpoint in configurations['TOUCHPOINTS']:
+    #filter seasonality_df to fit scope
+    seasonality_df = seasonality_df[configurations['SEASONALITY_VARIABLES_BASE']]
 
-            #define the type of normalization(s) to apply defined in config 'NORMALIZATION_STEPS_TOUCHPOINTS':
-            # First we apply the max/custom normalization
-            # Second we do the log transformation for each touchpoint
-            normalization_steps = configurations['NORMALIZATION_STEPS_TOUCHPOINTS'][touchpoint]
 
-            #send the column to the normalization file with all required parameters
-            feature_df[touchpoint] = Data_Preparation.normalization.normalize_feature(feature_df, normalization_steps, configurations, touchpoint)
+    feature_df_normalized = pd.DataFrame()
 
-        target_raw = feature_df['TARGET_VOL_SO']
-        #normalize and log transform sales
-        feature_df['TARGET_VOL_SO'] = Data_Preparation.normalization.normalize_feature(feature_df, configurations['NORMALIZATION_STEPS_TARGET']['TARGET_VOL_SO'], configurations, 'TARGET_VOL_SO')
+    #define raw spendings dataframe
+    spendings_df = feature_df[configurations['TOUCHPOINTS']]
     
-    return feature_df, target_raw
+
+    for touchpoint in configurations['TOUCHPOINTS']:
+
+        #define the type of normalization(s) to apply defined in config 'NORMALIZATION_STEPS_TOUCHPOINTS':
+        # First we apply the max/custom normalization
+        # Second we do the log transformation for each touchpoint
+        normalization_steps = configurations['NORMALIZATION_STEPS_TOUCHPOINTS'][touchpoint]
+
+        #send the column to the normalization file with all required parameters
+        feature_df_normalized[touchpoint] = Data_Preparation.normalization.normalize_feature(feature_df, normalization_steps, configurations, touchpoint)
+
+    target_raw = feature_df['TARGET_VOL_SO']
+    
+    #normalize and log transform sales
+    feature_df_normalized['TARGET_VOL_SO'] = Data_Preparation.normalization.normalize_feature(feature_df, configurations['NORMALIZATION_STEPS_TARGET']['TARGET_VOL_SO'], configurations, 'TARGET_VOL_SO')
+    
+    return spendings_df, feature_df,feature_df_normalized, seasonality_df, promotion_df, target_raw
 
 
 # final output dataframe

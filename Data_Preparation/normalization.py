@@ -36,7 +36,11 @@ def normalize_feature(
         #application of max-based normalization
         elif step == 'max_across_brands':
             scaling_factor = normalized_feature.max()
-            normalized_feature = normalized_feature / scaling_factor
+
+            if(scaling_factor == 0):
+                normalized_feature = normalized_feature
+            else:
+                normalized_feature = normalized_feature / scaling_factor
 
 
         #application of natural logarithm (ln(x)) to the series +1
