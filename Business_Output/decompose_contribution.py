@@ -2,7 +2,6 @@ import helper_functions.adstock_functions
 import helper_functions.transformations
 import helper_functions.hill_function
 import Business_Output.applyParameters
-import Data_Preparation.normalization
 import numpy as np
 import pandas as pd
 import matplotlib
@@ -32,6 +31,7 @@ def decompose_absolute_contribution(responseModel, plot = False):
                                             original_spendings=responseModel.spendingsFrame, 
                                             parameters = responseModel.parameters,
                                             configurations = responseModel.configurations,
+                                            responseModelConfig= responseModel.responseModelConfig,
                                             scope = responseModel.configurations['TOUCHPOINTS'],
                                             seasonality_df = responseModel.seasonality_df,
                                             seasonality_beta = responseModel.beta_seasonality)
@@ -76,7 +76,7 @@ def decompose_absolute_contribution(responseModel, plot = False):
     pred = y_pred
 
     compareFrame = true.merge(pred.rename('pred'), left_index=True, right_index=True)
-    compareFrame.to_csv("compare.csv")
+    # compareFrame.to_csv("compare.csv")
     
 
 
@@ -107,7 +107,6 @@ def decompose_absolute_contribution(responseModel, plot = False):
     # plt.plot(compareFrame['pred'],  color='red')
     #plt.plot(compareFrame['sales'])
 
-    plt.savefig('sales2.png')
 
     return mc_df, sales_prediction
 

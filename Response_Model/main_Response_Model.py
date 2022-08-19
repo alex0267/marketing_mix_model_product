@@ -1,24 +1,26 @@
 import stan
-import Response_Model.stan_file
-import model_savings
 import pandas as pd
-import yaml
+import numpy as np
+import helper_functions.normalization
 
 #class that contains the input and output data of a specific response model with respective model settings
 #Also contains the functions to estimate and extract parameters
 class ResponseModel:
 
-    def __init__(self, spendingsFrame, controlFrame, seasonalityFrame, configurations, data_normalized, target):
-        #define touchpoints and parameters (later replaced by yaml config files)
-        self.max_length = 4
+    def __init__(self, spendingsFrame, controlFrame, seasonalityFrame, configurations, responseModelConfig, target, stan_code):
+        #define configurations
         self.configurations = configurations
+        self.responseModelConfig = responseModelConfig
 
         #data
-        self.data_normalized = data_normalized
         self.seasonality_df = seasonalityFrame
         self.otherControl_df = controlFrame
         self.target = target #raw sales (target) variable with no transformation
         self.spendingsFrame = spendingsFrame #raw touchpoint spending data
+
+        #define data normalized
+        self.spendingsFrame_norm = helper_functions.normalization.normalize_feature(self.spendingsFrame,self.spendingsFrame, self.responseModelConfig['NORMALIZATION_STEPS_TOUCHPOINTS'], self.responseModelConfig)
+        self.target_norm = helper_functions.normalization.normalize_feature(self.target,self.target, self.responseModelConfig['NORMALIZATION_STEPS_TARGET'], self.responseModelConfig)
         
         #easy access variables
         self.num_media = None
@@ -32,11 +34,41 @@ class ResponseModel:
 
         #Define stan dictionary used for the stan model
         self.stanDict = None
+        self.createDict()
+
+        #Define stan code
+        self.stan_code = stan_code
+        
+
+    
+    #create dictionary as input data for the stan model
+    def createDict(self):
+
+
+        num_media = len(self.configurations['TOUCHPOINTS'])
+        media_norm = np.array(self.spendingsFrame[self.configurations['TOUCHPOINTS']].max())
+        X_media = self.spendingsFrame[self.configurations['TOUCHPOINTS']]
+        #add zeros to beginning of media dataframe to account for padding (weight application of adstock)
+        X_media = np.concatenate((np.zeros((self.responseModelConfig['max_lag']-1, num_media)), np.array(X_media)),axis=0)
+
+        self.stanDict = {
+            'N': len(self.spendingsFrame),
+            'max_lag': self.responseModelConfig['max_lag'], 
+            'num_media': num_media,
+            'X_media': X_media,
+            'media_norm': media_norm,
+            'num_seasons': len(self.configurations['SEASONALITY_VARIABLES_BASE']),
+            'seasonality': np.array(self.seasonality_df),
+            # 'num_control': len(self.configurations['CONTROL_VARIABLES_BASE']),
+            # 'control': np.array(responseModel.otherControl_df),
+            'y': self.target_norm.values
+        }
+
 
     
     #extract parameters for each touchpoint
     def extractParameters(self, printOut=False):
-        pd.DataFrame(self.extractFrame.mean(axis=0)).to_csv('extractFrame.csv')
+        #pd.DataFrame(self.extractFrame.mean(axis=0)).to_csv('extractFrame.csv')
         self.parameters = {}
         self.num_media = self.stanDict['num_media']
 
@@ -44,7 +76,7 @@ class ResponseModel:
         self.parameters['tau'] = self.extractFrame[f'tau'].mean(axis=0)
         self.parameters['noise_var'] = self.extractFrame['noise_var'].mean(axis=0)
         
-        self.extractFrame.mean().to_csv('estimatedParameters.csv')
+        #self.extractFrame.mean().to_csv('estimatedParameters.csv')
         #print(self.extractFrame.mean())
 
         for i, season in enumerate(self.configurations['SEASONALITY_VARIABLES_BASE'],start = 1):
@@ -62,7 +94,7 @@ class ResponseModel:
 
             #Collect per touchpoint parameters in dictionary
             self.parameters[f'{touchpoint}_adstock'] = {
-                'L': self.max_length,
+                'L': self.responseModelConfig['max_lag'],
                 'P': peak,
                 'D': decay
             }
@@ -109,11 +141,8 @@ class ResponseModel:
     def runModel(self, name, load=True):
 
         if(load==False):
-            print(Response_Model.stan_file.stan_code)
-            print()
-            print('dict')
-            print(self.stanDict)
-            posterior = stan.build(Response_Model.stan_file.stan_code, data=self.stanDict)
+
+            posterior = stan.build(self.stan_code, data=self.stanDict)
             fit = posterior.sample(num_chains=4, num_samples=1000)
             self.extractFrame = fit.to_frame()
             self.extractFrame.to_csv(f'model_savings/extract{name}.csv')
@@ -121,7 +150,6 @@ class ResponseModel:
         else:
             self.extractFrame = pd.read_csv(f'model_savings/extract{name}.csv')
         
-
         return 0
 
     

@@ -54,6 +54,7 @@ class ResponseCurve:
                                                             original_spendings = self.responseModel.spendingsFrame.copy(),
                                                             parameters = self.responseModel.parameters,
                                                             configurations= self.responseModel.configurations,
+                                                            responseModelConfig = self.responseModel.responseModelConfig,
                                                             scope = self.responseModel.configurations['TOUCHPOINTS'],
                                                             seasonality_df = self.responseModel.seasonality_df,
                                                             seasonality_beta= self.responseModel.beta_seasonality)
@@ -62,7 +63,7 @@ class ResponseCurve:
         prediction = (y_pred-1)*self.responseModel.target.max()
         
         #cut the prediction frame to only include change window + after-change window (incl. after effects)
-        prediction = prediction[self.start: self.start + self.window + self.responseModel.max_length]
+        prediction = prediction[self.start: self.start + self.window + self.responseModel.responseModelConfig['max_lag']]
         
         return prediction
 
@@ -76,9 +77,9 @@ class ResponseCurve:
         plt.plot(self.lift.keys(),self.lift.values())
 
         if (absolute == True):
-            plt.savefig(f'responseCurve_2_{touchpoint}_absolute.png')
+            plt.savefig(f'responseCurve_3_{touchpoint}_absolute.png')
         else:
-            plt.savefig(f'responseCurve_2_{touchpoint}_relative.png')
+            plt.savefig(f'responseCurve_3_{touchpoint}_relative.png')
 
 
     def calculateLift(self, prediction, spendings_sum, absolute):
@@ -108,7 +109,7 @@ class ResponseCurve:
 
         self.ROAS = sum(self.original_prediction-self.prediction[0.0])/self.spendings[1.0]
 
-    def run(self, plot = False, absolute=True):
+    def run(self, plot, absolute):
 
         self.spendings = {}
         self.prediction = {}
@@ -117,7 +118,7 @@ class ResponseCurve:
 
         for lift in self.configurations['SPEND_UPLIFT_TO_TEST']:
         #for lift in [0.0]:
-            spendings, spendings_sum = self.changeSpendings(touchpoint = 'marc', lift=lift)
+            spendings, spendings_sum = self.changeSpendings(touchpoint = 'touchpoint_3', lift=lift)
             prediction = self.simulateSales(spendings)
 
             
@@ -137,8 +138,8 @@ class ResponseCurve:
             # print(self.lift[lift])
 
             #self.calculateROAS()
-            if (plot==False):
-                self.plotResponseCurve('marc', absolute)
+            if (plot==True):
+                self.plotResponseCurve('touchpoint_3', absolute)
                 #self.plotPredictions(0.0)
             #pd.DataFrame([self.lift]).to_excel('tp3.xlsx')
 

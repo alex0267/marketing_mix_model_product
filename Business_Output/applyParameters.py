@@ -4,19 +4,20 @@ import helper_functions
 
 #use the estimated parameters to combine with model to calculate sales prediction
 
-def applyParametersToData(raw_data,original_spendings, parameters, configurations, scope, seasonality_df, seasonality_beta):
+def applyParametersToData(raw_data,original_spendings, parameters, configurations, responseModelConfig, scope, seasonality_df, seasonality_beta):
 
 
     media_adstocked = helper_functions.adstock_functions.adstock_transform(media = raw_data[scope],
                                                                          touchpoints = scope,
                                                                          parameters=parameters)
 
+
     #media_shaped = media_adstocked
     media_shaped = helper_functions.hill_function.hill_transform(data = media_adstocked,
                                                         raw_data = original_spendings,
                                                         scope=scope, 
                                                         parameters=parameters, 
-                                                        configurations=configurations)
+                                                        responseModelConfig=responseModelConfig)
 
     # plt.plot(data['touchpoint_4_adstocked'], color='blue')
     # plt.plot(media_shaped['touchpoint_4'], color='green')
@@ -26,7 +27,6 @@ def applyParametersToData(raw_data,original_spendings, parameters, configuration
     #Normalize adstocked media via max accross brands with  +1
     #(adstock(touchpoint_x, param = estimated_parameters_x))/mean + 1
     for touchpoint in scope:
-        normalization_steps = configurations['NORMALIZATION_STEPS_TOUCHPOINTS'][touchpoint]
         media_shaped[touchpoint] = media_shaped[touchpoint]/original_spendings[touchpoint].max()
         media_shaped[touchpoint] = media_shaped[touchpoint] + 1
 

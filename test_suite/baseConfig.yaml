@@ -28,17 +28,5 @@ SEASONALITY_VARIABLES_BASE:
 CONTROL_VARIABLES_BASE:
   - promotion
 
-#defining normalization steps of touchpoints
-#the normalization steps will follow the order below:
-NORMALIZATION_STEPS_TOUCHPOINTS:
 
-  # touchpoint_2: ['max_across_brands']
-  touchpoint_3: ['max_across_brands']
-  touchpoint_4: ['max_across_brands']
-  
-
-#defining normalization steps of touchpoints
-#the normalization steps will follow the order below:
-NORMALIZATION_STEPS_SALES:
-  sales: ['max_across_brands', 'logp1']
 

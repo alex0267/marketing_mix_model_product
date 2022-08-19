@@ -1,9 +1,10 @@
 import test_suite.data_generation
-import test_suite.stan_dict
 import test_suite.data_preparation
 import Business_Output.main_Business_Output
 import helper_functions.hill_function
 from Response_Model.main_Response_Model import ResponseModel
+import helper_functions.normalization
+import Response_Model.stan_file
 import yaml
 import numpy as np
 import matplotlib.pyplot as plt
@@ -23,8 +24,11 @@ os.environ["CXX"] = "g++-11"
 with open('test_suite/baseConfig.yaml', 'r') as file:
             configurations = yaml.safe_load(file)
 
-#maximum number of weeks the touchpoint can influence sales
-max_lag = 4
+with open('test_suite/responseModelConfig.yaml', 'r') as file:
+            responseModelConfig = yaml.safe_load(file)
+
+with open('test_suite/responseCurveConfig.yaml', 'r') as file:
+      responseCurveConfig = yaml.safe_load(file)
 
 #touchpoint definition
 touchpoints = [
@@ -115,10 +119,11 @@ pd.DataFrame(result).T.to_excel('result.xlsx')
 # print(data['sales'][0:52].sum())
 
 data, spendingsFrame, controlFrame = test_suite.data_generation.simulateTouchpoints(touchpoints,'_shaped',plot = False)
-   
-# Prepare data
-feature_df = test_suite.data_preparation.normalize_data(spendingsFrame, target = data['sales'])
 
+# print(helper_functions.normalization.normalize_feature(spendingsFrame['touchpoint_3'], configurations['NORMALIZATION_STEPS_TOUCHPOINTS'], configurations))
+
+
+# Prepare data
 seasonality_df = controlFrame[configurations['SEASONALITY_VARIABLES_BASE']]
 control_df = controlFrame[configurations['CONTROL_VARIABLES_BASE']]
 
@@ -127,13 +132,12 @@ control_df = controlFrame[configurations['CONTROL_VARIABLES_BASE']]
 responseModel = ResponseModel(spendingsFrame = spendingsFrame, 
                               controlFrame = control_df,
                               seasonalityFrame = seasonality_df,
-                              configurations = configurations, 
-                              data_normalized = feature_df, 
-                              target = data['sales'])
+                              configurations = configurations,
+                              responseModelConfig=responseModelConfig, 
+                              target = data['sales'],
+                              stan_code = Response_Model.stan_file.stan_code)
 
-   #Create dictionary
-stanDict = test_suite.stan_dict.createDict(responseModel, max_lag)
-responseModel.stanDict = stanDict
+
 
 # for key in stanDict.keys():
 #    print(key)
@@ -146,11 +150,11 @@ responseModel.stanDict = stanDict
 #tp_3 shaped model: tp_3_shaped_model
 #tp_3 & tp_4 shaped model: tp_3_tp_4_shaped_model
 
-
    #train bayesian Model
-responseModel.runModel(name ='test', load=False)
-# responseModel.extractParameters(printOut=True)
-'''
+responseModel.runModel(name ='test', load=True)
+responseModel.extractParameters(printOut=True)
+
 #calculate contribution decomposition via estimated parameters and original spendings/sales
-Business_Output.main_Business_Output.createBusinessOutputs(responseModel = responseModel)
-'''
+Business_Output.main_Business_Output.createBusinessOutputs(responseModel = responseModel, 
+                                                           responseCurveConfig = responseCurveConfig)
+
