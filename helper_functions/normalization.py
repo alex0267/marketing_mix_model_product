@@ -55,7 +55,6 @@ def normalize_feature(
     The normalization steps refer to the order of execution of normalization
     The configurations are passed since reference to other parts of the responseModelConfig might be necesserary (MAKE OPTIONAL)
     '''
-    print(norm_data)
     #define process if only one column is passed (pd.Series)
     if isinstance(feature_df, pd.Series):
         df = feature_df.copy()

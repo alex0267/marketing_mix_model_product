@@ -68,7 +68,7 @@ class ResponseModel:
     
     #extract parameters for each touchpoint
     def extractParameters(self, printOut=False):
-        pd.DataFrame(self.extractFrame.mean(axis=0)).to_csv('extractFrame.csv')
+        #pd.DataFrame(self.extractFrame.mean(axis=0)).to_csv('extractFrame.csv')
         self.parameters = {}
         self.num_media = self.stanDict['num_media']
 
@@ -76,7 +76,7 @@ class ResponseModel:
         self.parameters['tau'] = self.extractFrame[f'tau'].mean(axis=0)
         self.parameters['noise_var'] = self.extractFrame['noise_var'].mean(axis=0)
         
-        self.extractFrame.mean().to_csv('estimatedParameters.csv')
+        #self.extractFrame.mean().to_csv('estimatedParameters.csv')
         #print(self.extractFrame.mean())
 
         for i, season in enumerate(self.configurations['SEASONALITY_VARIABLES_BASE'],start = 1):

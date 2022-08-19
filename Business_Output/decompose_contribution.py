@@ -76,7 +76,7 @@ def decompose_absolute_contribution(responseModel, plot = False):
     pred = y_pred
 
     compareFrame = true.merge(pred.rename('pred'), left_index=True, right_index=True)
-    compareFrame.to_csv("compare.csv")
+    # compareFrame.to_csv("compare.csv")
     
 
 
@@ -107,7 +107,6 @@ def decompose_absolute_contribution(responseModel, plot = False):
     # plt.plot(compareFrame['pred'],  color='red')
     #plt.plot(compareFrame['sales'])
 
-    plt.savefig('sales2.png')
 
     return mc_df, sales_prediction
 
