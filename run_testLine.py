@@ -96,8 +96,8 @@ touchpoints = [
                ]
 
 # Create features
-
-
+#test
+a=4
 #Simulate true response curves
 '''
 #iterate through lift options (avoid Nan for first by making number close to 0)
