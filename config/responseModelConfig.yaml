@@ -41,6 +41,9 @@ NORMALIZATION_STEPS_TOUCHPOINTS:
   alex: ['max_across_brands']
 
 
+
+
+
 #  distribution_off: ['log', 'minus_mean', 'std']
 # in the original, the log transformation is also applied here
 # this is ignored in V01 to facilitate the model

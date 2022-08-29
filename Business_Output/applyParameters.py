@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-import helper_functions
+import helper_functions.normalization
 
 #use the estimated parameters to combine with model to calculate sales prediction
 
@@ -9,7 +9,8 @@ def applyParametersToData(raw_data,original_spendings, parameters, configuration
 
     media_adstocked = helper_functions.adstock_functions.adstock_transform(media = raw_data[scope],
                                                                          touchpoints = scope,
-                                                                         parameters=parameters)
+                                                                         parameters=parameters,
+                                                                         responseModelConfig = responseModelConfig)
 
 
     #media_shaped = media_adstocked
@@ -26,27 +27,28 @@ def applyParametersToData(raw_data,original_spendings, parameters, configuration
 
     #Normalize adstocked media via max accross brands with  +1
     #(adstock(touchpoint_x, param = estimated_parameters_x))/mean + 1
-    for touchpoint in scope:
-        media_shaped[touchpoint] = media_shaped[touchpoint]/original_spendings[touchpoint].max()
-        media_shaped[touchpoint] = media_shaped[touchpoint] + 1
 
-    X = media_shaped
+    
+    for touchpoint in scope:
+        #media_shaped[touchpoint], data_norm = helper_functions.normalization.normalize_feature(media_shaped[touchpoint],media_shaped[touchpoint],responseModelConfig['NORMALIZATION_STEPS_TOUCHPOINTS'][touchpoint])
+        
+        #media_shaped[touchpoint] = media_shaped[touchpoint]/original_spendings[touchpoint].max()
+        media_shaped[touchpoint] = media_shaped[touchpoint] + 1
 
 
     #calculation of x**Beta for the media variables and the control model variables (= basesales)
     #we take the media_impressions (mean transformed)^Beta_i
-    #x_Beta_matrix = X.apply(lambda x: x[:responseModel.num_media]**responseModel.beta[:responseModel.num_media], axis=1)
-
+    
     factor_df = pd.DataFrame(columns=scope+['intercept']+configurations['SEASONALITY_VARIABLES_BASE'])
    
     for touchpoint in scope:
-        factor_df[touchpoint] = X[touchpoint] ** parameters[f'{touchpoint}_beta']
+        factor_df[touchpoint] = media_shaped[touchpoint] ** parameters[f'{touchpoint}_beta']
     
     factor_df['intercept'] = np.exp(parameters['tau'])
     
 
     # 2. calculate the product of all factors -> y_pred
-    # baseline = intercept * control factor = e^tau * X[13]^beta[13]
+    # baseline = intercept * control factor = e^tau * media_shaped[13]^beta[13]
     #y_pred = baseline*((touchpoint_4_shaped)^Beta)*e^(seasonality*Beta)
     y_pred = factor_df.apply(np.prod, axis=1)*np.exp(np.dot(seasonality_df,seasonality_beta))
 

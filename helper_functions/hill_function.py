@@ -6,9 +6,33 @@
 import numpy as np
 import pandas as pd
 import helper_functions.normalization
+import math
+
+
+def shape_function(adstocked_spendings,shape, scale, threshold, saturation):
+
+  shaped_spendings=[]
+  for spend in adstocked_spendings:
+    if spend > threshold:
+      #define scale ()
+
+      scaled_form = (spend-threshold)/(scale*saturation)
+
+      #high scaled_form-value leads to high shape value
+      shaped = 1 - math.exp(-scaled_form**shape)
+      shaped_spendings.append(shaped)
+
+    else:
+      shaped = 0
+      shaped_spendings.append(shaped)
+
+
+  return shaped_spendings
+
 
 #Definition of Hill function (raw mathematical formulation)
-def hill_function(adstocked_spending, S, H):
+#LEGACY
+def hill_function_old(adstocked_spending, S, H):
     hill = []
 
     for spending in adstocked_spending:
@@ -28,32 +52,23 @@ def hill_transform(data, raw_data, scope, parameters, responseModelConfig):
     for i,touchpoint in enumerate(scope):
 
         #Return estimated parameters from dictionary
-        S,H = parameters[f'{touchpoint}_shape']['S'], parameters[f'{touchpoint}_shape']['H']
+        shape,scale = parameters[f'{touchpoint}_shape']['shape'], parameters[f'{touchpoint}_shape']['scale']
+        threshold, saturation = responseModelConfig['BRAND_TO_SHAPE_PARAMETERS'][f'{touchpoint}_threshold'], responseModelConfig['BRAND_TO_SHAPE_PARAMETERS'][f'{touchpoint}_saturation']
         
-        #normalize data & mutliply by 5 to get 0-5 range
-        data_normalized = helper_functions.normalization.normalize_feature(feature_df = data[touchpoint],
+        #normalize data
+        data_normalized, data_norm = helper_functions.normalization.normalize_feature(feature_df = data[touchpoint],
                                                                            norm_data = raw_data[touchpoint],
-                                                                           normalization_steps = responseModelConfig['NORMALIZATION_STEPS_TOUCHPOINTS'], 
-                                                                           configurations = responseModelConfig)
+                                                                           normalization_steps = responseModelConfig['NORMALIZATION_STEPS_TOUCHPOINTS'][touchpoint], 
+                                                                           responseModelConfig = responseModelConfig)
+
+        #shape transformation of normalized data
+        data_shaped = shape_function(data_normalized, 
+                                     shape = shape,
+                                     scale = scale,
+                                     threshold = threshold,
+                                     saturation = saturation)
 
 
-        # data_normalized = data[touchpoint]/raw_data[touchpoint].max()
-        data_scaled = data_normalized*5
-            
-        #hill transformation of normalized data
-        data_shaped = hill_function(data_scaled, S,H)
-
-        #calculating the coefficient of y/x of the respective hill transformation
-        #we double the normalized data since:
-        #-> y = x*5 on a 0-10 range (definition limit for H of Shape function - user defined) 
-        #-> Therefore, all x mappings are only half the size 
-        #-> coefficient_of_growth = y/x*2
-        coefficient = (data_shaped/data_normalized)
-
-        #scale the adstocked information according to the hill transformation
-        touchpoint_shaped = coefficient*data[touchpoint]
-
-
-        media_shaped[touchpoint] = touchpoint_shaped
+        media_shaped[touchpoint] = data_shaped
 
     return media_shaped

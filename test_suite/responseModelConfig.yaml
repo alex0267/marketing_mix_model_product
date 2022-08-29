@@ -7,9 +7,21 @@ NORMALIZATION_STEPS_TOUCHPOINTS:
   # touchpoint_2: ['max_across_brands']
   touchpoint_3: ['max_across_brands']
   touchpoint_4: ['max_across_brands']
+  touchpoint_5: ['max_across_brands']
+
+#not functional yet
+ADSTOCK_FUNCTION_TYPE:
+  touchpoint_3: 'impression_spendings'
+  touchpoint_4: 'impression_spendings'
+  touchpoint_5: 'impression_spendings'
+
   
 
 #defining normalization steps of touchpoints
 #the normalization steps will follow the order below:
 NORMALIZATION_STEPS_TARGET:
   sales: ['max_across_brands', 'logp1']
+
+BRAND_TO_SHAPE_PARAMETERS:
+  touchpoint_5_threshold: 0
+  touchpoint_5_saturation: 1 

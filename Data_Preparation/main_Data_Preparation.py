@@ -14,9 +14,7 @@ import Data_Preparation.promotion
 #import testing
 import pandas as pd
 import numpy as np
-import os
 import yaml
-import helper_functions.normalization
 
 #get current working directory
 #print(os.getcwd())

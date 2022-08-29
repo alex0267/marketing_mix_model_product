@@ -4,6 +4,10 @@ functions {
   real Adstock(vector t, row_vector weights) {
     return dot_product(t, weights) / sum(weights);
   }
+
+
+
+  
   real Shape(real t, real H, real S) {
     return ((t^S) / (H^S+t^S));
   }
@@ -11,19 +15,20 @@ functions {
 data {
   // the total number of observations
   int<lower=1> N;
+  //
   // the vector of sales
   array [N] real y;
   // the maximum duration of lag effect, in weeks
   int<lower=1> max_lag;
   // the number of media channels
-  int<lower=0> num_media;
+  int<lower=0> num_touchpoints;
   // matrix of media variables
-  matrix[N+max_lag-1, num_media] X_media;
+  matrix[N+max_lag-1, num_touchpoints] touchpoint_spendings;
   // matrix of seasonality variables
   int<lower=0> num_seasons;
   matrix[N,num_seasons] seasonality;
   // list of mean values of media (raw data)
-  vector [num_media] media_norm;
+  vector [num_touchpoints] touchpoint_norms;
 }
 parameters {
   // residual variance
@@ -31,16 +36,16 @@ parameters {
   // the intercept
   real tau;
   // the coefficients for media variables
-  vector<lower=0>[num_media] beta;
+  vector<lower=0>[num_touchpoints] beta;
   // the coefficients for seasonality variables
   vector[num_seasons] beta_seasonality;
   // the decay and peak parameter for the adstock transformation of
   // each media
-  vector<lower=0,upper=1>[num_media] decay;
-  vector<lower=0,upper=ceil(max_lag/2)>[num_media] peak;
+  vector<lower=0,upper=1>[num_touchpoints] decay;
+  vector<lower=0,upper=ceil(max_lag/2)>[num_touchpoints] peak;
   //Shape parameter
-  vector<lower=0,upper=10>[num_media] H; //Half saturation point
-  vector<lower=0,upper=10>[num_media] S; //slope parameter
+  vector<lower=0,upper=10>[num_touchpoints] H; //Half saturation point
+  vector<lower=0,upper=10>[num_touchpoints] S; //slope parameter
 }
 transformed parameters {
   // the cumulative media effect after adstock
@@ -51,17 +56,22 @@ transformed parameters {
   real coefficient;
   real touchpoint_shaped;
   // matrix of media variables after adstock
-  matrix[N, num_media] X_media_adstocked;
+  matrix[N, num_touchpoints] X_media_adstocked;
   // adstock, mean-center, log1p transformation
   row_vector[max_lag] lag_weights;
   for (nn in 1:N) {
-    for (media in 1 : num_media) {
-      for (lag in 1 : max_lag) {
-        lag_weights[max_lag-lag+1] = pow(decay[media], (lag - 1 - peak[media]) ^ 2);
+    for (media in 1 : num_touchpoints) {
+      //calculate weights for adstock function
+      for (lag in 0 : max_lag) {
+        print(lag)
+        lag_weights[max_lag-lag] = pow(decay[media], lag);
+        
       }
-      cum_effect = Adstock(sub_col(X_media, nn, media, max_lag), lag_weights);
+      print(lag_weights)
 
-      normalized_data = cum_effect/media_norm[media];
+      cum_effect = Adstock(sub_col(touchpoint_spendings, nn, media, max_lag), lag_weights);
+
+      normalized_data = cum_effect/touchpoint_norms[media];
       shape_effect = Shape((normalized_data)*5,H[media], S[media]);
 
       //avoid division by zero
@@ -71,7 +81,7 @@ transformed parameters {
         coefficient = shape_effect/(normalized_data);
       touchpoint_shaped = coefficient*cum_effect;
 
-      X_media_adstocked[nn, media] = log1p(touchpoint_shaped/media_norm[media]);
+      X_media_adstocked[nn, media] = log1p(touchpoint_shaped/touchpoint_norms[media]);
     }
   } 
 }
@@ -80,7 +90,7 @@ model {
   peak ~ uniform(0, ceil(max_lag/2));
   tau ~ normal(0, 5);
   //definition of beta variables - generic for now including media betas
-  for (i in 1 : num_media) {
+  for (i in 1 : num_touchpoints) {
     beta[i] ~ normal(1, 1);
   }
   for (i in 1 : num_seasons) {

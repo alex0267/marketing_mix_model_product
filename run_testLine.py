@@ -5,13 +5,12 @@ import helper_functions.hill_function
 from Response_Model.main_Response_Model import ResponseModel
 import helper_functions.normalization
 import Response_Model.stan_file
+import Response_Model.stan_file_adstock
 import yaml
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 import os
-os.environ["CC"] = "gcc-11"
-os.environ["CXX"] = "g++-11"
 
 #Run pipeline tasks:
 # - Data Preparation
@@ -32,72 +31,54 @@ with open('test_suite/responseCurveConfig.yaml', 'r') as file:
 
 #touchpoint definition
 touchpoints = [
-               {
-                  'control_var':'month',
-                  'name':'december',
-                  'factor': 6000,
-                  'beta':1
-               },
-               {
-                  'control_var':'month',
-                  'name':'november',
-                  'factor': 4000,
-                  'beta':1
-               },
-               {
-                  'control_var':'month',
-                  'name':'june',
-                  'factor': -3000,
-                  'beta':1
-               },
-               {
-                  'control_var':'month',
-                  'name':'july',
-                  'factor': -3000,
-                  'beta':1
-               },
-               {
-                  'control_var':False,
-                  'name':'base_1',
-                  'factor': 30000,
-                  'noise_percentage': 0.1,
-                  'beta':1
-               },
                # {
-               #     'control_var':False,
-               #     'name':'touchpoint_2',
-               #     'beta':1.3 ,
-               #     'L':4,
-               #     'P':2,
-               #     'D':0.9,
-               #     'S':1,
-               #     'H':1
-               #  },
-                {
+               #    'control_var':'month',
+               #    'name':'december',
+               #    'factor': 6000,
+               #    'beta':1
+               # },
+               # {
+               #    'control_var':'month',
+               #    'name':'november',
+               #    'factor': 4000,
+               #    'beta':1
+               # },
+               # {
+               #    'control_var':'month',
+               #    'name':'june',
+               #    'factor': -3000,
+               #    'beta':1
+               # },
+               # {
+               #    'control_var':'month',
+               #    'name':'july',
+               #    'factor': -3000,
+               #    'beta':1
+               # },
+               # {
+               #    'control_var':False,
+               #    'name':'base_1',
+               #    'factor': 30000,
+               #    'noise_percentage': 0.1,
+               #    'beta':1
+               # },
+
+               {
                    'control_var':False,
-                   'name':'touchpoint_3',
-                   'beta':1.3 ,
+                   'name':'touchpoint_5',
+                   'beta':1,
                    'L':4,
-                   'P':2,
-                   'D':0.9,
-                   'S':3,
-                   'H':1.9
-                },
-                {
-                   'control_var':False,
-                   'name':'touchpoint_4',
-                   'beta':1.3 ,
-                   'L':4,
-                   'P':2,
-                   'D':0.9,
-                   'S':0.7,
-                   'H':9.4
-                }
+                   'D':0.8,
+                   'scale':1.8,
+                   'shape':1,
+                   'saturation':1,
+                   'threshold':0,
+                   'sales_saturation':10000,
+               }
                ]
 
 # Create features
-#test
-a=4
+
 #Simulate true response curves
 '''
 #iterate through lift options (avoid Nan for first by making number close to 0)
@@ -118,9 +99,7 @@ pd.DataFrame(result).T.to_excel('result.xlsx')
 # data, spendingsFrame, controlFrame = test_suite.data_generation.simulateTouchpoints(touchpoints,'_shaped',baseSalesCoefficient_tp3=10000, plot = False)
 # print(data['sales'][0:52].sum())
 
-data, spendingsFrame, controlFrame = test_suite.data_generation.simulateTouchpoints(touchpoints,'_shaped',plot = False)
-
-# print(helper_functions.normalization.normalize_feature(spendingsFrame['touchpoint_3'], configurations['NORMALIZATION_STEPS_TOUCHPOINTS'], configurations))
+data, spendingsFrame, controlFrame = test_suite.data_generation.simulateTouchpoints(touchpoints, configurations, responseModelConfig, '_shaped',plot = True)
 
 
 # Prepare data
@@ -135,7 +114,7 @@ responseModel = ResponseModel(spendingsFrame = spendingsFrame,
                               configurations = configurations,
                               responseModelConfig=responseModelConfig, 
                               target = data['sales'],
-                              stan_code = Response_Model.stan_file.stan_code)
+                              stan_code = Response_Model.stan_file_adstock.stan_code)
 
 
 
@@ -150,9 +129,12 @@ responseModel = ResponseModel(spendingsFrame = spendingsFrame,
 #tp_3 shaped model: tp_3_shaped_model
 #tp_3 & tp_4 shaped model: tp_3_tp_4_shaped_model
 
+#test: test of new adstock & shape with tp_5
+
    #train bayesian Model
-responseModel.runModel(name ='test', load=True)
+responseModel.runModel(name ='adstock_shape_v02', load=True)
 responseModel.extractParameters(printOut=True)
+
 
 #calculate contribution decomposition via estimated parameters and original spendings/sales
 Business_Output.main_Business_Output.createBusinessOutputs(responseModel = responseModel, 
