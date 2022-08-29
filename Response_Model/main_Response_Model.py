@@ -19,11 +19,11 @@ class ResponseModel:
         self.spendingsFrame = spendingsFrame #raw touchpoint spending data
 
         #define data normalized
-        self.spendingsFrame_norm = helper_functions.normalization.normalize_feature(self.spendingsFrame,self.spendingsFrame, self.responseModelConfig['NORMALIZATION_STEPS_TOUCHPOINTS'], self.responseModelConfig)
-        self.target_norm = helper_functions.normalization.normalize_feature(self.target,self.target, self.responseModelConfig['NORMALIZATION_STEPS_TARGET'], self.responseModelConfig)
+        self.spendingsFrame_normalized, self.touchpoint_norms = helper_functions.normalization.normalize_feature(self.spendingsFrame,self.spendingsFrame, self.responseModelConfig['NORMALIZATION_STEPS_TOUCHPOINTS'])
+        self.target_normalized, self.target_norm = helper_functions.normalization.normalize_feature(self.target,self.target, self.responseModelConfig['NORMALIZATION_STEPS_TARGET'][self.target.name])
         
         #easy access variables
-        self.num_media = None
+        self.num_touchpoints = None
         self.beta = []
         self.beta_seasonality = []
 
@@ -39,29 +39,28 @@ class ResponseModel:
         #Define stan code
         self.stan_code = stan_code
         
-
-    
     #create dictionary as input data for the stan model
     def createDict(self):
 
-
-        num_media = len(self.configurations['TOUCHPOINTS'])
-        media_norm = np.array(self.spendingsFrame[self.configurations['TOUCHPOINTS']].max())
-        X_media = self.spendingsFrame[self.configurations['TOUCHPOINTS']]
+        num_touchpoints = len(self.configurations['TOUCHPOINTS'])
+        touchpoint_norms = self.touchpoint_norms
+        touchpoint_spendings = self.spendingsFrame[self.configurations['TOUCHPOINTS']]
         #add zeros to beginning of media dataframe to account for padding (weight application of adstock)
-        X_media = np.concatenate((np.zeros((self.responseModelConfig['max_lag']-1, num_media)), np.array(X_media)),axis=0)
+        touchpoint_spendings = np.concatenate((np.zeros((self.responseModelConfig['max_lag']-1, num_touchpoints)), np.array(touchpoint_spendings)),axis=0)
 
         self.stanDict = {
             'N': len(self.spendingsFrame),
             'max_lag': self.responseModelConfig['max_lag'], 
-            'num_media': num_media,
-            'X_media': X_media,
-            'media_norm': media_norm,
+            'num_touchpoints': num_touchpoints,
+            'touchpoint_spendings': touchpoint_spendings,
+            'touchpoint_norms': touchpoint_norms,
+            'touchpoint_thresholds': [self.responseModelConfig['BRAND_TO_SHAPE_PARAMETERS']['touchpoint_5_threshold']],
+            'touchpoint_saturations': [self.responseModelConfig['BRAND_TO_SHAPE_PARAMETERS']['touchpoint_5_saturation']],
             'num_seasons': len(self.configurations['SEASONALITY_VARIABLES_BASE']),
             'seasonality': np.array(self.seasonality_df),
             # 'num_control': len(self.configurations['CONTROL_VARIABLES_BASE']),
             # 'control': np.array(responseModel.otherControl_df),
-            'y': self.target_norm.values
+            'y': self.target_normalized.values
         }
 
 
@@ -70,7 +69,7 @@ class ResponseModel:
     def extractParameters(self, printOut=False):
         #pd.DataFrame(self.extractFrame.mean(axis=0)).to_csv('extractFrame.csv')
         self.parameters = {}
-        self.num_media = self.stanDict['num_media']
+        self.num_touchpoints = self.stanDict['num_touchpoints']
 
         #Collect general model parameters and summarize in dictionary
         self.parameters['tau'] = self.extractFrame[f'tau'].mean(axis=0)
@@ -95,17 +94,18 @@ class ResponseModel:
             #Collect per touchpoint parameters in dictionary
             self.parameters[f'{touchpoint}_adstock'] = {
                 'L': self.responseModelConfig['max_lag'],
-                'P': peak,
+                #'P': peak,
                 'D': decay
             }
 
-            slope = self.extractFrame[f'S.{i}'].mean(axis=0)
-            half = self.extractFrame[f'H.{i}'].mean(axis=0)
 
-            #Collect per touchpoint parameters in dictionary
+            shape = self.extractFrame[f'shape.{i}'].mean(axis=0)
+            scale = self.extractFrame[f'scale.{i}'].mean(axis=0)
+
+
             self.parameters[f'{touchpoint}_shape'] = {
-                'S': slope,
-                'H': half
+                'shape': shape,
+                'scale': scale
             }
 
             self.parameters[f'{touchpoint}_beta']  = beta
@@ -126,8 +126,8 @@ class ResponseModel:
                 print(f"value peak:{peak}")
                 print()
                 print("shape_touchpoint")
-                print(f"value slope:{slope}")
-                print(f"value half:{half}")
+                print(f"value shape:{shape}")
+                print(f"value scale:{scale}")
                 print()
 
         if (printOut == True):
@@ -137,11 +137,9 @@ class ResponseModel:
 
         return 0
 
-
     def runModel(self, name, load=True):
 
         if(load==False):
-
             posterior = stan.build(self.stan_code, data=self.stanDict)
             fit = posterior.sample(num_chains=4, num_samples=1000)
             self.extractFrame = fit.to_frame()

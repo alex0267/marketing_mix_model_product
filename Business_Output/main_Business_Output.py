@@ -5,9 +5,13 @@ import yaml
 def createBusinessOutputs(responseModel, responseCurveConfig):
 
 
-    #Decompose contribution by touchpoint
+    #Decompose absolute contribution by touchpoint
     df, sales_prediction = Business_Output.decompose_contribution.decompose_absolute_contribution(responseModel = responseModel, plot=True)
 
+    #Decompose relative contribution by touchpoint
+    mc_pct, mc_pct2 = Business_Output.decompose_contribution.calc_media_contrib_pct(df, media_vars=responseModel.configurations['TOUCHPOINTS'], period=52)
+    # print(mc_pct)
+    # print(mc_pct2)
     
     #Create response curves
     responseCurve = Business_Output.simulateResponseCurves.ResponseCurve(responseModel = responseModel,
@@ -17,6 +21,7 @@ def createBusinessOutputs(responseModel, responseCurveConfig):
                                                  start=1, #define start week of change period (1 = first week)
                                                  lift = 0) #define up-or-down lift simulation (1 = parameter-tested spendings) 
     
-    responseCurve.run(plot = True, absolute = True)
+    responseCurve.run(plot = True)
+    
     
     return 0

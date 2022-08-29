@@ -2,10 +2,18 @@
 #Definition of touchpoints and order of calling
 TOUCHPOINTS:
   # - touchpoint_2
-  - touchpoint_3
-  - touchpoint_4
+  # - touchpoint_3
+  # - touchpoint_4
+  - touchpoint_5
 
 TARGET: sales
+
+#Definition of type of adstock formula to be applied (order must be equal to touchpoint defined order)
+ADSTOCK_TYPE:
+  touchpoint_2 : apply_adstock_to_direct_spendings
+  touchpoint_3 : apply_adstock_to_direct_spendings
+  touchpoint_4 : apply_adstock_to_direct_spendings
+  touchpoint_5 : apply_adstock_to_impression_spendings
 
 #define seasonality variables - order due to data generation model
 SEASONALITY_VARIABLES_BASE:

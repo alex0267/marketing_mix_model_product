@@ -16,6 +16,7 @@ class ResponseCurve:
         self.start = start-1
         self.lift = lift
 
+
         #changed data
         self.spendingsF = None
 
@@ -23,9 +24,10 @@ class ResponseCurve:
         self.ROAS = None
 
         #generated ResponseCurve data
-        self.spendings = None
-        self.prediction = None
-        self.lift = None
+        self.spendings = {}
+        self.prediction = {}
+        self.volumeContribution = {}
+        self.upliftContribution = {}
 
 
     def changeSpendings(self, touchpoint, lift):
@@ -70,37 +72,29 @@ class ResponseCurve:
     def plotPredictions(self, lift):
         plt.plot(self.original_prediction, color='orange')
         plt.plot(self.prediction[lift], color='green')
-        plt.savefig('predictionComp.png')
+        plt.savefig('plots/predictionComp.png')
 
-    def plotResponseCurve(self, touchpoint, absolute):
+    def plotResponseCurve(self, touchpoint):
         
-        plt.plot(self.lift.keys(),self.lift.values())
+        # plt.plot(self.volumeContribution.keys(),self.volumeContribution.values())
+        # plt.savefig(f'plots/responseCurve_{touchpoint}_volume_Contribution.png')
+        # plt.clf()
 
-        if (absolute == True):
-            plt.savefig(f'responseCurve_3_{touchpoint}_absolute.png')
-        else:
-            plt.savefig(f'responseCurve_3_{touchpoint}_relative.png')
+        plt.plot(self.upliftContribution.keys(),self.upliftContribution.values())
+        plt.savefig(f'plots/responseCurve_{touchpoint}_uplift_Contribution.png')
+        plt.clf()
 
 
-    def calculateLift(self, prediction, spendings_sum, absolute):
+    def calculateLift(self, prediction, spendings_sum):
 
         #calculate response curve based on 0 spendings prediction
         #might be subject to two errors but shows direct impact of touchpoint spendings
-        # lift = sum(prediction - self.prediction[0.0])/spendings_sum
+        volumeContribution = sum(prediction[1.0] - self.prediction[0.0])
 
-        if (absolute == True):
-            lift = sum(prediction)
-        else:
-            #calculate response curve based on 0 difference between 
-            #might be subject to two errors but shows direct impact of touchpoint spendings
-            lift = sum(prediction)/spendings_sum
-
-
-        #lift = sum(prediction - self.prediction[0.0])
-        # lift = sum(prediction)
+        upliftContribution = sum(prediction-self.prediction[0.0])
         
 
-        return lift
+        return volumeContribution,upliftContribution
 
     def calculateROAS(self):
         #calculate Return on Advertisements Spend by taking the difference as 
@@ -109,16 +103,12 @@ class ResponseCurve:
 
         self.ROAS = sum(self.original_prediction-self.prediction[0.0])/self.spendings[1.0]
 
-    def run(self, plot, absolute):
+    def run(self, plot):
 
-        self.spendings = {}
-        self.prediction = {}
-        self.lift = {}
         # for touchpoint in self.responseModel.configurations['TOUCHPOINTS']:
 
         for lift in self.configurations['SPEND_UPLIFT_TO_TEST']:
-        #for lift in [0.0]:
-            spendings, spendings_sum = self.changeSpendings(touchpoint = 'touchpoint_3', lift=lift)
+            spendings, spendings_sum = self.changeSpendings(touchpoint = 'touchpoint_5', lift=lift)
             prediction = self.simulateSales(spendings)
 
             
@@ -128,7 +118,7 @@ class ResponseCurve:
 
             self.spendings[lift] = spendings_sum
             self.prediction[lift] = prediction
-            self.lift[lift] = self.calculateLift(prediction, spendings_sum, absolute)
+            self.volumeContribution[lift],self.upliftContribution[lift]  = self.calculateLift(prediction, spendings_sum)
 
             # print('sum')
             # print(spendings_sum)
@@ -139,9 +129,11 @@ class ResponseCurve:
 
             #self.calculateROAS()
             if (plot==True):
-                self.plotResponseCurve('touchpoint_3', absolute)
+                self.plotResponseCurve('touchpoint_5')
                 #self.plotPredictions(0.0)
             #pd.DataFrame([self.lift]).to_excel('tp3.xlsx')
+        print('total')
+        print(sum(self.prediction[1.0]-self.prediction[0.0])/sum(self.prediction[1.0]))
 
         
 

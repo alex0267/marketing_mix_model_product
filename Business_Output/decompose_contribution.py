@@ -5,6 +5,7 @@ import Business_Output.applyParameters
 import numpy as np
 import pandas as pd
 import matplotlib
+import sklearn.metrics
 # matplotlib.use("TkAgg")
 #https://pyimagesearch.com/2015/08/24/resolved-matplotlib-figures-not-showing-up-or-displaying/
 
@@ -20,8 +21,7 @@ def plotContribution(prediction, max_sales):
     plt.figure()
     plt.plot(data[:], color="black")
     plt.show(block=True)
-    plt.savefig('estimatedContribution2.png')
-
+    plt.savefig('plots/estimatedContribution2.png')
 
 
 def decompose_absolute_contribution(responseModel, plot = False):
@@ -40,67 +40,58 @@ def decompose_absolute_contribution(responseModel, plot = False):
     #getting max()+1 normalized sales variable 
     target = pd.DataFrame(np.exp(responseModel.stanDict['y'])).rename(columns={0:'sales'})
 
-    factor_df['y_pred'], factor_df['y_true2'] = y_pred, target
+    factor_df['y_pred'], factor_df['y_true'] = y_pred, target
 
     # 3. calculate each media factor's contribution
     # media contribution = total volume – volume upon removal of the media factor
     mc_df = pd.DataFrame(columns=responseModel.configurations['TOUCHPOINTS']+['baseline'])
     for col in responseModel.configurations['TOUCHPOINTS']:
-        mc_df[col] = factor_df['y_true2'] - factor_df['y_true2']/factor_df[col]
+        mc_df[col] = factor_df['y_true'] - factor_df['y_true']/factor_df[col]
     mc_df['baseline'] = factor_df['baseline']
-    mc_df['y_true2'] = factor_df['y_true2']
+    mc_df['y_true'] = factor_df['y_true']
 
     # 4. scale contribution
     # predicted total media contribution: product of all media factors
     mc_df['mc_pred'] = mc_df[responseModel.configurations['TOUCHPOINTS']].apply(np.sum, axis=1)
     # true total media contribution: total volume - baseline
-    mc_df['mc_true'] = mc_df['y_true2'] - mc_df['baseline']
+    mc_df['mc_true'] = mc_df['y_true'] - mc_df['baseline']
+
+
     # predicted total media contribution is slightly different from true total media contribution
     # scale each media factor’s contribution by removing the delta volume proportionally
-
-    #Delta was excluded from the calculation since it distorts the actual predictive power of the model
-    # mc_df['mc_delta'] =  mc_df['mc_pred'] - mc_df['mc_true']
-    # for col in responseModel.configurations['TOUCHPOINTS']:
-    #     mc_df[col] = mc_df[col] - mc_df['mc_delta']*mc_df[col]/mc_df['mc_pred']
+    
+    #DELTA - try with and without to see adaption effect
+    mc_df['mc_delta'] =  mc_df['mc_pred'] - mc_df['mc_true']
+    for col in responseModel.configurations['TOUCHPOINTS']:
+        mc_df[col] = mc_df[col] - mc_df['mc_delta']*mc_df[col]/mc_df['mc_pred']
 
     # 5. scale mc_df based on original sales
     mc_df['sales'] = target
     for col in responseModel.configurations['TOUCHPOINTS']+['baseline']:
-        mc_df[col] = mc_df[col]*mc_df['sales']/mc_df['y_true2']
+        mc_df[col] = mc_df[col]*mc_df['sales']/mc_df['y_true']
     
     # print('rmse (log-log model): ', 
-    #      mean_squared_error(np.log(y_true2), np.log(y_pred)) ** (1/2))
+    #      mean_squared_error(np.log(y_true), np.log(y_pred)) ** (1/2))
  
-
-    true = target
-    pred = y_pred
-
-    compareFrame = true.merge(pred.rename('pred'), left_index=True, right_index=True)
+    compareFrame = target.merge(y_pred.rename('pred'), left_index=True, right_index=True)
     # compareFrame.to_csv("compare.csv")
     
-
 
     print('MAPE (multiplicative model): ', 
          helper_functions.transformations.mean_absolute_percentage_error(compareFrame['sales'], compareFrame['pred']))
 
-    print("MAE")
-    print((sum(abs(compareFrame['sales']-compareFrame['pred'])))/len(compareFrame))
+    print('R2')
+    print(sklearn.metrics.r2_score(compareFrame['sales'], compareFrame['pred']))
 
-    #Plot the error if wanted
-    # print('org')
-    # print()
+    #print("MAE")
+    #print((sum(abs(compareFrame['sales']-compareFrame['pred'])))/len(compareFrame))
+
 
     #compare results on sales scale
-
     sales_prediction = (y_pred-1)*responseModel.target.max()
     # plt.plot((compareFrame['sales']-1)*responseModel.target.max(),  color='blue')
     # plt.plot(sales_prediction,  color='green')
 
-
-
-    # print('comp')
-    # print(compareFrame['sales'])
-    # print(compareFrame['pred'])
 
     # if(plot == True):
     #     plotContribution(mc_df['mc_pred'],original_sales.max())
