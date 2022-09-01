@@ -2,19 +2,21 @@ import stan
 import pandas as pd
 import numpy as np
 import helper_functions.normalization
+import helper_functions.summarize
 
 #class that contains the input and output data of a specific response model with respective model settings
 #Also contains the functions to estimate and extract parameters
 class ResponseModel:
 
-    def __init__(self, spendingsFrame, controlFrame, seasonalityFrame, configurations, responseModelConfig, target, stan_code):
+    def __init__(self, spendingsFrame, controlFrame, configurations, responseModelConfig, target, stan_code):
         #define configurations
         self.configurations = configurations
         self.responseModelConfig = responseModelConfig
 
         #data
-        self.seasonality_df = seasonalityFrame
-        self.otherControl_df = controlFrame
+        self.controlFrame = controlFrame
+        self.seasonality_df = self.controlFrame[configurations['SEASONALITY_VARIABLES_BASE']]
+        self.otherControl_df = self.controlFrame[configurations['CONTROL_VARIABLES_BASE']]
         self.target = target #raw sales (target) variable with no transformation
         self.spendingsFrame = spendingsFrame #raw touchpoint spending data
 
@@ -38,7 +40,40 @@ class ResponseModel:
 
         #Define stan code
         self.stan_code = stan_code
+
+        #launch data extraction
+        self.extractSummary()
         
+    def extractSummary(self):
+
+        responseModelInit_df = pd.DataFrame()
+
+        for item in self.configurations['TOUCHPOINTS']:
+            tp_df = pd.concat([self.controlFrame['YEAR_WEEK'],self.spendingsFrame[item].rename('spendings'),self.target], ignore_index=False, axis =1)
+            tp_df['touchpoint'] = self.spendingsFrame[item].name
+            #responseModelInit_df = responseModelInit_df.append(tp_df)
+            responseModelInit_df = pd.concat([responseModelInit_df, tp_df], ignore_index=False,axis=0)
+
+        print(responseModelInit_df)
+        
+
+
+
+        '''
+        touchpoints=[]
+        for item in self.configurations['TOUCHPOINTS']:
+            summaryFrameself.spendingsFrame[item]
+        
+
+        target_to_add = pd.concat([self.controlFrame['YEAR_WEEK'],self.target], ignore_index=False, axis =1)
+
+        summaryFrame = pd.concat([summaryFrame, self.spendingsFrame], ignore_index=False, axis=1).set_index('YEAR_WEEK')
+        summaryFrame = self.spendingsFrame.stack()
+
+        print(summaryFrame)
+        # summaryFrame.to_excel('summaryFrame.xlsx')
+        
+        '''
     #create dictionary as input data for the stan model
     def createDict(self):
 
@@ -54,15 +89,14 @@ class ResponseModel:
             'num_touchpoints': num_touchpoints,
             'touchpoint_spendings': touchpoint_spendings,
             'touchpoint_norms': touchpoint_norms,
-            'touchpoint_thresholds': [self.responseModelConfig['BRAND_TO_SHAPE_PARAMETERS']['touchpoint_5_threshold']],
-            'touchpoint_saturations': [self.responseModelConfig['BRAND_TO_SHAPE_PARAMETERS']['touchpoint_5_saturation']],
+            'touchpoint_thresholds': [self.responseModelConfig['SHAPE_THRESHOLD_VALUE'][tp] for tp in self.responseModelConfig['SHAPE_THRESHOLD_VALUE']],
+            'touchpoint_saturations': [self.responseModelConfig['SHAPE_SATURATION_VALUE'][tp] for tp in self.responseModelConfig['SHAPE_SATURATION_VALUE']],
             'num_seasons': len(self.configurations['SEASONALITY_VARIABLES_BASE']),
             'seasonality': np.array(self.seasonality_df),
             # 'num_control': len(self.configurations['CONTROL_VARIABLES_BASE']),
             # 'control': np.array(responseModel.otherControl_df),
             'y': self.target_normalized.values
         }
-
 
     
     #extract parameters for each touchpoint
@@ -123,7 +157,7 @@ class ResponseModel:
                 print()
                 print("adstock_touchpoint")
                 print(f"value decay:{decay}")
-                print(f"value peak:{peak}")
+                #print(f"value peak:{peak}")
                 print()
                 print("shape_touchpoint")
                 print(f"value shape:{shape}")

@@ -1,11 +1,9 @@
 import test_suite.data_generation
 import test_suite.data_preparation
 import Business_Output.main_Business_Output
-import helper_functions.hill_function
 from Response_Model.main_Response_Model import ResponseModel
 import helper_functions.normalization
 import Response_Model.stan_file
-import Response_Model.stan_file_adstock
 import yaml
 import numpy as np
 import matplotlib.pyplot as plt
@@ -55,13 +53,14 @@ touchpoints = [
                #    'factor': -3000,
                #    'beta':1
                # },
-               # {
-               #    'control_var':False,
-               #    'name':'base_1',
-               #    'factor': 30000,
-               #    'noise_percentage': 0.1,
-               #    'beta':1
-               # },
+               {
+                  'control_var':False,
+                  'name':'base_1',
+                  'factor': 30000,
+                  'noise_percentage': 0.1,
+                  'beta':1,
+                  'sales_saturation':1
+               },
 
                {
                    'control_var':False,
@@ -74,6 +73,18 @@ touchpoints = [
                    'saturation':1,
                    'threshold':0,
                    'sales_saturation':10000,
+               },
+                              {
+                   'control_var':False,
+                   'name':'touchpoint_6',
+                   'beta':1,
+                   'L':4,
+                   'D':0.4,
+                   'scale':0.7,
+                   'shape':2,
+                   'saturation':1,
+                   'threshold':0,
+                   'sales_saturation':20000,
                }
                ]
 
@@ -100,21 +111,16 @@ pd.DataFrame(result).T.to_excel('result.xlsx')
 # print(data['sales'][0:52].sum())
 
 data, spendingsFrame, controlFrame = test_suite.data_generation.simulateTouchpoints(touchpoints, configurations, responseModelConfig, '_shaped',plot = True)
-
-
-# Prepare data
-seasonality_df = controlFrame[configurations['SEASONALITY_VARIABLES_BASE']]
-control_df = controlFrame[configurations['CONTROL_VARIABLES_BASE']]
+print(data)
 
 
 #Initialize Model instance and Train Bayesian Model 
 responseModel = ResponseModel(spendingsFrame = spendingsFrame, 
-                              controlFrame = control_df,
-                              seasonalityFrame = seasonality_df,
+                              controlFrame = controlFrame,
                               configurations = configurations,
                               responseModelConfig=responseModelConfig, 
                               target = data['sales'],
-                              stan_code = Response_Model.stan_file_adstock.stan_code)
+                              stan_code = Response_Model.stan_file.stan_code)
 
 
 
@@ -129,14 +135,20 @@ responseModel = ResponseModel(spendingsFrame = spendingsFrame,
 #tp_3 shaped model: tp_3_shaped_model
 #tp_3 & tp_4 shaped model: tp_3_tp_4_shaped_model
 
+#NEW MODEL
 #test: test of new adstock & shape with tp_5
+#One touchpoint - adstock_shape_v02
+#Two touchpoints - 2tps_adstock_shape_v01
+#Two touchpoints, different initialization of data generation of tp_6 - 2tps_adstock_shape_v02
+#As tps_adstock_shape_v02 but with baseline
 
    #train bayesian Model
-responseModel.runModel(name ='adstock_shape_v02', load=True)
-responseModel.extractParameters(printOut=True)
+responseModel.runModel(name ='2tps_adstock_shape_v03', load=True)
+responseModel.extractParameters(printOut=False)
 
 
 #calculate contribution decomposition via estimated parameters and original spendings/sales
 Business_Output.main_Business_Output.createBusinessOutputs(responseModel = responseModel, 
                                                            responseCurveConfig = responseCurveConfig)
+
 

@@ -14,15 +14,11 @@ def createIndex():
   Y2 = pd.Series([f'Y{2}' for x in range(48)])
   Y3 = pd.Series([f'Y{3}' for x in range(48)])
 
+  #define years
   df = pd.DataFrame(Y1)
   df = pd.concat([df, Y2, Y3], axis=0)
-  df['week'] = week
-  df.head()
 
-  df['ind'] = df[0]+'_'+ df['week'].astype(str)
-
-
-
+  #define months
   months = [
   'january',
   'february',
@@ -44,6 +40,14 @@ def createIndex():
       monthList.append(months[x])
 
   df['month'] = monthList*3
+
+
+  df['week'] = week
+  df.head()
+
+  df['YEAR_WEEK'] = df[0]+'_'+ df['week'].astype(str)
+
+
   dummy = pd.get_dummies(pd.Series(monthList*3))
   df = df.reset_index(drop=True).rename(columns={0:'year'})
   df = pd.concat([df,dummy], axis=1)
@@ -53,7 +57,7 @@ def createIndex():
 
 def simulateTouchpoints(touchpoints, configurations,responseModelConfig, format, baseSalesCoefficient_tp3 = 2500,baseSalesCoefficient_tp4=2500, plot = False):
 
-  print(configurations['ADSTOCK_TYPE']['touchpoint_2'])
+
   controlFrame = createIndex()
 
   #only display a year of the plot
@@ -246,17 +250,59 @@ def simulateTouchpoints(touchpoints, configurations,responseModelConfig, format,
                                                                                     scale = touchpoint['scale'], 
                                                                                     saturation = touchpoint['saturation'], 
                                                                                     threshold= touchpoint['threshold'])
+        if plot == True:
+          #plt.plot(spendingsFrame["touchpoint_5"][:subplot], color='blue')
+          plt.plot(data["touchpoint_5_adstocked"][:subplot], color='green')
+          #plt.plot(data["touchpoint_5_shaped"][:subplot], color='black')
+          
+    if(touchpoint ['name']=="touchpoint_6"):
+            baseSalesCoefficient_tp6 = 4000
+            #Define touchpoint as pointed periodic spending throughout the year
+            touchpoint_6 = []
+            for x in range(weeks):
+
+              touchpoint_6.append(0)
+              #for each week in scope, distribute the spendings over the following 4 weeks
+              #we generate general spendings each two month that last a month
+              # if x%8 == 0 and x !=0: 
+              #   touchpoint_6[x] = touchpoint_6[x] + baseSalesCoefficient_tp6
+              #   touchpoint_6[x-1] = touchpoint_6[x-1] + baseSalesCoefficient_tp6
+              #   touchpoint_6[x-2] = touchpoint_6[x-2] + baseSalesCoefficient_tp6
+              #   touchpoint_6[x-3] = touchpoint_6[x-3] + baseSalesCoefficient_tp6
+              #we generate half-year higher spendings that last a month
+              if x%20 == 0 and x !=0: 
+                touchpoint_6[x] = touchpoint_6[x] + baseSalesCoefficient_tp6*1.5
+                touchpoint_6[x-1] = touchpoint_6[x-1] + baseSalesCoefficient_tp6*1.5
+                touchpoint_6[x-2] = touchpoint_6[x-2] + baseSalesCoefficient_tp6*1.5
+                touchpoint_6[x-3] = touchpoint_6[x-3] + baseSalesCoefficient_tp6*1.5
+
+            #touchpoint definitions
+            spendingsFrame["touchpoint_6"] = touchpoint_6
+
+            #apply adstock
+            data["touchpoint_6_adstocked"] = adstock_functions.apply_adstock_to_impression_spendings(spendingsFrame["touchpoint_6"],touchpoint['L'], touchpoint['D'])
+
+            #normalize data
+            data_normalized, data_norm = helper_functions.normalization.normalize_feature(data["touchpoint_6_adstocked"], spendingsFrame["touchpoint_6"], responseModelConfig['NORMALIZATION_STEPS_TOUCHPOINTS']['touchpoint_6'])
+
+            #shape data
+            data["touchpoint_6_shaped"] = helper_functions.hill_function.shape_function(data_normalized, 
+                                                                                        shape = touchpoint['shape'], 
+                                                                                        scale = touchpoint['scale'], 
+                                                                                        saturation = touchpoint['saturation'], 
+                                                                                        threshold= touchpoint['threshold'])
 
         
-        if plot == True:
-          plt.plot(spendingsFrame["touchpoint_5"][:subplot], color='blue')
-          plt.plot(data["touchpoint_5_adstocked"][:subplot], color='green')
-          plt.plot(data["touchpoint_5_shaped"][:subplot], color='black')
+            if plot == True:
+              plt.plot(spendingsFrame["touchpoint_6"][:subplot]+spendingsFrame["touchpoint_5"][:subplot], color='blue')
+              plt.plot(data["touchpoint_6_adstocked"][:subplot], color='red')
+              #plt.plot(data["touchpoint_6_shaped"][:subplot], color='red')
 
       #data[f"combination_{touchpoint['name']}"] = data[f"{touchpoint['name']}{format}"]*touchpoint['beta']
 
 
       #target model with "to_predict" beta variables
+
 
     data['sales'] = data['sales'] + data[f"{touchpoint['name']}{format}"]*touchpoint['sales_saturation']
 
@@ -273,4 +319,5 @@ def simulateTouchpoints(touchpoints, configurations,responseModelConfig, format,
   #return data - sales with respective adstocked spendings & influence parameters
   #return spendingsFrame - direct spendings per touchpoint
   #return controlFrame - dummy variable list of month variables
-  return data, spendingsFrame, controlFrame.iloc[:,4:]
+
+  return data, spendingsFrame, controlFrame

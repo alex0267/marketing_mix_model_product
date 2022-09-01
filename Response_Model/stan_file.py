@@ -2,12 +2,32 @@ stan_code = '''
 functions {
   // the adstock transformation with a vector of weights
   real Adstock(vector t, row_vector weights) {
-    return dot_product(t, weights) / sum(weights);
+    return dot_product(t, weights);
   }
 
+  real shape_with_threshold(
+            real feature_value,
+            real shape_param,
+            real scale_param,
+            real threshold,
+            real saturation
+            
+        ){
+            real returned_value;
 
+            if (feature_value < threshold)
+                returned_value = 0;
+            else
+                returned_value = 1 - exp(
+                    - 1 * pow(
+                        (feature_value - threshold) / (scale_param*saturation),
+                        shape_param
+                    )
+                );
 
-  
+            return returned_value;
+        }
+
   real Shape(real t, real H, real S) {
     return ((t^S) / (H^S+t^S));
   }
@@ -24,6 +44,10 @@ data {
   int<lower=0> num_touchpoints;
   // matrix of media variables
   matrix[N+max_lag-1, num_touchpoints] touchpoint_spendings;
+  // threshold values
+  vector [num_touchpoints] touchpoint_thresholds;
+  // saturation values
+  vector [num_touchpoints] touchpoint_saturations;
   // matrix of seasonality variables
   int<lower=0> num_seasons;
   matrix[N,num_seasons] seasonality;
@@ -43,9 +67,15 @@ parameters {
   // each media
   vector<lower=0,upper=1>[num_touchpoints] decay;
   vector<lower=0,upper=ceil(max_lag/2)>[num_touchpoints] peak;
-  //Shape parameter
+
+  //Shape parameter - spendings
   vector<lower=0,upper=10>[num_touchpoints] H; //Half saturation point
   vector<lower=0,upper=10>[num_touchpoints] S; //slope parameter
+
+  //Shape parameters - distributed, impression-oriented spendings
+  vector<lower=0,upper=3>[num_touchpoints] shape;
+  vector<lower=0,upper=3>[num_touchpoints] scale;
+
 }
 transformed parameters {
   // the cumulative media effect after adstock
@@ -61,27 +91,18 @@ transformed parameters {
   row_vector[max_lag] lag_weights;
   for (nn in 1:N) {
     for (media in 1 : num_touchpoints) {
-      //calculate weights for adstock function
-      for (lag in 0 : max_lag) {
-        print(lag)
+      //calculate weights for adstock function (max_lag-1 because iteration is inclusive of iteration limitor)
+      for (lag in 0 : max_lag-1) {
         lag_weights[max_lag-lag] = pow(decay[media], lag);
-        
       }
-      print(lag_weights)
 
       cum_effect = Adstock(sub_col(touchpoint_spendings, nn, media, max_lag), lag_weights);
 
       normalized_data = cum_effect/touchpoint_norms[media];
-      shape_effect = Shape((normalized_data)*5,H[media], S[media]);
 
-      //avoid division by zero
-      if (shape_effect ==0)
-        coefficient = 0;
-      else if (shape_effect !=0)
-        coefficient = shape_effect/(normalized_data);
-      touchpoint_shaped = coefficient*cum_effect;
+      shape_effect = shape_with_threshold(normalized_data,shape[media], scale[media], touchpoint_thresholds[media], touchpoint_saturations[media]);
 
-      X_media_adstocked[nn, media] = log1p(touchpoint_shaped/touchpoint_norms[media]);
+      X_media_adstocked[nn, media] = log1p(shape_effect);
     }
   } 
 }
@@ -93,6 +114,15 @@ model {
   for (i in 1 : num_touchpoints) {
     beta[i] ~ normal(1, 1);
   }
+
+  for (i in 1 : num_touchpoints) {
+    shape[i] ~ normal(1.5, 2);
+  }
+
+  for (i in 1 : num_touchpoints) {
+    scale[i] ~ normal(1.5, 2);
+  }
+
   for (i in 1 : num_seasons) {
     beta_seasonality[i] ~ normal(1, 1);
   }

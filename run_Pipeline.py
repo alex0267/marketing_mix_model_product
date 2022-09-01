@@ -26,12 +26,13 @@ with open('config/responseCurveConfig.yaml', 'r') as file:
 
 #Create features and prepare data
 spendings_df, feature_df, seasonality_df, promotion_df, target = Data_Preparation.main_Data_Preparation.run()
+#print(feature_df)
 feature_df.to_csv('feature_df.csv')
 
-
+'''
 # Initialize Model instance and Train Bayesian Model 
 responseModel = ResponseModel(spendingsFrame = spendings_df, 
-                              controlFrame = promotion_df,
+                              controlFrame = promotion_df, #here it needs to be changed when put togehter with real data
                               seasonalityFrame = seasonality_df,
                               configurations = configurations,
                               responseModelConfig= responseModelConfig, 
@@ -50,3 +51,6 @@ responseModel.extractParameters(printOut=True)
 #calculate contribution decomposition via estimated parameters and original spendings/sales
 Business_Output.main_Business_Output.createBusinessOutputs(responseModel = responseModel, 
                                                            responseCurveConfig = responseCurveConfig)
+
+
+'''

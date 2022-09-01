@@ -6,22 +6,22 @@ def createBusinessOutputs(responseModel, responseCurveConfig):
 
 
     #Decompose absolute contribution by touchpoint
-    df, sales_prediction = Business_Output.decompose_contribution.decompose_absolute_contribution(responseModel = responseModel, plot=True)
+    touchpointContribution_df, sales_prediction = Business_Output.decompose_contribution.decompose_absolute_contribution(responseModel = responseModel, plot=True)
 
     #Decompose relative contribution by touchpoint
-    mc_pct, mc_pct2 = Business_Output.decompose_contribution.calc_media_contrib_pct(df, media_vars=responseModel.configurations['TOUCHPOINTS'], period=52)
-    # print(mc_pct)
-    # print(mc_pct2)
+    #mc_pct, mc_pct2 = Business_Output.decompose_contribution.calc_media_contrib_pct(touchpointContribution_df, media_vars=responseModel.configurations['TOUCHPOINTS'], period=52)
+    
+    #print(mc_pct)
+    #print(mc_pct2)
     
     #Create response curves
     responseCurve = Business_Output.simulateResponseCurves.ResponseCurve(responseModel = responseModel,
-                                                 configurations = responseCurveConfig, #define configurations for response Curve generation
+                                                 responseCurveConfig = responseCurveConfig, #define configurations for response Curve generation
                                                  original_prediction = sales_prediction,
-                                                 window = 52, #define length of change period
-                                                 start=1, #define start week of change period (1 = first week)
-                                                 lift = 0) #define up-or-down lift simulation (1 = parameter-tested spendings) 
+                                                 window = 48, #define length of change period
+                                                 start=1) #define start week of change period (1 = first week) 
     
-    responseCurve.run(plot = True)
+    responseCurve.run()
     
     
     return 0

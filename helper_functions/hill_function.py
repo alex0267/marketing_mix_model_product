@@ -53,7 +53,7 @@ def hill_transform(data, raw_data, scope, parameters, responseModelConfig):
 
         #Return estimated parameters from dictionary
         shape,scale = parameters[f'{touchpoint}_shape']['shape'], parameters[f'{touchpoint}_shape']['scale']
-        threshold, saturation = responseModelConfig['BRAND_TO_SHAPE_PARAMETERS'][f'{touchpoint}_threshold'], responseModelConfig['BRAND_TO_SHAPE_PARAMETERS'][f'{touchpoint}_saturation']
+        threshold, saturation = responseModelConfig['SHAPE_THRESHOLD_VALUE'][touchpoint], responseModelConfig['SHAPE_SATURATION_VALUE'][touchpoint]
         
         #normalize data
         data_normalized, data_norm = helper_functions.normalization.normalize_feature(feature_df = data[touchpoint],

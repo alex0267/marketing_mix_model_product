@@ -5,16 +5,15 @@ import pandas as pd
 
 class ResponseCurve:
 
-    def __init__(self, responseModel,configurations,original_prediction, window=48, start=0, lift=1):
+    def __init__(self, responseModel,responseCurveConfig,original_prediction, window=48, start=0):
         
         #initial response Model
         self.responseModel = responseModel
-        self.configurations = configurations
+        self.responseCurveConfig = responseCurveConfig
         self.original_prediction = original_prediction
         self.original_spendings = None
         self.window = window
         self.start = start-1
-        self.lift = lift
 
 
         #changed data
@@ -26,13 +25,14 @@ class ResponseCurve:
         #generated ResponseCurve data
         self.spendings = {}
         self.prediction = {}
-        self.volumeContribution = {}
-        self.upliftContribution = {}
+        self.volumeUplift = {}
+        self.noSpendSimulation = 0
 
+        #generated contribution data
+        self.volumeContribution = {}
 
     def changeSpendings(self, touchpoint, lift):
 
-        
         #select to be changed window
         originalSpendingsInWindow = self.responseModel.spendingsFrame[touchpoint].loc[self.start: self.start+self.window]
         # print('window')
@@ -63,39 +63,51 @@ class ResponseCurve:
         
         #prediction is equal to the (normalized prediction -1)*raw_sales.max()
         prediction = (y_pred-1)*self.responseModel.target.max()
-        
-        #cut the prediction frame to only include change window + after-change window (incl. after effects)
-        prediction = prediction[self.start: self.start + self.window + self.responseModel.responseModelConfig['max_lag']]
-        
+            
         return prediction
 
-    def plotPredictions(self, lift):
-        plt.plot(self.original_prediction, color='orange')
-        plt.plot(self.prediction[lift], color='green')
-        plt.savefig('plots/predictionComp.png')
+    # def plotPredictions(self, lift):
+    #     plt.plot(self.original_prediction, color='orange')
+    #     plt.plot(self.prediction[lift], color='green')
+    #     plt.savefig('plots/predictionComp.png')
 
-    def plotResponseCurve(self, touchpoint):
+
+    '''NOT AT RIGHT PLACE - NEEDS TO GO TO DECOMPOSE_CONTRIBUTION'''
+    def generateVolumeContribution(self, touchpoint):
+
+        noSpendSimulation = self.prediction[0.0][self.responseModel.responseModelConfig['max_lag']-self.start: self.start + self.window]
+        currentSpendSimulation = self.prediction[1.0][self.responseModel.responseModelConfig['max_lag']-self.start: self.start + self.window]
         
-        # plt.plot(self.volumeContribution.keys(),self.volumeContribution.values())
-        # plt.savefig(f'plots/responseCurve_{touchpoint}_volume_Contribution.png')
-        # plt.clf()
+        self.volumeContribution[touchpoint] = sum(currentSpendSimulation - noSpendSimulation)/ sum(currentSpendSimulation)
 
-        plt.plot(self.upliftContribution.keys(),self.upliftContribution.values())
-        plt.savefig(f'plots/responseCurve_{touchpoint}_uplift_Contribution.png')
+        return 0
+    
+    def generateResponseCurve(self, touchpoint):
+
+        plt.plot(self.volumeUplift[touchpoint].keys(),self.volumeUplift[touchpoint].values())
+        plt.savefig(f'plots/responseCurve_{touchpoint}.png')
         plt.clf()
 
-
-    def calculateLift(self, prediction, spendings_sum):
-
-        #calculate response curve based on 0 spendings prediction
-        #might be subject to two errors but shows direct impact of touchpoint spendings
-        volumeContribution = sum(prediction[1.0] - self.prediction[0.0])
-
-        upliftContribution = sum(prediction-self.prediction[0.0])
+    def calculateVolumeUplift(self, lift, prediction):
         
+        if(self.start + self.window + self.responseModel.responseModelConfig['max_lag'] > len(self.responseModel.spendingsFrame)):
+            prediction = prediction[self.start: self.start + self.window]
+            print('prediction window does not contain post-change period since end of timeseries has been reached')
+        #cut the prediction frame to only include change window + after-change window (incl. after effects)
+        prediction = prediction[self.start: self.start + self.window + self.responseModel.responseModelConfig['max_lag']]
 
-        return volumeContribution,upliftContribution
+        #set the baseline simulation with no touchpoint expenses
+        if(lift == 0.0):
+            self.noSpendSimulation = prediction
 
+        #Calculate the volume uplift as the difference between the current lift level and the no spend level
+        #scope is the entire change & post-change period
+        uplift = sum(prediction-self.noSpendSimulation)
+
+        return uplift
+
+
+    '''NOT IN USE - NEEDS REDEFINITION'''
     def calculateROAS(self):
         #calculate Return on Advertisements Spend by taking the difference as 
         #predicted sales - predicted sales simulated by spending nothing
@@ -103,40 +115,28 @@ class ResponseCurve:
 
         self.ROAS = sum(self.original_prediction-self.prediction[0.0])/self.spendings[1.0]
 
-    def run(self, plot):
-
-        # for touchpoint in self.responseModel.configurations['TOUCHPOINTS']:
-
-        for lift in self.configurations['SPEND_UPLIFT_TO_TEST']:
-            spendings, spendings_sum = self.changeSpendings(touchpoint = 'touchpoint_5', lift=lift)
-            prediction = self.simulateSales(spendings)
-
-            
-            # print(prediction.sum())
-            # print(spendings_sum)
-
-
-            self.spendings[lift] = spendings_sum
-            self.prediction[lift] = prediction
-            self.volumeContribution[lift],self.upliftContribution[lift]  = self.calculateLift(prediction, spendings_sum)
-
-            # print('sum')
-            # print(spendings_sum)
-            # print('pred')
-            # print(prediction)
-            # print('lift')
-            # print(self.lift[lift])
-
-            #self.calculateROAS()
-            if (plot==True):
-                self.plotResponseCurve('touchpoint_5')
-                #self.plotPredictions(0.0)
-            #pd.DataFrame([self.lift]).to_excel('tp3.xlsx')
-        print('total')
-        print(sum(self.prediction[1.0]-self.prediction[0.0])/sum(self.prediction[1.0]))
-
+    def run(self):
         
+        #Generate curves for each touchpoint and lift level
+        for touchpoint in self.responseModel.configurations['TOUCHPOINTS']:
+            uplift = {}
+            for lift in self.responseCurveConfig['SPEND_UPLIFT_TO_TEST']:
 
+                #change spendings according to lift level and simulate the sales based on estimated parameters
+                spendings, spendings_sum = self.changeSpendings(touchpoint = touchpoint, lift=lift)
+                prediction = self.simulateSales(spendings)
 
-        
+                #extract a predictions for entire dataframe for each spending lift
+                self.prediction[lift] = prediction
+
+                #calculate the volumeUplift to generate the y-values of the response curve
+                uplift[lift] = self.calculateVolumeUplift(lift, prediction)
+
+            self.volumeUplift[touchpoint] = uplift
+
+            self.generateResponseCurve(touchpoint)
+            self.generateVolumeContribution(touchpoint)
+        print('contributions')
+        print(self.volumeContribution)
+        print(sum(self.volumeContribution.values()))
 

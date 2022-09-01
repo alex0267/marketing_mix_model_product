@@ -76,17 +76,16 @@ def run():
     #filter seasonality_df to fit scope
     seasonality_df = seasonality_df[configurations['SEASONALITY_VARIABLES_BASE']]
 
-
     #define raw spendings dataframe
     spendings_df = feature_df[configurations['TOUCHPOINTS']]
     
-
     #define target
     target_raw = feature_df[configurations['TARGET']]
+
+    # final output dataframe
+    feature_df.to_csv("feature_df.csv")
     
     
     return spendings_df, feature_df, seasonality_df, promotion_df, target_raw
 
 
-# final output dataframe
-# feature_df.to_csv("feature_df.csv")
