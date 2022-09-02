@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 
-class ResponseCurve:
+class UpliftSimulation:
 
     def __init__(self, responseModel,responseCurveConfig,original_prediction, window=48, start=0):
         
@@ -30,6 +30,9 @@ class ResponseCurve:
 
         #generated contribution data
         self.volumeContribution = {}
+
+        #execute pipeline
+        self.run()
 
     def changeSpendings(self, touchpoint, lift):
 
@@ -139,4 +142,3 @@ class ResponseCurve:
         print('contributions')
         print(self.volumeContribution)
         print(sum(self.volumeContribution.values()))
-

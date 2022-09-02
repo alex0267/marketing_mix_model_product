@@ -8,12 +8,13 @@ import helper_functions.summarize
 #Also contains the functions to estimate and extract parameters
 class ResponseModel:
 
-    def __init__(self, spendingsFrame, controlFrame, configurations, responseModelConfig, target, stan_code):
+    def __init__(self, indexColumns, spendingsFrame, controlFrame, configurations, responseModelConfig, target, stan_code):
         #define configurations
         self.configurations = configurations
         self.responseModelConfig = responseModelConfig
 
         #data
+        self.indexColumns = indexColumns #columns to be used as index references when filtering the database by e.g. year
         self.controlFrame = controlFrame
         self.seasonality_df = self.controlFrame[configurations['SEASONALITY_VARIABLES_BASE']]
         self.otherControl_df = self.controlFrame[configurations['CONTROL_VARIABLES_BASE']]
@@ -56,8 +57,6 @@ class ResponseModel:
 
         print(responseModelInit_df)
         
-
-
 
         '''
         touchpoints=[]

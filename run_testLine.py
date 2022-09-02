@@ -2,7 +2,6 @@ import test_suite.data_generation
 import test_suite.data_preparation
 import Business_Output.main_Business_Output
 from Response_Model.main_Response_Model import ResponseModel
-import helper_functions.normalization
 import Response_Model.stan_file
 import yaml
 import numpy as np
@@ -110,12 +109,14 @@ pd.DataFrame(result).T.to_excel('result.xlsx')
 # data, spendingsFrame, controlFrame = test_suite.data_generation.simulateTouchpoints(touchpoints,'_shaped',baseSalesCoefficient_tp3=10000, plot = False)
 # print(data['sales'][0:52].sum())
 
-data, spendingsFrame, controlFrame = test_suite.data_generation.simulateTouchpoints(touchpoints, configurations, responseModelConfig, '_shaped',plot = True)
+data, spendingsFrame, controlFrame, indexColumns = test_suite.data_generation.simulateTouchpoints(touchpoints, configurations, responseModelConfig, '_shaped',plot = True)
 print(data)
 
 
+
 #Initialize Model instance and Train Bayesian Model 
-responseModel = ResponseModel(spendingsFrame = spendingsFrame, 
+responseModel = ResponseModel(indexColumns = indexColumns,
+                              spendingsFrame = spendingsFrame, 
                               controlFrame = controlFrame,
                               configurations = configurations,
                               responseModelConfig=responseModelConfig, 

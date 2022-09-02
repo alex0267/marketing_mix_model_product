@@ -49,7 +49,7 @@ def createIndex():
 
 
   dummy = pd.get_dummies(pd.Series(monthList*3))
-  df = df.reset_index(drop=True).rename(columns={0:'year'})
+  df = df.reset_index(drop=True).rename(columns={0:'YEAR'})
   df = pd.concat([df,dummy], axis=1)
 
   return df
@@ -319,5 +319,5 @@ def simulateTouchpoints(touchpoints, configurations,responseModelConfig, format,
   #return data - sales with respective adstocked spendings & influence parameters
   #return spendingsFrame - direct spendings per touchpoint
   #return controlFrame - dummy variable list of month variables
-
-  return data, spendingsFrame, controlFrame
+  index = controlFrame[['YEAR', 'YEAR_WEEK']]
+  return data, spendingsFrame, controlFrame, index

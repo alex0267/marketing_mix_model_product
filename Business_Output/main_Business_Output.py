@@ -1,5 +1,7 @@
 import Business_Output.decompose_contribution
-import Business_Output.simulateResponseCurves
+import Business_Output.simulateUplift
+import Business_Output.generateResponseCurves
+import Business_Output.generateVolumeContribution
 import yaml
 
 def createBusinessOutputs(responseModel, responseCurveConfig):
@@ -15,13 +17,13 @@ def createBusinessOutputs(responseModel, responseCurveConfig):
     #print(mc_pct2)
     
     #Create response curves
-    responseCurve = Business_Output.simulateResponseCurves.ResponseCurve(responseModel = responseModel,
+    uplift = Business_Output.simulateUplift.UpliftSimulation(responseModel = responseModel,
                                                  responseCurveConfig = responseCurveConfig, #define configurations for response Curve generation
                                                  original_prediction = sales_prediction,
                                                  window = 48, #define length of change period
                                                  start=1) #define start week of change period (1 = first week) 
     
-    responseCurve.run()
     
+    # responseCurves = 
     
     return 0
