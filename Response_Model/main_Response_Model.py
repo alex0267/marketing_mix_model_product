@@ -41,21 +41,6 @@ class ResponseModel:
 
         #Define stan code
         self.stan_code = stan_code
-
-        #launch data extraction
-        self.extractSummary()
-        
-    def extractSummary(self):
-
-        responseModelInit_df = pd.DataFrame()
-
-        for item in self.configurations['TOUCHPOINTS']:
-            tp_df = pd.concat([self.controlFrame['YEAR_WEEK'],self.spendingsFrame[item].rename('spendings'),self.target], ignore_index=False, axis =1)
-            tp_df['touchpoint'] = self.spendingsFrame[item].name
-            #responseModelInit_df = responseModelInit_df.append(tp_df)
-            responseModelInit_df = pd.concat([responseModelInit_df, tp_df], ignore_index=False,axis=0)
-
-        print(responseModelInit_df)
         
 
         '''

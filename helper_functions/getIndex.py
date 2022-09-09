@@ -1,8 +1,8 @@
 
-def getIndex(indexColumns, scope, index):
+def getIndex(indexColumns, scope, subset):
 
     if(scope=='YEAR'):
-        if(index =='ALL'):
+        if(subset =='ALL'):
             return indexColumns.index.values.tolist()
         else:
-            return indexColumns.index[indexColumns['YEAR']=='Y2'].tolist()
+            return indexColumns.index[indexColumns['YEAR']==subset].tolist()

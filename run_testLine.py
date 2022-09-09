@@ -23,8 +23,8 @@ with open('test_suite/baseConfig.yaml', 'r') as file:
 with open('test_suite/responseModelConfig.yaml', 'r') as file:
             responseModelConfig = yaml.safe_load(file)
 
-with open('test_suite/responseCurveConfig.yaml', 'r') as file:
-      responseCurveConfig = yaml.safe_load(file)
+with open('test_suite/outputConfig.yaml', 'r') as file:
+      outputConfig = yaml.safe_load(file)
 
 #touchpoint definition
 touchpoints = [
@@ -56,7 +56,7 @@ touchpoints = [
                   'control_var':False,
                   'name':'base_1',
                   'factor': 30000,
-                  'noise_percentage': 0.1,
+                  'noise_percentage': 0,
                   'beta':1,
                   'sales_saturation':1
                },
@@ -110,7 +110,10 @@ pd.DataFrame(result).T.to_excel('result.xlsx')
 # print(data['sales'][0:52].sum())
 
 data, spendingsFrame, controlFrame, indexColumns = test_suite.data_generation.simulateTouchpoints(touchpoints, configurations, responseModelConfig, '_shaped',plot = True)
-print(data)
+#print(data)
+datas = pd.concat([data,spendingsFrame], axis=1)
+print(datas)
+datas.to_excel('feature_summary.xlsx')
 
 
 
@@ -142,14 +145,16 @@ responseModel = ResponseModel(indexColumns = indexColumns,
 #Two touchpoints - 2tps_adstock_shape_v01
 #Two touchpoints, different initialization of data generation of tp_6 - 2tps_adstock_shape_v02
 #As tps_adstock_shape_v02 but with baseline
+#2tps_adstock_shape_v04:As tps_adstock_shape_v03 but without noise
+
 
    #train bayesian Model
-responseModel.runModel(name ='2tps_adstock_shape_v03', load=True)
+responseModel.runModel(name ='2tps_adstock_shape_v04', load=True)
 responseModel.extractParameters(printOut=False)
 
 
 #calculate contribution decomposition via estimated parameters and original spendings/sales
 Business_Output.main_Business_Output.createBusinessOutputs(responseModel = responseModel, 
-                                                           responseCurveConfig = responseCurveConfig)
+                                                           outputConfig = outputConfig)
 
 

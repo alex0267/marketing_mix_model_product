@@ -305,7 +305,9 @@ def simulateTouchpoints(touchpoints, configurations,responseModelConfig, format,
 
 
     data['sales'] = data['sales'] + data[f"{touchpoint['name']}{format}"]*touchpoint['sales_saturation']
-
+    
+    data[f"{touchpoint['name']}{format}_saturation"] = data[f"{touchpoint['name']}{format}"]*touchpoint['sales_saturation']
+    
  
 
   controlFrame['promotion'] = 1
