@@ -29,5 +29,5 @@ SHAPE_THRESHOLD_VALUE:
   touchpoint_6: 0
 
 SHAPE_SATURATION_VALUE:
-  touchpoint_5: 1
-  touchpoint_6: 1
+  touchpoint_5: 5000
+  touchpoint_6: 6000

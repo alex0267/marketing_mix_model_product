@@ -237,22 +237,28 @@ def simulateTouchpoints(touchpoints, configurations,responseModelConfig, format,
 
         #touchpoint definitions
         spendingsFrame["touchpoint_5"] = touchpoint_5
+        print('tp5')
+        
 
         #apply adstock
         data["touchpoint_5_adstocked"] = adstock_functions.apply_adstock_to_impression_spendings(spendingsFrame["touchpoint_5"],touchpoint['L'], touchpoint['D'])
-
+        for x in data["touchpoint_5_adstocked"]: print(x)
         #normalize data
         data_normalized, data_norm = helper_functions.normalization.normalize_feature(data["touchpoint_5_adstocked"], spendingsFrame["touchpoint_5"], responseModelConfig['NORMALIZATION_STEPS_TOUCHPOINTS']['touchpoint_5'])
 
+        max_spends = spendingsFrame["touchpoint_5"].max()
         #shape data
+        print('shaped')
         data["touchpoint_5_shaped"] = helper_functions.hill_function.shape_function(data_normalized, 
                                                                                     shape = touchpoint['shape'], 
                                                                                     scale = touchpoint['scale'], 
-                                                                                    saturation = touchpoint['saturation'], 
-                                                                                    threshold= touchpoint['threshold'])
+                                                                                    threshold= touchpoint['threshold']/max_spends,
+                                                                                    saturation = touchpoint['saturation']/max_spends)
+        
+        for x in data["touchpoint_5_shaped"]*touchpoint['sales_saturation']: print(x)
         if plot == True:
           #plt.plot(spendingsFrame["touchpoint_5"][:subplot], color='blue')
-          plt.plot(data["touchpoint_5_adstocked"][:subplot], color='green')
+          plt.plot((data["touchpoint_5_shaped"]*touchpoint['sales_saturation'])[:subplot], color='green')
           #plt.plot(data["touchpoint_5_shaped"][:subplot], color='black')
           
     if(touchpoint ['name']=="touchpoint_6"):
@@ -279,23 +285,30 @@ def simulateTouchpoints(touchpoints, configurations,responseModelConfig, format,
             #touchpoint definitions
             spendingsFrame["touchpoint_6"] = touchpoint_6
 
+            print('tp6')
+            print(spendingsFrame["touchpoint_6"].describe())
+            print('tp_5_saturation')
+            print(max_spends)
+            print(touchpoint['saturation']/max_spends)
+
             #apply adstock
             data["touchpoint_6_adstocked"] = adstock_functions.apply_adstock_to_impression_spendings(spendingsFrame["touchpoint_6"],touchpoint['L'], touchpoint['D'])
-
+            
             #normalize data
             data_normalized, data_norm = helper_functions.normalization.normalize_feature(data["touchpoint_6_adstocked"], spendingsFrame["touchpoint_6"], responseModelConfig['NORMALIZATION_STEPS_TOUCHPOINTS']['touchpoint_6'])
 
+            max_spends = spendingsFrame["touchpoint_6"].max()
             #shape data
             data["touchpoint_6_shaped"] = helper_functions.hill_function.shape_function(data_normalized, 
                                                                                         shape = touchpoint['shape'], 
                                                                                         scale = touchpoint['scale'], 
-                                                                                        saturation = touchpoint['saturation'], 
-                                                                                        threshold= touchpoint['threshold'])
+                                                                                        saturation = touchpoint['saturation']/max_spends, 
+                                                                                        threshold = touchpoint['threshold']/max_spends)
 
         
             if plot == True:
-              plt.plot(spendingsFrame["touchpoint_6"][:subplot]+spendingsFrame["touchpoint_5"][:subplot], color='blue')
-              plt.plot(data["touchpoint_6_adstocked"][:subplot], color='red')
+              #plt.plot(spendingsFrame["touchpoint_6"][:subplot]+spendingsFrame["touchpoint_5"][:subplot], color='blue')
+              plt.plot((data["touchpoint_6_shaped"]*touchpoint['sales_saturation'])[:subplot], color='red')
               #plt.plot(data["touchpoint_6_shaped"][:subplot], color='red')
 
       #data[f"combination_{touchpoint['name']}"] = data[f"{touchpoint['name']}{format}"]*touchpoint['beta']
@@ -307,8 +320,6 @@ def simulateTouchpoints(touchpoints, configurations,responseModelConfig, format,
     data['sales'] = data['sales'] + data[f"{touchpoint['name']}{format}"]*touchpoint['sales_saturation']
     
     data[f"{touchpoint['name']}{format}_saturation"] = data[f"{touchpoint['name']}{format}"]*touchpoint['sales_saturation']
-    
- 
 
   controlFrame['promotion'] = 1
 

@@ -80,4 +80,11 @@ def normalize_feature(
         return pd.DataFrame(normalized_features).T, scaling_factors
 
 
-    
+def normalize_value(value, norm_data, normalization_steps):
+
+    #iterate through all normalization steps and change column based on parameters
+    for step in normalization_steps:
+
+        if(step == 'max_across_brands'):
+            scaling_factor = max(norm_data)
+            return value/scaling_factor

@@ -85,7 +85,14 @@ def run():
     # final output dataframe
     feature_df.to_csv("feature_df.csv")
     
+    print(feature_df)
+    #define index columns as a reference for year scoping and dataset length
     
-    return spendings_df, feature_df, seasonality_df, promotion_df, target_raw
+    indexColumns = feature_df['YEAR_WEEK']
+    indexColumns['YEAR'] = feature_df['YEAR_WEEK'].astype(str).str[3]
+
+    print(indexColumns)
+    
+    return spendings_df, feature_df, seasonality_df, promotion_df, target_raw, indexColumns
 
 

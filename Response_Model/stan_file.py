@@ -100,7 +100,7 @@ transformed parameters {
 
       normalized_data = cum_effect/touchpoint_norms[media];
 
-      shape_effect = shape_with_threshold(normalized_data,shape[media], scale[media], touchpoint_thresholds[media], touchpoint_saturations[media]);
+      shape_effect = shape_with_threshold(normalized_data,shape[media], scale[media], touchpoint_thresholds[media]/touchpoint_norms[media], touchpoint_saturations[media]/touchpoint_norms[media]);
 
       X_media_adstocked[nn, media] = log1p(shape_effect);
     }

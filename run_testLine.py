@@ -69,7 +69,7 @@ touchpoints = [
                    'D':0.8,
                    'scale':1.8,
                    'shape':1,
-                   'saturation':1,
+                   'saturation':5000,
                    'threshold':0,
                    'sales_saturation':10000,
                },
@@ -81,7 +81,7 @@ touchpoints = [
                    'D':0.4,
                    'scale':0.7,
                    'shape':2,
-                   'saturation':1,
+                   'saturation':6000,
                    'threshold':0,
                    'sales_saturation':20000,
                }
@@ -110,11 +110,6 @@ pd.DataFrame(result).T.to_excel('result.xlsx')
 # print(data['sales'][0:52].sum())
 
 data, spendingsFrame, controlFrame, indexColumns = test_suite.data_generation.simulateTouchpoints(touchpoints, configurations, responseModelConfig, '_shaped',plot = True)
-#print(data)
-datas = pd.concat([data,spendingsFrame], axis=1)
-print(datas)
-datas.to_excel('feature_summary.xlsx')
-
 
 
 #Initialize Model instance and Train Bayesian Model 
@@ -146,10 +141,12 @@ responseModel = ResponseModel(indexColumns = indexColumns,
 #Two touchpoints, different initialization of data generation of tp_6 - 2tps_adstock_shape_v02
 #As tps_adstock_shape_v02 but with baseline
 #2tps_adstock_shape_v04:As tps_adstock_shape_v03 but without noise
-
+#2tps_adstock_shape_v05:As tps_adstock_shape_v04 but touchpoint_5 has threshold 3000 and saturation 10000 (before saturation was equal to the norm (max_tp_spend) = 6250)
+#2tps_adstock_shape_v06: as in tps_adstock_shape_v03 but with adapted staturation and threshold definition
+#2tps_adstock_shape_v07: as in tps_adstock_shape_v04 but with adapted saturation and threshold definition
 
    #train bayesian Model
-responseModel.runModel(name ='2tps_adstock_shape_v04', load=True)
+responseModel.runModel(name ='2tps_adstock_shape_v08', load=True)
 responseModel.extractParameters(printOut=False)
 
 

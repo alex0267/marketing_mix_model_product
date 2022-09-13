@@ -15,8 +15,8 @@ with open('config/baseConfig.yaml', 'r') as file:
 with open('config/responseModelConfig.yaml', 'r') as file:
             responseModelConfig = yaml.safe_load(file)
 
-with open('config/responseCurveConfig.yaml', 'r') as file:
-            responseCurveConfig = yaml.safe_load(file)
+with open('config/outputConfig.yaml', 'r') as file:
+            outputConfig = yaml.safe_load(file)
             
 #Run pipeline tasks:
 # - Data Preparation
