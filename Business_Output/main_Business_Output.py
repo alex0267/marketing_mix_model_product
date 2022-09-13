@@ -1,27 +1,45 @@
 import Business_Output.decompose_contribution
-import Business_Output.simulateResponseCurves
+import Business_Output.simulateUplift
+import Business_Output.generateResponseCurves
+import Business_Output.calculateVolumeContribution
+import Business_Output.extractSummary
+import Business_Output.calculateROS
 import yaml
 
-def createBusinessOutputs(responseModel, responseCurveConfig):
-
+def createBusinessOutputs(responseModel, outputConfig):
 
     #Decompose absolute contribution by touchpoint
-    df, sales_prediction = Business_Output.decompose_contribution.decompose_absolute_contribution(responseModel = responseModel, plot=True)
+    #LEGACY
+    touchpointContribution_df, sales_prediction = Business_Output.decompose_contribution.decompose_absolute_contribution(responseModel = responseModel, plot=True)
+    
+    #Simulate uplifts
+    upliftSimulation = Business_Output.simulateUplift.UpliftSimulation(responseModel = responseModel,
+                                                 outputConfig = outputConfig) #define configurations for response Curve generation
+  
+    #Calculate volume contributions based on uplifts
+    volumeContribution = Business_Output.calculateVolumeContribution.VolumeContribution(upliftSimulation = upliftSimulation, 
+                                                                                        responseModel = responseModel,
+                                                                                        outputConfig = outputConfig)
+    
+    volumeContribution.calculateVolumeContribution()
+    volumeContribution.correctContributionError()
+    volumeContribution.calculateRelativeContribution()
 
-    #Decompose relative contribution by touchpoint
-    mc_pct, mc_pct2 = Business_Output.decompose_contribution.calc_media_contrib_pct(df, media_vars=responseModel.configurations['TOUCHPOINTS'], period=52)
-    # print(mc_pct)
-    # print(mc_pct2)
+    #Generate response curves based on uplifts
+    responseCurves = Business_Output.generateResponseCurves.ResponseCurves(simulatedSpendings = upliftSimulation.spendings,
+                                                                           simulatedSales = upliftSimulation.prediction, 
+                                                                           responseModel = responseModel,
+                                                                           outputConfig = outputConfig)
+
+    #Calculate ROS based on volume contribution
+    ROS = Business_Output.calculateROS.ROS_Calculation(responseModel = responseModel,
+                                                       volumeContribution = volumeContribution,
+                                                       outputConfig = outputConfig)
     
-    #Create response curves
-    responseCurve = Business_Output.simulateResponseCurves.ResponseCurve(responseModel = responseModel,
-                                                 configurations = responseCurveConfig, #define configurations for response Curve generation
-                                                 original_prediction = sales_prediction,
-                                                 window = 52, #define length of change period
-                                                 start=1, #define start week of change period (1 = first week)
-                                                 lift = 0) #define up-or-down lift simulation (1 = parameter-tested spendings) 
-    
-    responseCurve.run(plot = True)
-    
+    #Generate summary based on volumeContribution and ROS
+    Business_Output.extractSummary.extractSummary(responseModel = responseModel,
+                                                  volumeContribution = volumeContribution,
+                                                  ROS_Calculation = ROS, 
+                                                  outputConfig = outputConfig)
     
     return 0

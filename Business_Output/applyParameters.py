@@ -52,6 +52,7 @@ def applyParametersToData(raw_data,original_spendings, parameters, configuration
     #y_pred = baseline*((touchpoint_4_shaped)^Beta)*e^(seasonality*Beta)
     y_pred = factor_df.apply(np.prod, axis=1)*np.exp(np.dot(seasonality_df,seasonality_beta))
 
+    #for now only the intercept makes up the baseline
     factor_df['baseline'] = factor_df[['intercept']].apply(np.prod, axis=1)
     
 

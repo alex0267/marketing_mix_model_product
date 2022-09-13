@@ -1,11 +1,8 @@
 import test_suite.data_generation
 import test_suite.data_preparation
 import Business_Output.main_Business_Output
-import helper_functions.hill_function
 from Response_Model.main_Response_Model import ResponseModel
-import helper_functions.normalization
 import Response_Model.stan_file
-import Response_Model.stan_file_adstock
 import yaml
 import numpy as np
 import matplotlib.pyplot as plt
@@ -26,8 +23,8 @@ with open('test_suite/baseConfig.yaml', 'r') as file:
 with open('test_suite/responseModelConfig.yaml', 'r') as file:
             responseModelConfig = yaml.safe_load(file)
 
-with open('test_suite/responseCurveConfig.yaml', 'r') as file:
-      responseCurveConfig = yaml.safe_load(file)
+with open('test_suite/outputConfig.yaml', 'r') as file:
+      outputConfig = yaml.safe_load(file)
 
 #touchpoint definition
 touchpoints = [
@@ -55,13 +52,14 @@ touchpoints = [
                #    'factor': -3000,
                #    'beta':1
                # },
-               # {
-               #    'control_var':False,
-               #    'name':'base_1',
-               #    'factor': 30000,
-               #    'noise_percentage': 0.1,
-               #    'beta':1
-               # },
+               {
+                  'control_var':False,
+                  'name':'base_1',
+                  'factor': 30000,
+                  'noise_percentage': 0,
+                  'beta':1,
+                  'sales_saturation':1
+               },
 
                {
                    'control_var':False,
@@ -71,9 +69,21 @@ touchpoints = [
                    'D':0.8,
                    'scale':1.8,
                    'shape':1,
-                   'saturation':1,
+                   'saturation':5000,
                    'threshold':0,
                    'sales_saturation':10000,
+               },
+                              {
+                   'control_var':False,
+                   'name':'touchpoint_6',
+                   'beta':1,
+                   'L':4,
+                   'D':0.4,
+                   'scale':0.7,
+                   'shape':2,
+                   'saturation':6000,
+                   'threshold':0,
+                   'sales_saturation':20000,
                }
                ]
 
@@ -99,22 +109,17 @@ pd.DataFrame(result).T.to_excel('result.xlsx')
 # data, spendingsFrame, controlFrame = test_suite.data_generation.simulateTouchpoints(touchpoints,'_shaped',baseSalesCoefficient_tp3=10000, plot = False)
 # print(data['sales'][0:52].sum())
 
-data, spendingsFrame, controlFrame = test_suite.data_generation.simulateTouchpoints(touchpoints, configurations, responseModelConfig, '_shaped',plot = True)
-
-
-# Prepare data
-seasonality_df = controlFrame[configurations['SEASONALITY_VARIABLES_BASE']]
-control_df = controlFrame[configurations['CONTROL_VARIABLES_BASE']]
+data, spendingsFrame, controlFrame, indexColumns = test_suite.data_generation.simulateTouchpoints(touchpoints, configurations, responseModelConfig, '_shaped',plot = True)
 
 
 #Initialize Model instance and Train Bayesian Model 
-responseModel = ResponseModel(spendingsFrame = spendingsFrame, 
-                              controlFrame = control_df,
-                              seasonalityFrame = seasonality_df,
+responseModel = ResponseModel(indexColumns = indexColumns,
+                              spendingsFrame = spendingsFrame, 
+                              controlFrame = controlFrame,
                               configurations = configurations,
                               responseModelConfig=responseModelConfig, 
                               target = data['sales'],
-                              stan_code = Response_Model.stan_file_adstock.stan_code)
+                              stan_code = Response_Model.stan_file.stan_code)
 
 
 
@@ -129,14 +134,24 @@ responseModel = ResponseModel(spendingsFrame = spendingsFrame,
 #tp_3 shaped model: tp_3_shaped_model
 #tp_3 & tp_4 shaped model: tp_3_tp_4_shaped_model
 
+#NEW MODEL
 #test: test of new adstock & shape with tp_5
+#One touchpoint - adstock_shape_v02
+#Two touchpoints - 2tps_adstock_shape_v01
+#Two touchpoints, different initialization of data generation of tp_6 - 2tps_adstock_shape_v02
+#As tps_adstock_shape_v02 but with baseline
+#2tps_adstock_shape_v04:As tps_adstock_shape_v03 but without noise
+#2tps_adstock_shape_v05:As tps_adstock_shape_v04 but touchpoint_5 has threshold 3000 and saturation 10000 (before saturation was equal to the norm (max_tp_spend) = 6250)
+#2tps_adstock_shape_v06: as in tps_adstock_shape_v03 but with adapted staturation and threshold definition
+#2tps_adstock_shape_v07: as in tps_adstock_shape_v04 but with adapted saturation and threshold definition
 
    #train bayesian Model
-responseModel.runModel(name ='adstock_shape_v02', load=True)
-responseModel.extractParameters(printOut=True)
+responseModel.runModel(name ='2tps_adstock_shape_v08', load=True)
+responseModel.extractParameters(printOut=False)
 
 
 #calculate contribution decomposition via estimated parameters and original spendings/sales
 Business_Output.main_Business_Output.createBusinessOutputs(responseModel = responseModel, 
-                                                           responseCurveConfig = responseCurveConfig)
+                                                           outputConfig = outputConfig)
+
 

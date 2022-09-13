@@ -8,12 +8,14 @@ NORMALIZATION_STEPS_TOUCHPOINTS:
   touchpoint_3: ['max_across_brands']
   touchpoint_4: ['max_across_brands']
   touchpoint_5: ['max_across_brands']
+  touchpoint_6: ['max_across_brands']
 
 #not functional yet
 ADSTOCK_FUNCTION_TYPE:
   touchpoint_3: 'impression_spendings'
   touchpoint_4: 'impression_spendings'
   touchpoint_5: 'impression_spendings'
+  touchpoint_6: 'impression_spendings'
 
   
 
@@ -22,6 +24,10 @@ ADSTOCK_FUNCTION_TYPE:
 NORMALIZATION_STEPS_TARGET:
   sales: ['max_across_brands', 'logp1']
 
-BRAND_TO_SHAPE_PARAMETERS:
-  touchpoint_5_threshold: 0
-  touchpoint_5_saturation: 1 
+SHAPE_THRESHOLD_VALUE:
+  touchpoint_5: 0
+  touchpoint_6: 0
+
+SHAPE_SATURATION_VALUE:
+  touchpoint_5: 5000
+  touchpoint_6: 6000
