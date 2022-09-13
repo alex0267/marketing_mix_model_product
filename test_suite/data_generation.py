@@ -10,9 +10,9 @@ import yaml
 
 def createIndex():
   week = pd.Series([x+1 for x in range(48)]*3)
-  Y1 = pd.Series([f'Y{1}' for x in range(48)])
-  Y2 = pd.Series([f'Y{2}' for x in range(48)])
-  Y3 = pd.Series([f'Y{3}' for x in range(48)])
+  Y1 = pd.Series(['2020' for x in range(48)])
+  Y2 = pd.Series(['2021' for x in range(48)])
+  Y3 = pd.Series(['2022' for x in range(48)])
 
   #define years
   df = pd.DataFrame(Y1)

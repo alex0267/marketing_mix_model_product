@@ -1,6 +1,22 @@
 import pandas as pd
 
 class VolumeContribution:
+    '''
+    Volume contribution calculation for the standard spending case (uplift(lift=1)-uplift(lift=0))
+
+    Parameters:
+    - upliftSimulation: The results of the uplift simulation (& delta to zero calculation uplift(lift=1)-uplift(lift=0)) 
+    - responseModel: Class init of the responseModel
+    - outputConfig: The type of change periods that apply to the ratio calculations
+    - responseModel base configurations: The touchpoints
+
+    Attributes:
+    - deltaToZeroDict: Collecting all data necessary to calculate volume contribution
+    - absoluteContributionCorrected: Corrected absolute result of delta to zero calculations
+    - relativeContributions: Calculated relative contribution per influence factor
+
+
+    '''
 
     def __init__(self, upliftSimulation, responseModel, outputConfig):
 
@@ -14,7 +30,7 @@ class VolumeContribution:
         self.outputConfig = outputConfig
         
         #calculated Contribution based on calculation of uplift(lift=1)-uplift(lift=0)
-        self.absoluteContribution = upliftSimulation.deltaCurrentToZero
+        #self.absoluteContribution = upliftSimulation.deltaCurrentToZero
 
         #collect all deltaToZeroSimulations for all subsets
         self.deltaToZeroDict = {}
@@ -56,8 +72,16 @@ class VolumeContribution:
             self.deltaToZeroDict[subset] = deltaToZeroSimulations
 
             #print the 'all weeks' delta to zero simulation (as it comes last) as a checking table
-            deltaToZeroSimulations.to_csv('test_delta.csv')
+            # deltaToZeroSimulations.to_csv('test_delta.csv')
+        
+        # print('here')
+        # for i,x in enumerate(self.deltaToZeroDict['Y2']['total_predict']):
+        #     print()
+        #     print(i)
+        #     print(self.deltaToZeroDict['Y2']['total_predict'][i])
+        #     print(self.deltaToZeroDict['Y2']['total_target'][i])
 
+        #self.deltaToZeroDict['Y2'].to_excel('test_HERE.xlsx')
 
         return 0
 

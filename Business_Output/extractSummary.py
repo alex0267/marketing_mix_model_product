@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 #launch data extraction
-def extractSummary(responseModel, volumeContribution,ratios, outputConfig):
+def extractSummary(responseModel, volumeContribution,ROS_Calculation, outputConfig):
     '''
     Create a summary of all KPIs by week including
     - sales
@@ -17,7 +17,7 @@ def extractSummary(responseModel, volumeContribution,ratios, outputConfig):
         #iterate through touchpoints and add spendings and ROS (touchpoint specific information)
         if item in responseModel.configurations['TOUCHPOINTS']:
             spendings = responseModel.spendingsFrame[item].rename('spendings')
-            ROS = ratios.ROS_Weekly[item]
+            ROS = ROS_Calculation.ROS_Weekly[item]
             ROS.replace([np.inf, -np.inf], 0, inplace=True)
 
         #iterate through control variables and fill the touchpoint specific cells with 0

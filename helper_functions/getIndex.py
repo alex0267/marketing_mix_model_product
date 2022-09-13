@@ -5,4 +5,4 @@ def getIndex(indexColumns, scope, subset):
         if(subset =='ALL'):
             return indexColumns.index.values.tolist()
         else:
-            return indexColumns.index[indexColumns['YEAR']==subset].tolist()
+            return indexColumns.index[indexColumns['YEAR']==str(subset)].tolist()

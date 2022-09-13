@@ -56,8 +56,8 @@ class ResponseModel:
 
         print(summaryFrame)
         # summaryFrame.to_excel('summaryFrame.xlsx')
-        
         '''
+        
     #create dictionary as input data for the stan model
     def createDict(self):
 

@@ -2,143 +2,88 @@ import Business_Output.applyParameters
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
+import helper_functions.getIndex
 
-class UpliftSimulation:
+class ResponseCurves:
+    '''
+    Generates the response curves based on the uplift simulations.
 
-    def __init__(self, responseModel,responseCurveConfig,original_prediction, window=48, start=0):
+    Attributes:
+    - spendings: Collection of the sum of all spendings for a specific (subset, touchpoint, lift)-combination
+    - deltaSales: Collection of the sum of all deltaSales (sales uplift(u)- sales uplift(0)) for a specific subset, touchpoint, lift combination
+
+    Parameters:
+    - simulatedSpendings: Collection of changed spendings for a specific (subset, touchpoint, lift)-combination
+    - simulatedSales: Collection of simulated sales for a specific (subset, touchpoint, lift)-combination
+    '''
+
+    def __init__(self, simulatedSpendings, simulatedSales, responseModel,outputConfig):
         
         #initial response Model
+
+        self.simulatedSpendings = simulatedSpendings
+        self.simulatedSales = simulatedSales
+
         self.responseModel = responseModel
-        self.responseCurveConfig = responseCurveConfig
-        self.original_prediction = original_prediction
-        self.original_spendings = None
-        self.window = window
-        self.start = start-1
+        self.outputConfig = outputConfig
 
-
-        #changed data
-        self.spendingsF = None
-
-        #created metrices
-        self.ROAS = None
-
-        #generated ResponseCurve data
+        #Attributes
         self.spendings = {}
-        self.prediction = {}
-        self.volumeUplift = {}
-        self.noSpendSimulation = 0
-
-        #generated contribution data
-        self.volumeContribution = {}
+        self.deltaSales = {}
 
         #execute pipeline
         self.run()
 
-    def changeSpendings(self, touchpoint, lift):
 
-        #select to be changed window
-        originalSpendingsInWindow = self.responseModel.spendingsFrame[touchpoint].loc[self.start: self.start+self.window]
-        # print('window')
-        # print(originalSpendingsInWindow)
-        #save original spendings as metric
-        self.original_spendings = originalSpendingsInWindow.sum()
-        #apply change
-        changedSpendings = originalSpendingsInWindow*lift
-                
-        #change entire dataframe according to change
-        spendings = self.responseModel.spendingsFrame.copy()
-        spendings[touchpoint].loc[changedSpendings.index] = changedSpendings[:]
-
-        return spendings, changedSpendings.sum()
         
-    def simulateSales(self, spendings):
-        # plt.plot(spendings)
-        # plt.savefig('test.png')
-        #extract sales predictions from changed spendingsFrame
-        factor_df, y_pred = Business_Output.applyParameters.applyParametersToData(raw_data = spendings,
-                                                            original_spendings = self.responseModel.spendingsFrame.copy(),
-                                                            parameters = self.responseModel.parameters,
-                                                            configurations= self.responseModel.configurations,
-                                                            responseModelConfig = self.responseModel.responseModelConfig,
-                                                            scope = self.responseModel.configurations['TOUCHPOINTS'],
-                                                            seasonality_df = self.responseModel.seasonality_df,
-                                                            seasonality_beta= self.responseModel.beta_seasonality)
-        
-        #prediction is equal to the (normalized prediction -1)*raw_sales.max()
-        prediction = (y_pred-1)*self.responseModel.target.max()
-            
-        return prediction
+    def createResponseCurves(self, spendings, deltaSales, subset, touchpoint):
 
-    # def plotPredictions(self, lift):
-    #     plt.plot(self.original_prediction, color='orange')
-    #     plt.plot(self.prediction[lift], color='green')
-    #     plt.savefig('plots/predictionComp.png')
-
-
-    '''NOT AT RIGHT PLACE - NEEDS TO GO TO DECOMPOSE_CONTRIBUTION'''
-    def generateVolumeContribution(self, touchpoint):
-
-        noSpendSimulation = self.prediction[0.0][self.responseModel.responseModelConfig['max_lag']-self.start: self.start + self.window]
-        currentSpendSimulation = self.prediction[1.0][self.responseModel.responseModelConfig['max_lag']-self.start: self.start + self.window]
-        
-        self.volumeContribution[touchpoint] = sum(currentSpendSimulation - noSpendSimulation)/ sum(currentSpendSimulation)
-
-        return 0
-    
-    def generateResponseCurve(self, touchpoint):
-
-        plt.plot(self.volumeUplift[touchpoint].keys(),self.volumeUplift[touchpoint].values())
-        plt.savefig(f'plots/responseCurve_{touchpoint}.png')
+        plt.plot(spendings.values(),deltaSales.values())
+        plt.savefig(f'Business_Output/responseCurvePlots/responseCurve_{subset}_{touchpoint}.png')
         plt.clf()
+        return 0
 
-    def calculateVolumeUplift(self, lift, prediction):
-        
-        if(self.start + self.window + self.responseModel.responseModelConfig['max_lag'] > len(self.responseModel.spendingsFrame)):
-            prediction = prediction[self.start: self.start + self.window]
-            print('prediction window does not contain post-change period since end of timeseries has been reached')
-        #cut the prediction frame to only include change window + after-change window (incl. after effects)
-        prediction = prediction[self.start: self.start + self.window + self.responseModel.responseModelConfig['max_lag']]
-
-        #set the baseline simulation with no touchpoint expenses
-        if(lift == 0.0):
-            self.noSpendSimulation = prediction
-
-        #Calculate the volume uplift as the difference between the current lift level and the no spend level
-        #scope is the entire change & post-change period
-        uplift = sum(prediction-self.noSpendSimulation)
-
-        return uplift
-
-
-    '''NOT IN USE - NEEDS REDEFINITION'''
-    def calculateROAS(self):
-        #calculate Return on Advertisements Spend by taking the difference as 
-        #predicted sales - predicted sales simulated by spending nothing
-        #and then comparing it to the spendings at the standard spending level
-
-        self.ROAS = sum(self.original_prediction-self.prediction[0.0])/self.spendings[1.0]
-
+    
     def run(self):
-        
-        #Generate curves for each touchpoint and lift level
-        for touchpoint in self.responseModel.configurations['TOUCHPOINTS']:
-            uplift = {}
-            for lift in self.responseCurveConfig['SPEND_UPLIFT_TO_TEST']:
 
-                #change spendings according to lift level and simulate the sales based on estimated parameters
-                spendings, spendings_sum = self.changeSpendings(touchpoint = touchpoint, lift=lift)
-                prediction = self.simulateSales(spendings)
+        #Execute calculation for different scopes (years individ. & all together)
+        for subset in self.outputConfig['CHANGE_PERIODS']:
+            #Simulate sales for each touchpoint and lift level
 
-                #extract a predictions for entire dataframe for each spending lift
-                self.prediction[lift] = prediction
+            #get indexes of data for respective time frame
+            ind = helper_functions.getIndex.getIndex(indexColumns = self.responseModel.indexColumns,scope='YEAR' , subset=subset)
+            adstock_length = self.responseModel.responseModelConfig['max_lag']
+            index = self.responseModel.indexColumns.index
 
-                #calculate the volumeUplift to generate the y-values of the response curve
-                uplift[lift] = self.calculateVolumeUplift(lift, prediction)
+            #define extended_length as the max index + the maximum adstock length to increase size of frame in scope
+            extended_index = ind[-1]+1 + adstock_length
+            
+            #if the end of the list is not reached -> extend list elements to include max length of adstock
+            if (extended_index in index):
+                rangeList = [*range(ind[-1]+1, extended_index,1)]
+                ind.extend(rangeList)
+                
 
-            self.volumeUplift[touchpoint] = uplift
+            for touchpoint in self.responseModel.configurations['TOUCHPOINTS']:
+                spendings = {}
+                deltaSales = {}
 
-            self.generateResponseCurve(touchpoint)
-            self.generateVolumeContribution(touchpoint)
-        print('contributions')
-        print(self.volumeContribution)
-        print(sum(self.volumeContribution.values()))
+                #Still need to add the adstock length
+                salesNoSpends = self.simulatedSales[(subset, touchpoint, 0.0)].iloc[ind]
+
+                for lift in self.outputConfig['SPEND_UPLIFT_TO_TEST']:
+                
+                    #get the spendings for the touchpoint & subset in scope
+                    spends = self.simulatedSpendings[(subset, touchpoint, lift)][touchpoint].iloc[ind]
+                    spendings[lift] = sum(spends)
+
+                    #Still need to add the adstock length
+                    sales = self.simulatedSales[(subset, touchpoint, lift)].iloc[ind] - salesNoSpends
+                    deltaSales[lift] = sum(sales)
+
+                self.spendings[(subset, touchpoint)]= spendings
+                self.deltaSales[(subset, touchpoint)] = deltaSales
+
+                self.createResponseCurves(spendings, deltaSales, subset, touchpoint)
+                        
+

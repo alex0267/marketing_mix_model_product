@@ -1,7 +1,7 @@
 #Contribution parameters
 #here we define the starting weeks to test - since we are working with simulated data, we use the week index
 #in the original, this must be converted to years
-CHANGE_PERIODS: [Y1, Y2, Y3, ALL]
+CHANGE_PERIODS: [2020,2021,2022, ALL]
 
 #Response Curve Parameters
 SPEND_UPLIFT_TO_TEST: [0.0, 0.2, 0.4, 0.6, 0.8, 1.0,

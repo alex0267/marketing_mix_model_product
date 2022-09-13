@@ -5,15 +5,27 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 class UpliftSimulation:
+    '''
+    Simulation space to apply the estimated parameters to the changed spending matrix.
 
-    def __init__(self, responseModel,outputConfig,original_prediction, window=48, start=0):
+    Parameters:
+    - responseModel: Class init
+    - Uplift simulation prediction window size
+    - Uplift simulation start
+
+    Attributes:
+    - spendings: Collection of changed spendings table for each scope
+    - prediction: Collection of the generated lift predictions for each scope
+    - DeltaCurrentToZero: Calculated difference between lift(1) and lift(0)
+    - deltaBaseline: Influence of baseline sales deduced from touchpoint influence for each scope
+
+    '''
+
+    def __init__(self, responseModel,outputConfig):
         
         #initial response Model
         self.responseModel = responseModel
         self.outputConfig = outputConfig
-        self.original_prediction = original_prediction
-        self.window = window
-        self.start = start-1
 
         #generated Lift data
         self.spendings = {}
@@ -110,11 +122,17 @@ class UpliftSimulation:
                     self.spendings[(subset,touchpoint,lift)] = spendings
                     self.prediction[(subset,touchpoint,lift)] = prediction
 
+                    
+
                 #calculate the calculateDeltaCurrentToZero as the difference between uplift(1) and uplift(0)
                 #for each touchpoint
                 self.deltaCurrentToZero[(subset,touchpoint)] = self.prediction[(subset,touchpoint,1.0)]-self.prediction[(subset,touchpoint,0.0)]
 
                 summary.to_excel('summary.xlsx')
+        #pd.DataFrame(self.prediction[('2021', 'touchpoint_5', 0.6)]).to_excel('predict.xlsx')
+
+        
+            
 
     def runBaselineExtract(self):
         '''
@@ -141,8 +159,8 @@ class UpliftSimulation:
 
             self.deltaBaseline = ZeroSpendingsPredict
 
-        print('baseline')
-        print(self.deltaBaseline)
+        # print('baseline')
+        # print(self.deltaBaseline)
 
         
 

@@ -1,7 +1,22 @@
-from numpy import sort_complex
+import numpy as np
 import helper_functions.getIndex
 
-class RatioCalculation:
+class ROS_Calculation:
+    '''
+    Calculation of ROS ratio on the basis of the calculated volume contribution of each touchpoint.
+
+    Parameters:
+    - responseModel: Response Model class initialization to get data-specific parameters and the configurations
+    - volumeContribution: Volume Contribution class initialization to get the absolute volume contribution
+    - outputConfig: The type of change periods that apply to the ratio calculations
+    - responseModel base configurations: The touchpoints
+
+    Attributes:
+    - ROS: Calculation of Return of Sales on a yearly basis
+    - ROS_weekly: Calculation of Return of Sales on a weekly basis
+
+
+    '''
     def __init__(self, responseModel, volumeContribution, outputConfig):
 
         #class inits and configurations
@@ -13,8 +28,10 @@ class RatioCalculation:
         self.ROS = {}
         self.ROS_Weekly={}
 
-    def calculateROS(self):
+        #implement calculation
+        self.calculateROS()
 
+    def calculateROS(self):
 
 
         #calculate ROS based on 'ALL'
@@ -37,7 +54,16 @@ class RatioCalculation:
                     if (subset=='ALL' and scope == 'ALL'):
                         self.ROS_Weekly[touchpoint] = totalVolumeContribution/totalSpendings
 
-                    self.ROS[(subset,scope, touchpoint)] = (totalVolumeContribution/totalSpendings).sum()
+                    ratio = (totalVolumeContribution.sum()/totalSpendings.sum())
+                    # ratio.replace([np.inf, -np.inf], 0, inplace=True)
+                    # print(f'check_{touchpoint}_{scope}_{subset}')
+                    # print(totalVolumeContribution)
+                    # print(totalVolumeContribution.sum())
+                    # print(totalSpendings)
+                    # print(totalSpendings.sum())
+                    # print(totalVolumeContribution/totalSpendings)
+
+                    self.ROS[(subset,scope, touchpoint)] = ratio
 
             #     print('ROS')
             #     print(subset)
