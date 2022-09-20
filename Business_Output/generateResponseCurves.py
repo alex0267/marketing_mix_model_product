@@ -56,7 +56,9 @@ class ResponseCurves:
             index = self.responseModel.indexColumns.index
 
             #define extended_length as the max index + the maximum adstock length to increase size of frame in scope
+            #print(ind[-1])
             extended_index = ind[-1]+1 + adstock_length
+            #print(ind[-1]+1 + adstock_length)
             
             #if the end of the list is not reached -> extend list elements to include max length of adstock
             if (extended_index in index):

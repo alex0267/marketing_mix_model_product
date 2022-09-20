@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 import helper_functions.getIndex
 
 class ROS_Calculation:
@@ -17,7 +18,7 @@ class ROS_Calculation:
 
 
     '''
-    def __init__(self, responseModel, volumeContribution, outputConfig):
+    def __init__(self, responseModel, volumeContribution, outputConfig, price_df):
 
         #class inits and configurations
         self.responseModel = responseModel
@@ -28,6 +29,10 @@ class ROS_Calculation:
         self.ROS = {}
         self.ROS_Weekly={}
 
+        #get price dict
+        self.price_df = price_df
+        self.prices_ALL = None
+
         #implement calculation
         self.calculateROS()
 
@@ -37,6 +42,7 @@ class ROS_Calculation:
         #calculate ROS based on 'ALL'
         for subset in self.outputConfig['CHANGE_PERIODS']:
             #execute a ROS calculation for all subsets when scope is ALL
+
             if(subset == 'ALL'): scopes = self.outputConfig['CHANGE_PERIODS']
             #execute ROS calculation for only the respective subset if scope is not ALL
             else: scopes = [subset]
@@ -48,13 +54,22 @@ class ROS_Calculation:
 
                 for touchpoint in self.responseModel.configurations['TOUCHPOINTS']:
                     
-
                     totalVolumeContribution = (self.volumeContribution.absoluteContributionCorrected[scope][touchpoint].iloc[ind])
-                    totalSpendings = self.responseModel.spendingsFrame[touchpoint].iloc[ind]
-                    if (subset=='ALL' and scope == 'ALL'):
-                        self.ROS_Weekly[touchpoint] = totalVolumeContribution/totalSpendings
+                    
+                    prices = self.price_df[self.price_df['BRAND']==self.responseModel.configurations['BRANDS'][0]].reset_index().iloc[ind]
+                    averagePrice = prices['AVERAGE']
+                    
 
-                    ratio = (totalVolumeContribution.sum()/totalSpendings.sum())
+                    valueContribution = averagePrice*totalVolumeContribution.values
+
+                    totalSpendings = self.responseModel.spendingsFrame[touchpoint].iloc[ind].reset_index(drop = True)
+
+
+                    if (subset=='ALL' and scope == 'ALL'):
+                        self.prices_ALL = prices
+                        self.ROS_Weekly[touchpoint] = valueContribution/totalSpendings
+
+                    ratio = (valueContribution.sum()/totalSpendings.sum())
                     # ratio.replace([np.inf, -np.inf], 0, inplace=True)
                     # print(f'check_{touchpoint}_{scope}_{subset}')
                     # print(totalVolumeContribution)

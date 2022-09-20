@@ -13,6 +13,6 @@ SPEND_UPLIFT_TO_TEST: [0.0, 0.2, 0.4, 0.6, 0.8, 1.0,
 #all touchpoints, all control variables that should be decomposed (distribution = yes, seasonality = no)
 #what is left is the baseline that is the delta of simulating all other contributors neutral
 CONTRIBUTORS:
+  - baseline
   - touchpoint_5
   - touchpoint_6
-  - baseline
