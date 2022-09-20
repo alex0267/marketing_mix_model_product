@@ -1,5 +1,6 @@
 import pandas as pd
 
+
 class VolumeContribution:
     '''
     Volume contribution calculation for the standard spending case (uplift(lift=1)-uplift(lift=0))
@@ -133,6 +134,8 @@ class VolumeContribution:
             for item in self.outputConfig['CONTRIBUTORS']:
                 relativeContribution[item] = self.absoluteContributionCorrected[subset][item]/self.absoluteContributionCorrected[subset].sum(axis=1)
             self.relativeContributions[subset] = relativeContribution
+
+
 
                 
 

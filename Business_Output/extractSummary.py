@@ -29,16 +29,20 @@ def extractSummary(responseModel, volumeContribution,ROS_Calculation, outputConf
         tp_df['contributor'] = item
         tp_df['absolute_contribution'] = volumeContribution.absoluteContributionCorrected['ALL'][item]
         tp_df['relative_contribution'] = volumeContribution.relativeContributions['ALL'][item]
-
+        #tp_df['price'] = ROS.prices_ALL
         tp_df['ROS'] = ROS
+
+
 
         #responseModelInit_df = responseModelInit_df.append(tp_df)
         responseModelInit_df = pd.concat([responseModelInit_df, tp_df], ignore_index=False,axis=0)
     
     #add ROS ratio
+    responseModelInit_df = responseModelInit_df.merge(ROS_Calculation.prices_ALL[['YEAR_WEEK', 'AVERAGE']], how='inner', on='YEAR_WEEK')
     # responseModelInit_df['ROS'] = responseModelInit_df['absolute_contribution']/responseModelInit_df['spendings']
     # responseModelInit_df.replace([np.inf, -np.inf], 0, inplace=True)
     # responseModelInit_df.fillna( 0, inplace=True)
+    print(responseModelInit_df)
 
     responseModelInit_df.to_excel('summaryFrame.xlsx')
     #print(responseModelInit_df)

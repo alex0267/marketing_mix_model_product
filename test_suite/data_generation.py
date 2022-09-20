@@ -45,7 +45,7 @@ def createIndex():
   df['week'] = week
   df.head()
 
-  df['YEAR_WEEK'] = df[0]+'_'+ df['week'].astype(str)
+  df['YEAR_WEEK'] = df[0]+ df['week'].astype(str)
 
 
   dummy = pd.get_dummies(pd.Series(monthList*3))
@@ -237,25 +237,25 @@ def simulateTouchpoints(touchpoints, configurations,responseModelConfig, format,
 
         #touchpoint definitions
         spendingsFrame["touchpoint_5"] = touchpoint_5
-        print('tp5')
+
         
 
         #apply adstock
         data["touchpoint_5_adstocked"] = adstock_functions.apply_adstock_to_impression_spendings(spendingsFrame["touchpoint_5"],touchpoint['L'], touchpoint['D'])
-        for x in data["touchpoint_5_adstocked"]: print(x)
+
         #normalize data
         data_normalized, data_norm = helper_functions.normalization.normalize_feature(data["touchpoint_5_adstocked"], spendingsFrame["touchpoint_5"], responseModelConfig['NORMALIZATION_STEPS_TOUCHPOINTS']['touchpoint_5'])
 
         max_spends = spendingsFrame["touchpoint_5"].max()
         #shape data
-        print('shaped')
+
         data["touchpoint_5_shaped"] = helper_functions.hill_function.shape_function(data_normalized, 
                                                                                     shape = touchpoint['shape'], 
                                                                                     scale = touchpoint['scale'], 
                                                                                     threshold= touchpoint['threshold']/max_spends,
                                                                                     saturation = touchpoint['saturation']/max_spends)
         
-        for x in data["touchpoint_5_shaped"]*touchpoint['sales_saturation']: print(x)
+
         if plot == True:
           #plt.plot(spendingsFrame["touchpoint_5"][:subplot], color='blue')
           plt.plot((data["touchpoint_5_shaped"]*touchpoint['sales_saturation'])[:subplot], color='green')
@@ -285,11 +285,7 @@ def simulateTouchpoints(touchpoints, configurations,responseModelConfig, format,
             #touchpoint definitions
             spendingsFrame["touchpoint_6"] = touchpoint_6
 
-            print('tp6')
-            print(spendingsFrame["touchpoint_6"].describe())
-            print('tp_5_saturation')
-            print(max_spends)
-            print(touchpoint['saturation']/max_spends)
+
 
             #apply adstock
             data["touchpoint_6_adstocked"] = adstock_functions.apply_adstock_to_impression_spendings(spendingsFrame["touchpoint_6"],touchpoint['L'], touchpoint['D'])
@@ -333,4 +329,7 @@ def simulateTouchpoints(touchpoints, configurations,responseModelConfig, format,
   #return spendingsFrame - direct spendings per touchpoint
   #return controlFrame - dummy variable list of month variables
   index = controlFrame[['YEAR', 'YEAR_WEEK']]
-  return data, spendingsFrame, controlFrame, index
+
+  price_df = pd.Series([2 for x in range(len(spendingsFrame)) ])
+
+  return data, price_df, spendingsFrame, controlFrame, index

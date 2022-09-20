@@ -109,7 +109,7 @@ pd.DataFrame(result).T.to_excel('result.xlsx')
 # data, spendingsFrame, controlFrame = test_suite.data_generation.simulateTouchpoints(touchpoints,'_shaped',baseSalesCoefficient_tp3=10000, plot = False)
 # print(data['sales'][0:52].sum())
 
-data, spendingsFrame, controlFrame, indexColumns = test_suite.data_generation.simulateTouchpoints(touchpoints, configurations, responseModelConfig, '_shaped',plot = True)
+data, price_df, spendingsFrame, controlFrame, indexColumns = test_suite.data_generation.simulateTouchpoints(touchpoints, configurations, responseModelConfig, '_shaped',plot = True)
 
 
 #Initialize Model instance and Train Bayesian Model 
@@ -152,6 +152,7 @@ responseModel.extractParameters(printOut=False)
 
 #calculate contribution decomposition via estimated parameters and original spendings/sales
 Business_Output.main_Business_Output.createBusinessOutputs(responseModel = responseModel, 
-                                                           outputConfig = outputConfig)
+                                                           outputConfig = outputConfig,
+                                                           price_df = price_df)
 
 
