@@ -15,17 +15,18 @@
 
 #Brands in scope
 BRANDS:
-  - fast_duck
+  # - fast_duck
+  - precious_liquid
 
 TOUCHPOINTS:
   - tom
-  - laura
+  # - laura
   - lisa
   - mary
   - jack
 #  - lucy - lucy is not defined in the SPEND_MEDIA_EXECUTION_MAPPING
   - marc
-  - alex
+  # - alex
 #  - fiona - fiona is missing in the definitions but has allocated touchpoint spendings
 
 TARGET: TARGET_VOL_SO
@@ -46,7 +47,8 @@ SEASONALITY_VARIABLES_BASE:
 #  - is_last_week
 
 CONTROL_VARIABLES_BASE:
- - PROMOTION_FEATURE
+   - DISTRIBUTION
+#  - PROMOTION_FEATURE
 
 #  - christmas
 #  - is_penultimate_week

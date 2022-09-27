@@ -1,8 +1,7 @@
-import Data_Preparation.main_Data_Preparation
-import Response_Model.main_Response_Model
-from Response_Model.main_Response_Model import ResponseModel
-import Response_Model.stan_file
-import Business_Output.main_Business_Output
+import Data_Preparation.mainDataPreparation
+import Response_Model.ResponseModel
+import Response_Model.stanFile
+import Business_Output.mainBusinessOutput
 import yaml
 
 
@@ -25,24 +24,20 @@ with open('config/outputConfig.yaml', 'r') as file:
 
 
 #Create features and prepare data
-spendings_df, price_df, feature_df, control_df, target,indexColumns = Data_Preparation.main_Data_Preparation.run(configurations)
-#print(feature_df)
+spendings_df, seasonality_df, price_df, feature_df, control_df, target,indexColumns = Data_Preparation.mainDataPreparation.run(configurations)
 
 
-#print(price_df.get_group(('angry_cat', '2019')))
-# print(price_df[price_df['BRAND']=='angry_cat' and price_df['YEAR']=='2019']  )
-
-#print(spendings_df)
-feature_df.to_csv('feature_df.csv')
+feature_df.to_csv('output_df/feature_df.csv')
 
 # Initialize Model instance and Train Bayesian Model 
-responseModel = ResponseModel(indexColumns = indexColumns,
+responseModel = Response_Model.ResponseModel.ResponseModel(indexColumns = indexColumns,
                               spendingsFrame = spendings_df, 
+                              seasonalityFrame = seasonality_df,
                               controlFrame = control_df, #here it needs to be changed when put togehter with real data
                               configurations = configurations,
                               responseModelConfig= responseModelConfig, 
                               target = target,
-                              stan_code = Response_Model.stan_file.stan_code)
+                              stanCode = Response_Model.stanFile.stanCode)
 
 
 
@@ -51,12 +46,16 @@ responseModel = ResponseModel(indexColumns = indexColumns,
 #true_data_adstocked_shaped_fast_duck - fast_duck model
 #first_attemps_V02 : First try of implementing the model
 #first_attemps_V03 : As in first_attemps_V02 but with adstock = 4 instead of 8
+#first_attemps_V04_fast_duck: included control feature capability
+#V05_fast_duck: no limits on shape and slope
+#first_attemps_V04_precious_liquid : same with champagne
 
- #train bayesian Model
-responseModel.runModel(name ='first_attemps_V03', load=True)
+#train bayesian Model
+responseModel.runModel(name ='first_attemps_V04_precious_liquid', load=True)
 responseModel.extractParameters(printOut=True)
 
+
 #calculate contribution decomposition via estimated parameters and original spendings/sales
-Business_Output.main_Business_Output.createBusinessOutputs(responseModel = responseModel, 
+Business_Output.mainBusinessOutput.createBusinessOutputs(responseModel = responseModel, 
                                                            outputConfig = outputConfig,
                                                            price_df = price_df)

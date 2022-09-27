@@ -30,6 +30,7 @@ def plotWeeklyContribution(volumeContribution):
     plt.plot()
     plt.stackplot(X, contributors, baseline="zero")
     plt.plot(volumeContribution.responseModel.target, color='black')
+    #plt.legend()
     plt.title('Volume Contribution by contributor')
     plt.axis('tight')
     plt.savefig('plots/Contribution_Stacked_Area_Plot.png')

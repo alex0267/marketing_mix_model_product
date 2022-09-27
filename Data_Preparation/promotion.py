@@ -13,7 +13,7 @@ TO BE DONE
 from typing import Optional
 import pandas as pd
 
-from Data_Preparation.generic_features import create_feature_as_gap_to_brand_reference_level
+from Data_Preparation.genericFeatures import create_feature_as_gap_to_brand_reference_level
 
 # def _add_non_promo_sales(sell_out_pr_df: pd.DataFrame) -> pd.DataFrame:
 #

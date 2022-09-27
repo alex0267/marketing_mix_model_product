@@ -13,13 +13,14 @@ SPEND_UPLIFT_TO_TEST: [0.0, 0.2, 0.4, 0.6, 0.8, 1.0,
 #what is left is the baseline that is the delta of simulating all other contributors neutral
 CONTRIBUTORS:
   - baseline
+  - DISTRIBUTION
   - tom
-  - laura
+  # - laura
   - lisa
   - mary
   - jack
   - marc
-  - alex
+  # - alex
 
 
 #  SPEND_UPLIFT_TO_TEST: [0.0, 0.2]
