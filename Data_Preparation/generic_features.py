@@ -51,12 +51,8 @@ def create_feature_as_gap_to_brand_reference_level(
         - feature_bulk_df: table with bulk of feature that was filtered out
     """
     assert (quantile_reference >= 0) & (quantile_reference <= 1)
-    #relevant_granularity = get_grouping_columns()
-    #keys = [key for key in relevant_granularity if key != n.F_YEAR_WEEK]
-    #logger.info(f"[FEATURES] Building `{col_feature}` feature as a gap to reference level")
-
+  
     # 1. Compute the feature reference level
-    #is_ref_column_returned = bool(col_feature_ref)
     col_feature_ref = "_".join([col_feature, "ref"]) if not col_feature_ref else col_feature_ref
 
     #returns the quantile at level "quantile_reference" for each group (brand)
@@ -64,27 +60,17 @@ def create_feature_as_gap_to_brand_reference_level(
 
     # 2. Compute gap to reference level (forced to be positive)
     feature_df = feature_df.merge(ref_df, on=group, how="inner")
-    #feature_df[col_feature + "_raw"] = feature_df[col_feature].copy()
     feature_df[col_feature] = feature_df[col_feature] - feature_df[col_feature_ref]
-    #feature_raw = feature_df[col_feature + "_raw"].sum()
 
     # 3. Clip to force gap to be positive
     if force_positive_feature:
-        #logger.info(f"[FEATURES] Negative values of `{col_feature}` are capped to 0")
         feature_df[col_feature] = feature_df[col_feature].clip(0)
 
     # 4. Compute bulk of feature that was filtered out (must be kept for spends)
-    # feature_bulk_df = feature_df[relevant_granularity + [col_feature]].copy()
-    # feature_bulk_df[col_feature] = feature_df[col_feature + "_raw"] - feature_bulk_df[col_feature]
-    # feature_check = feature_bulk_df[col_feature].sum() + feature_df[col_feature].sum()
-    # assert np.abs(feature_raw - feature_check) <= 10 ** (-3)
 
     # 5. Compute feature as a discount / gap ratio vs the reference
     if is_ratio_to_ref:
-        #logger.info(f"[FEATURES] `{col_feature}` feature computed as ratio to reference level")
         feature_df[col_feature] = feature_df[col_feature] / feature_df[col_feature_ref].replace(0, 1)
 
-    # if not is_ref_column_returned:
-    #     feature_df = feature_df.drop(columns=[col_feature_ref])
 
     return feature_df

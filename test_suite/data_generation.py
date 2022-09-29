@@ -134,7 +134,6 @@ def simulateTouchpoints(touchpoints, configurations,responseModelConfig, format,
       data["touchpoint_2_adstocked"] = adstock_functions.apply_adstock_to_direct_spendings['touchpoint_2'](spendingsFrame["touchpoint_2"],touchpoint['L'], touchpoint['P'], touchpoint['D'])
 
       if plot == True:
-        # plt.plot(spendingsFrame['touchpoint_2'][:subplot], color='blue')
         plt.plot(data["touchpoint_2_adstocked"][:subplot], color='green')
   
     if(touchpoint ['name']=="touchpoint_3"):
@@ -158,10 +157,6 @@ def simulateTouchpoints(touchpoints, configurations,responseModelConfig, format,
       data["touchpoint_3_adstocked"] = adstock_functions.apply_adstock_to_direct_spendings['touchpoint_3'](spendingsFrame["touchpoint_3"],touchpoint['L'], touchpoint['P'], touchpoint['D'])
   
       #apply shape
-      # print('T3 normal')
-      # print((data["touchpoint_3_adstocked"]/spendingsFrame["touchpoint_3"].max())*5)
-      # print('TP3 max')
-      # print(spendingsFrame["touchpoint_3"].max())
 
       data["touchpoint_3_shaped"] = hillConversion(data["touchpoint_3_adstocked"],touchpoint, configurations, 25000)
       
@@ -169,8 +164,6 @@ def simulateTouchpoints(touchpoints, configurations,responseModelConfig, format,
         plt.plot(data["touchpoint_3_adstocked"][:subplot], color='green')
         plt.plot(data["touchpoint_3_shaped"][:subplot], color='black')
       
-      # print('DATA HERE')
-
       #apply shape to spendings
 
     if(touchpoint ['name']=="touchpoint_4"):
@@ -205,8 +198,6 @@ def simulateTouchpoints(touchpoints, configurations,responseModelConfig, format,
       #adstock spendings
       data["touchpoint_4_adstocked"] = adstock_functions.apply_adstock_to_direct_spendings(spendingsFrame["touchpoint_4"],touchpoint['L'], touchpoint['P'], touchpoint['D'])
       
-      # print('TP4 max')
-      # print(spendingsFrame["touchpoint_4"].max())
       #apply shape to spendings
       data["touchpoint_4_shaped"] = hillConversion(data["touchpoint_4_adstocked"],touchpoint, configurations, 65000)
       
@@ -257,9 +248,7 @@ def simulateTouchpoints(touchpoints, configurations,responseModelConfig, format,
         
 
         if plot == True:
-          #plt.plot(spendingsFrame["touchpoint_5"][:subplot], color='blue')
           plt.plot((data["touchpoint_5_shaped"]*touchpoint['sales_saturation'])[:subplot], color='green')
-          #plt.plot(data["touchpoint_5_shaped"][:subplot], color='black')
           
     if(touchpoint ['name']=="touchpoint_6"):
             baseSalesCoefficient_tp6 = 4000
@@ -270,11 +259,6 @@ def simulateTouchpoints(touchpoints, configurations,responseModelConfig, format,
               touchpoint_6.append(0)
               #for each week in scope, distribute the spendings over the following 4 weeks
               #we generate general spendings each two month that last a month
-              # if x%8 == 0 and x !=0: 
-              #   touchpoint_6[x] = touchpoint_6[x] + baseSalesCoefficient_tp6
-              #   touchpoint_6[x-1] = touchpoint_6[x-1] + baseSalesCoefficient_tp6
-              #   touchpoint_6[x-2] = touchpoint_6[x-2] + baseSalesCoefficient_tp6
-              #   touchpoint_6[x-3] = touchpoint_6[x-3] + baseSalesCoefficient_tp6
               #we generate half-year higher spendings that last a month
               if x%20 == 0 and x !=0: 
                 touchpoint_6[x] = touchpoint_6[x] + baseSalesCoefficient_tp6*1.5
@@ -303,12 +287,7 @@ def simulateTouchpoints(touchpoints, configurations,responseModelConfig, format,
 
         
             if plot == True:
-              #plt.plot(spendingsFrame["touchpoint_6"][:subplot]+spendingsFrame["touchpoint_5"][:subplot], color='blue')
               plt.plot((data["touchpoint_6_shaped"]*touchpoint['sales_saturation'])[:subplot], color='red')
-              #plt.plot(data["touchpoint_6_shaped"][:subplot], color='red')
-
-      #data[f"combination_{touchpoint['name']}"] = data[f"{touchpoint['name']}{format}"]*touchpoint['beta']
-
 
       #target model with "to_predict" beta variables
 

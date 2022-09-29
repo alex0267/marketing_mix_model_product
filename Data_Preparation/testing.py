@@ -1,13 +1,12 @@
 import logging
-from dataclasses import dataclass
-from typing import Dict, List, Tuple
-
 import numpy as np
 import pandas as pd
 
 from matrix.data_manager import names as n
 from matrix.st_response_model.feature_engineering.utils import filter_before_normalization
 from matrix.st_response_model.model_settings import model_settings
+from dataclasses import dataclass
+from typing import Dict, List, Tuple
 
 
 @dataclass(frozen=True)

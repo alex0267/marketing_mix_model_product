@@ -43,21 +43,6 @@ class ResponseModel:
         self.stan_code = stan_code
         
 
-        '''
-        touchpoints=[]
-        for item in self.configurations['TOUCHPOINTS']:
-            summaryFrameself.spendingsFrame[item]
-        
-
-        target_to_add = pd.concat([self.controlFrame['YEAR_WEEK'],self.target], ignore_index=False, axis =1)
-
-        summaryFrame = pd.concat([summaryFrame, self.spendingsFrame], ignore_index=False, axis=1).set_index('YEAR_WEEK')
-        summaryFrame = self.spendingsFrame.stack()
-
-        print(summaryFrame)
-        # summaryFrame.to_excel('summaryFrame.xlsx')
-        '''
-        
     #create dictionary as input data for the stan model
     def createDict(self):
 
@@ -85,7 +70,6 @@ class ResponseModel:
     
     #extract parameters for each touchpoint
     def extractParameters(self, printOut=False):
-        #pd.DataFrame(self.extractFrame.mean(axis=0)).to_csv('extractFrame.csv')
         self.parameters = {}
         self.num_touchpoints = self.stanDict['num_touchpoints']
 
@@ -93,9 +77,6 @@ class ResponseModel:
         self.parameters['tau'] = self.extractFrame[f'tau'].mean(axis=0)
         self.parameters['noise_var'] = self.extractFrame['noise_var'].mean(axis=0)
         
-        #self.extractFrame.mean().to_csv('estimatedParameters.csv')
-        #print(self.extractFrame.mean())
-
         for i, season in enumerate(self.configurations['SEASONALITY_VARIABLES_BASE'],start = 1):
             #append to general parameters list
             self.parameters[f'{season}_beta'] = self.extractFrame[f'beta_seasonality.{i}'].mean(axis=0)

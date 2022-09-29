@@ -52,10 +52,6 @@ class UpliftSimulation:
         ind = helper_functions.getIndex.getIndex(indexColumns = self.responseModel.indexColumns,scope='YEAR' , subset=subset)
         
         #select spendings from window
-        # if isinstance(touchpoint, list):
-        #     for x in 
-        #     originalSpendingsInWindow = self.responseModel.spendingsFrame[touchpoint].iloc[ind]
-
         originalSpendingsInWindow = self.responseModel.spendingsFrame[touchpoint].iloc[ind]
 
 
@@ -129,7 +125,6 @@ class UpliftSimulation:
                 self.deltaCurrentToZero[(subset,touchpoint)] = self.prediction[(subset,touchpoint,1.0)]-self.prediction[(subset,touchpoint,0.0)]
 
                 summary.to_excel('summary.xlsx')
-        #pd.DataFrame(self.prediction[('2021', 'touchpoint_5', 0.6)]).to_excel('predict.xlsx')
 
         
             
@@ -158,17 +153,5 @@ class UpliftSimulation:
             CurrentSpendingsPredict = self.simulateSales(CurrentSpendings)
 
             self.deltaBaseline = ZeroSpendingsPredict
-
-        # print('baseline')
-        # print(self.deltaBaseline)
-
-        
-
-        # print('spendings')
-        # print(self.spendings)
-        # print('prediction')
-        # print(self.prediction)
-        # print('delta')
-        # print(self.deltaCurrentToZero)
 
 

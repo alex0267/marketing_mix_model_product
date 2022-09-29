@@ -29,9 +29,6 @@ class VolumeContribution:
 
         #configurations
         self.outputConfig = outputConfig
-        
-        #calculated Contribution based on calculation of uplift(lift=1)-uplift(lift=0)
-        #self.absoluteContribution = upliftSimulation.deltaCurrentToZero
 
         #collect all deltaToZeroSimulations for all subsets
         self.deltaToZeroDict = {}
@@ -72,17 +69,6 @@ class VolumeContribution:
             #add the subset simulation table to the collection
             self.deltaToZeroDict[subset] = deltaToZeroSimulations
 
-            #print the 'all weeks' delta to zero simulation (as it comes last) as a checking table
-            # deltaToZeroSimulations.to_csv('test_delta.csv')
-        
-        # print('here')
-        # for i,x in enumerate(self.deltaToZeroDict['Y2']['total_predict']):
-        #     print()
-        #     print(i)
-        #     print(self.deltaToZeroDict['Y2']['total_predict'][i])
-        #     print(self.deltaToZeroDict['Y2']['total_target'][i])
-
-        #self.deltaToZeroDict['Y2'].to_excel('test_HERE.xlsx')
 
         return 0
 
@@ -108,15 +94,6 @@ class VolumeContribution:
             #include basesales
             deltaToZeroCorrected['baseline'] = error*self.deltaToZeroDict[subset]['baseline']
 
-            '''
-            #include sum and target to check if calculations were correct
-
-            #include sum - the variable to predict
-            deltaToZeroCorrected['total_predict'] = deltaToZeroCorrected.sum(axis=1)
-            
-            #include the target
-            deltaToZeroCorrected['total_target'] = self.responseModel.target
-            '''
             #add the subset simulation table to the collection
             self.absoluteContributionCorrected[subset] = deltaToZeroCorrected
             

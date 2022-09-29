@@ -4,11 +4,6 @@ import pandas as pd
 
 
 def plotYearlyContribution(volumeContribution):
-    # print('relative')
-    # print('2019')
-    # print(volumeContribution.relativeContributions[2019].mean())
-    # print(volumeContribution.relativeContributions[2020].mean())
-    # print(volumeContribution.relativeContributions[2021].mean())
     return 0
 
 
@@ -22,9 +17,7 @@ def plotWeeklyContribution(volumeContribution):
         contributors = pd.concat([contributors,volumeContribution.deltaToZeroDict['ALL'][item]], axis=1)
     
     contributors = contributors.T
-    #print(contributors)
 
-    #print(volumeContribution.responseModel.target)
     X = np.arange(0, len_X, 1) 
 
     plt.plot()

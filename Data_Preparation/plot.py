@@ -6,7 +6,6 @@ import matplotlib.ticker as ticker
 def touchpoint_spendings_per_brand(feature_df):
 
     #set index on year only
-    #feature_df = feature_df.set_index(['YEAR_WEEK'])
 
     f = plt.figure(figsize=(15, 15))
 
@@ -16,10 +15,6 @@ def touchpoint_spendings_per_brand(feature_df):
 
         brand_df = feature_df[feature_df['BRAND']==brand]
         brand_df = brand_df.drop(["YEAR_WEEK"],axis=1)
-        # brand_df["TARGET_VOL_SO"].to_csv("angry_cat_VOLULME.csv")
-
-
-        #print(feature_df)
 
         ax = sns.lineplot(data=brand_df,legend = False ,dashes = False)
         #only include 4 x-axis labels
@@ -41,10 +36,6 @@ def touchpoint_spendings(feature_df, touchpoints):
     data = feature_df.sum()[1:]
     ax = sns.barplot(data.index, data.values)
     plt.show()
-    # for i, touchpoint in enumerate(touchpoints):
-    #     feature_df
-
-
 
 
 
