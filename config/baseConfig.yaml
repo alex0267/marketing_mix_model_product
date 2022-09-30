@@ -15,39 +15,41 @@
 
 #Brands in scope
 BRANDS:
-  # - fast_duck
-  - precious_liquid
+  - fast_duck
+  # - precious_liquid
 
+# for predious_liquid - get rid of laura & alex
 TOUCHPOINTS:
   - tom
-  # - laura
+  - laura
   - lisa
   - mary
   - jack
 #  - lucy - lucy is not defined in the SPEND_MEDIA_EXECUTION_MAPPING
   - marc
-  # - alex
+  - alex
 #  - fiona - fiona is missing in the definitions but has allocated touchpoint spendings
 
 TARGET: TARGET_VOL_SO
 
 SEASONALITY_VARIABLES_BASE:
- - IS_JANUARY
- - IS_FEBRUARY
- - IS_MARCH
- - IS_APRIL
- - IS_MAY
- - IS_JUNE
- - IS_JULY
- - IS_AUGUST
- - IS_SEPTEMBER
- - IS_OCTOBER
- - IS_NOVEMBER
- - IS_DECEMBER
+ - is_january
+ - is_february
+ - is_march
+ - is_april
+ - is_may
+ - is_june
+ - is_july
+ - is_august
+ - is_september
+ - is_october
+ - is_november
+ - is_december
 #  - is_last_week
 
 CONTROL_VARIABLES_BASE:
-   - DISTRIBUTION
+   - distribution
+   - covid
 #  - PROMOTION_FEATURE
 
 #  - christmas

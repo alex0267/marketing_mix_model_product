@@ -16,16 +16,16 @@ def extractSummary(responseModel, volumeContribution,ROS_Calculation, outputConf
 
         #iterate through touchpoints and add spendings and ROS (touchpoint specific information)
         if item in responseModel.configurations['TOUCHPOINTS']:
-            spendings = responseModel.spendingsFrame[item].rename('spendings')
+            spendings = responseModel.spendings_df[item].rename('spendings')
             ROS = ROS_Calculation.ROS_Weekly[item]
             ROS.replace([np.inf, -np.inf], 0, inplace=True)
 
         #iterate through control variables and fill the touchpoint specific cells with 0
         else:
-            spendings = pd.Series([0 for x in range(len(responseModel.indexColumns['YEAR_WEEK']))]).rename('spendings')
-            ROS = pd.Series([0 for x in range(len(responseModel.indexColumns['YEAR_WEEK']))])
+            spendings = pd.Series([0 for x in range(len(responseModel.index_df['YEAR_WEEK']))]).rename('spendings')
+            ROS = pd.Series([0 for x in range(len(responseModel.index_df['YEAR_WEEK']))])
 
-        tp_df = pd.concat([responseModel.indexColumns['YEAR_WEEK'],spendings,responseModel.target], ignore_index=False, axis =1)
+        tp_df = pd.concat([responseModel.index_df['YEAR_WEEK'],spendings,responseModel.target], ignore_index=False, axis =1)
         tp_df['contributor'] = item
         tp_df['absolute_contribution'] = volumeContribution.absoluteContributionCorrected['ALL'][item]
         tp_df['relative_contribution'] = volumeContribution.relativeContributions['ALL'][item]
@@ -39,10 +39,7 @@ def extractSummary(responseModel, volumeContribution,ROS_Calculation, outputConf
     
     #add ROS ratio
     responseModelInit_df = responseModelInit_df.merge(ROS_Calculation.prices_ALL[['YEAR_WEEK', 'AVERAGE_PRICE']], how='inner', on='YEAR_WEEK')
-    # responseModelInit_df['ROS'] = responseModelInit_df['absolute_contribution']/responseModelInit_df['spendings']
-    # responseModelInit_df.replace([np.inf, -np.inf], 0, inplace=True)
-    # responseModelInit_df.fillna( 0, inplace=True)
+
     print(responseModelInit_df)
 
     responseModelInit_df.to_excel('output_df/resultSummary_df.xlsx')
-    #print(responseModelInit_df)

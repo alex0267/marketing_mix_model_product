@@ -46,7 +46,7 @@ class ROS_Calculation:
             for scope in scopes:
 
                 #get indexes of data for respective time frame
-                ind = helper_functions.getIndex.getIndex(indexColumns = self.responseModel.indexColumns,scope='YEAR' , subset=scope)
+                ind = helper_functions.getIndex.getIndex(indexColumns = self.responseModel.index_df,scope='YEAR' , subset=scope)
 
                 for touchpoint in self.responseModel.configurations['TOUCHPOINTS']:
                     
@@ -58,7 +58,7 @@ class ROS_Calculation:
 
                     valueContribution = averagePrice*totalVolumeContribution.values
 
-                    totalSpendings = self.responseModel.spendingsFrame[touchpoint].iloc[ind].reset_index(drop = True)
+                    totalSpendings = self.responseModel.spendings_df[touchpoint].iloc[ind].reset_index(drop = True)
 
                     if (subset=='ALL' and scope == 'ALL'):
                         self.prices_ALL = prices

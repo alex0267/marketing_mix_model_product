@@ -51,9 +51,9 @@ class ResponseCurves:
             #Simulate sales for each touchpoint and lift level
 
             #get indexes of data for respective time frame
-            ind = helper_functions.getIndex.getIndex(indexColumns = self.responseModel.indexColumns,scope='YEAR' , subset=subset)
-            adstock_length = self.responseModel.responseModelConfig['max_lag']
-            index = self.responseModel.indexColumns.index
+            ind = helper_functions.getIndex.getIndex(indexColumns = self.responseModel.index_df,scope='YEAR' , subset=subset)
+            adstock_length = self.responseModel.responseModelConfig['MAX_LAG']
+            index = self.responseModel.index_df.index
 
             #define extended_length as the max index + the maximum adstock length to increase size of frame in scope
             #print(ind[-1])

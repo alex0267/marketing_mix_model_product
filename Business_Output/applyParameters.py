@@ -1,20 +1,22 @@
 import numpy as np
 import pandas as pd
 import helper_functions.normalization
+import helper_functions.adstockFunctions
+import helper_functions.hillFunction
 
 #use the estimated parameters to combine with model to calculate sales prediction
 
 def applyParametersToData(raw_data,original_spendings, parameters, configurations, responseModelConfig, scope, seasonality_df, beta_seasonality, control_df, beta_control):
 
 
-    media_adstocked = helper_functions.adstock_functions.adstock_transform(media = raw_data[scope],
+    media_adstocked = helper_functions.adstockFunctions.adstock_transform(media = raw_data[scope],
                                                                          touchpoints = scope,
                                                                          parameters=parameters,
                                                                          responseModelConfig = responseModelConfig)
 
 
     #media_shaped = media_adstocked
-    media_shaped = helper_functions.hill_function.hill_transform(data = media_adstocked,
+    media_shaped = helper_functions.hillFunction.hill_transform(data = media_adstocked,
                                                         raw_data = original_spendings,
                                                         scope=scope, 
                                                         parameters=parameters, 

@@ -64,6 +64,7 @@ def create_feature_as_gap_to_brand_reference_level(
 
     # 2. Compute gap to reference level (forced to be positive)
     feature_df = feature_df.merge(ref_df, on=group, how="inner")
+
     #feature_df[col_feature + "_raw"] = feature_df[col_feature].copy()
     feature_df[col_feature] = feature_df[col_feature] - feature_df[col_feature_ref]
     #feature_raw = feature_df[col_feature + "_raw"].sum()

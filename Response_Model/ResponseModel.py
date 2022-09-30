@@ -8,21 +8,21 @@ import helper_functions.summarize
 #Also contains the functions to estimate and extract parameters
 class ResponseModel:
 
-    def __init__(self, indexColumns, spendingsFrame, seasonalityFrame, controlFrame, configurations, responseModelConfig, target, stanCode):
+    def __init__(self, index_df, spendings_df, seasonality_df, control_df, configurations, responseModelConfig, target, stanCode):
         #define configurations
         self.configurations = configurations
         self.responseModelConfig = responseModelConfig
 
         #data
-        self.indexColumns = indexColumns #columns to be used as index references when filtering the database by e.g. year
-        self.seasonality_df = seasonalityFrame[configurations['SEASONALITY_VARIABLES_BASE']]
-        self.otherControl_df = controlFrame[configurations['CONTROL_VARIABLES_BASE']]
+        self.index_df = index_df #columns to be used as index references when filtering the database by e.g. year
+        self.seasonality_df = seasonality_df[configurations['SEASONALITY_VARIABLES_BASE']]
+        self.control_df = control_df[configurations['CONTROL_VARIABLES_BASE']]
         self.target = target #raw sales (target) variable with no transformation
-        self.spendingsFrame = spendingsFrame #raw touchpoint spending data
+        self.spendings_df = spendings_df #raw touchpoint spending data
 
         #define data normalized
-        self.spendingsFrame_normalized, self.touchpoint_norms = helper_functions.normalization.normalize_feature(self.spendingsFrame,self.spendingsFrame, self.responseModelConfig['NORMALIZATION_STEPS_TOUCHPOINTS'])
-        self.target_normalized, self.target_norm = helper_functions.normalization.normalize_feature(self.target,self.target, self.responseModelConfig['NORMALIZATION_STEPS_TARGET'][self.target.name])
+        self.spendings_df_normalized, self.touchpoint_norms = helper_functions.normalization.normalize_feature(self.spendings_df,self.spendings_df, self.responseModelConfig['NORMALIZATION_STEPS_TOUCHPOINTS'])
+        self.target_df_normalized, self.target_df_norm = helper_functions.normalization.normalize_feature(self.target,self.target, self.responseModelConfig['NORMALIZATION_STEPS_TARGET'][self.target.name])
         
         #easy access variables
         self.num_touchpoints = None
@@ -42,17 +42,6 @@ class ResponseModel:
         #Define stan code
         self.stanCode = stanCode
         
-        '''
-        touchpoints=[]
-        for item in self.configurations['TOUCHPOINTS']:
-            summaryFrameself.spendingsFrame[item]
-        target_to_add = pd.concat([self.controlFrame['YEAR_WEEK'],self.target], ignore_index=False, axis =1)
-        summaryFrame = pd.concat([summaryFrame, self.spendingsFrame], ignore_index=False, axis=1).set_index('YEAR_WEEK')
-        summaryFrame = self.spendingsFrame.stack()
-        print(summaryFrame)
-        # summaryFrame.to_excel('summaryFrame.xlsx')
-        '''
-        
     
     def createDict(self):
         '''
@@ -60,13 +49,13 @@ class ResponseModel:
         '''
         num_touchpoints = len(self.configurations['TOUCHPOINTS'])
         touchpoint_norms = self.touchpoint_norms
-        touchpoint_spendings = self.spendingsFrame[self.configurations['TOUCHPOINTS']]
+        touchpoint_spendings = self.spendings_df[self.configurations['TOUCHPOINTS']]
         #add zeros to beginning of media dataframe to account for padding (weight application of adstock)
-        touchpoint_spendings = np.concatenate((np.zeros((self.responseModelConfig['max_lag']-1, num_touchpoints)), np.array(touchpoint_spendings)),axis=0)
+        touchpoint_spendings = np.concatenate((np.zeros((self.responseModelConfig['MAX_LAG']-1, num_touchpoints)), np.array(touchpoint_spendings)),axis=0)
 
         self.stanDict = {
-            'N': len(self.spendingsFrame),
-            'max_lag': self.responseModelConfig['max_lag'], 
+            'N': len(self.spendings_df),
+            'max_lag': self.responseModelConfig['MAX_LAG'], 
             'num_touchpoints': num_touchpoints,
             'touchpoint_spendings': touchpoint_spendings,
             'touchpoint_norms': touchpoint_norms,
@@ -75,8 +64,8 @@ class ResponseModel:
             'num_seasons': len(self.configurations['SEASONALITY_VARIABLES_BASE']),
             'seasonality': np.array(self.seasonality_df),
             'num_control': len(self.configurations['CONTROL_VARIABLES_BASE']),
-            'control': np.array(self.otherControl_df),
-            'y': self.target_normalized.values
+            'control': np.array(self.control_df),
+            'y': self.target_df_normalized.values
         }
 
 
@@ -119,7 +108,7 @@ class ResponseModel:
 
             #Collect per touchpoint parameters in dictionary
             self.parameters[f'{touchpoint}_adstock'] = {
-                'L': self.responseModelConfig['max_lag'],
+                'L': self.responseModelConfig['MAX_LAG'],
                 #'P': peak,
                 'D': decay
             }
@@ -178,5 +167,3 @@ class ResponseModel:
             self.extractFrame = pd.read_csv(f'model_savings/extract{name}.csv')
         
         return 0
-
-    

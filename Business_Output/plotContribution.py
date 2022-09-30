@@ -14,7 +14,7 @@ def plotYearlyContribution(volumeContribution):
 
 def plotWeeklyContribution(volumeContribution):
     #define X-axis
-    len_X = len(volumeContribution.responseModel.indexColumns['YEAR_WEEK'])
+    len_X = len(volumeContribution.responseModel.index_df['YEAR_WEEK'])
 
     #define the contribution factors in the right order
     contributors = pd.DataFrame()

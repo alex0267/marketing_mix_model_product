@@ -18,15 +18,13 @@ def construct_distribution_feature(
 
     distribution_df = sell_out_distribution_df.copy()
     #distribution_df = distribution_df[distribution_df['BRAND']==configurations['BRANDS'][0]]
-    distribution_df = distribution_df[['BRAND', 'YEAR_WEEK', 'DISTRIBUTION']]
-   
-
+    distribution_df = distribution_df[['BRAND', 'YEAR_WEEK', 'DISTRIBUTION']].rename(columns={'DISTRIBUTION':'distribution'})
 
     # Distribution feature as gap to a reference level if a quantile level is given as an input
     if quantile_reference_level is not None:
         distribution_df = Data_Preparation.genericFeatures.create_feature_as_gap_to_brand_reference_level(
             feature_df=distribution_df,
-            col_feature='DISTRIBUTION',
+            col_feature='distribution',
             col_feature_ref='DISTRIBUTION_REF',
             group='BRAND',
             quantile_reference=quantile_reference_level,

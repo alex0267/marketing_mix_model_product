@@ -143,18 +143,18 @@ def add_monthly_seasonality(df: pd.DataFrame) -> pd.DataFrame:
     features = df.YEAR_WEEK.apply(get_year_week_middle_timestamp).dt.month
     features = pd.get_dummies(features)
     features.columns = [
-                        "IS_JANUARY",
-                        "IS_FEBRUARY",
-                        "IS_MARCH",
-                        "IS_APRIL",
-                        "IS_MAY",
-                        "IS_JUNE",
-                        "IS_JULY",
-                        "IS_AUGUST",
-                        "IS_SEPTEMBER",
-                        "IS_OCTOBER",
-                        "IS_NOVEMBER",
-                        "IS_DECEMBER",
+                        "is_january",
+                        "is_february",
+                        "is_march",
+                        "is_april",
+                        "is_may",
+                        "is_june",
+                        "is_july",
+                        "is_august",
+                        "is_september",
+                        "is_october",
+                        "is_november",
+                        "is_december",
                         ]
     return pd.concat([df, features], axis=1)
 

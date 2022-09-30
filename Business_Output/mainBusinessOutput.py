@@ -1,4 +1,3 @@
-import Business_Output.decompose_contribution
 import Business_Output.UpliftSimulation
 import Business_Output.ResponseCurves
 import Business_Output.VolumeContribution
@@ -6,7 +5,6 @@ import Business_Output.extractSummary
 import Business_Output.calculateROS
 import Business_Output.calculateError
 import Business_Output.plotContribution
-import yaml
 
 def createBusinessOutputs(responseModel, outputConfig, price_df):
 
@@ -29,7 +27,7 @@ def createBusinessOutputs(responseModel, outputConfig, price_df):
 
     Business_Output.plotContribution.plotContribution(volumeContribution)
 
- 
+
 
     #Generate response curves based on uplifts
     responseCurves = Business_Output.ResponseCurves.ResponseCurves(simulatedSpendings = upliftSimulation.spendings,

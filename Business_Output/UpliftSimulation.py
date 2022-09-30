@@ -8,10 +8,12 @@ import pandas as pd
 class UpliftSimulation:
     '''
     Simulation space to apply the estimated parameters to the changed spending matrix.
+
     Parameters:
     - responseModel: Class init
     - Uplift simulation prediction window size
     - Uplift simulation start
+    
     Attributes:
     - spendings: Collection of changed spendings table for each scope
     - prediction: Collection of the generated lift predictions for each scope
@@ -52,18 +54,19 @@ class UpliftSimulation:
         '''
 
         #get indexes of data for respective time frame
-        ind = helper_functions.getIndex.getIndex(indexColumns = self.responseModel.indexColumns,scope='YEAR' , subset=subset)
+        ind = helper_functions.getIndex.getIndex(indexColumns = self.responseModel.index_df,scope='YEAR' , subset=subset)
 
 
         #extract the control dataframe window that needs to be changed    
-        originalControlWindow = self.responseModel.otherControl_df[controlVariable].iloc[ind]
+        originalControlWindow = self.responseModel.control_df[controlVariable].iloc[ind]
 
         #change control variable window to neutral position depending on control variable definition
         changedControl = Business_Output.changeControlVariable.changeControlVariable(originalControlWindow, controlVariable)
 
         #merge control variable window with the full window        
-        zeroControl = self.responseModel.otherControl_df.copy()
-
+        zeroControl = pd.DataFrame(self.responseModel.control_df.copy())
+        print('zero')
+        print(zeroControl)
 
         #if control variables are changed, each variable has to be changed individually
         if isinstance(controlVariable, list):
@@ -71,14 +74,6 @@ class UpliftSimulation:
                 zeroControl[ctrl].loc[changedControl.index] = changedControl[ctrl]
         
         else:
-            # print('')
-            # print('HERE')
-            # print('changedControl')
-            # print(changedControl)
-            # print('index')
-            # print(changedControl.index)
-            # print('original')
-            # print(zeroControl)
 
             zeroControl[controlVariable].loc[changedControl.index] = changedControl[:]
         
@@ -95,21 +90,18 @@ class UpliftSimulation:
         '''
 
         #get indexes of data for respective time frame
-        ind = helper_functions.getIndex.getIndex(indexColumns = self.responseModel.indexColumns,scope='YEAR' , subset=subset)
+        ind = helper_functions.getIndex.getIndex(indexColumns = self.responseModel.index_df,scope='YEAR' , subset=subset)
         
-        #select spendings from window
-        # if isinstance(touchpoint, list):
-        #     for x in 
-        #     originalSpendingsInWindow = self.responseModel.spendingsFrame[touchpoint].iloc[ind]
 
-        originalSpendingsInWindow = self.responseModel.spendingsFrame[touchpoint].iloc[ind]
+
+        originalSpendingsInWindow = self.responseModel.spendings_df[touchpoint].iloc[ind]
 
 
         #apply change
         changedSpendings = originalSpendingsInWindow*lift
 
         #change entire dataframe according to change
-        spendings = self.responseModel.spendingsFrame.copy()
+        spendings = self.responseModel.spendings_df.copy()
         
         #merge the changed section with the rest of the data
 
@@ -126,12 +118,12 @@ class UpliftSimulation:
         '''take the changed spendings and simulate the sales based on the estimated parameters'''
 
         #use the existing control_df values if no changed are specified
-        if spendings is None: spendings = self.responseModel.spendingsFrame
-        if control_df is None: control_df = self.responseModel.otherControl_df
+        if spendings is None: spendings = self.responseModel.spendings_df
+        if control_df is None: control_df = self.responseModel.control_df
 
         #extract sales predictions from changed spendingsFrame
         factor_df, y_pred = Business_Output.applyParameters.applyParametersToData(raw_data = spendings,
-                                                            original_spendings = self.responseModel.spendingsFrame.copy(),
+                                                            original_spendings = self.responseModel.spendings_df.copy(),
                                                             parameters = self.responseModel.parameters,
                                                             configurations= self.responseModel.configurations,
                                                             responseModelConfig = self.responseModel.responseModelConfig,

@@ -2,6 +2,8 @@ import warnings
 warnings.simplefilter(action='ignore', category=UserWarning)
 
 import pandas as pd
+pd.options.mode.chained_assignment = None
+
 import numpy as np
 
 #elements can be accessed via: price_df.get_group(('angry_cat', '2019'))

@@ -1,3 +1,4 @@
+from tkinter import S
 import Data_Preparation.seasonality
 import Data_Preparation.promotion
 import Data_Preparation.distribution
@@ -11,18 +12,22 @@ import yaml
 
 #import data - we define a list of unique weeks that are subject to event & seasonality engineering
 mediaExec_df = pd.read_csv('data/FRA_SPEND_MEDIA_EXECUTION_MAPPING.csv')
+sellOut_df = pd.read_csv('data/FRA_SELL_OUT_COMPANY_MAPPING_EDIT.csv')
+sellOutDistribution_df = pd.read_csv('data/FRA_SELL_OUT_DISTRIBUTION_MAPPING.csv')
+sellOutCompetition_df = pd.read_csv('data/FRA_SELL_OUT_COMPETITORS_MAPPING.csv')
+covid_df = pd.read_csv('data/FRA_COVID_MEASURES.csv')
+
     #clean data - replace mumm_champagne by precious_liquid
 mediaExec_df['BRAND'] = mediaExec_df['BRAND'].replace(to_replace='mumm_champagne', value='precious_liquid')
 
 uniqueWeeks = pd.DataFrame(mediaExec_df['YEAR_WEEK'].unique())
 uniqueWeeks = uniqueWeeks.rename(columns={0:'YEAR_WEEK'})
 
-sellOut_df = pd.read_csv('data/FRA_SELL_OUT_COMPANY_MAPPING_EDIT.csv')
-sellOutDistribution_df = pd.read_csv('data/FRA_SELL_OUT_DISTRIBUTION_MAPPING.csv')
+
 #clean data - replace mumm_champagne by precious_liquid
 sellOutDistribution_df['BRAND'] = sellOutDistribution_df['BRAND'].replace(to_replace='mumm_champagne', value='precious_liquid')
 
-sellOutCompetition_df = pd.read_csv('data/FRA_SELL_OUT_COMPETITORS_MAPPING.csv')
+
 
 def filterByScope(df, configurations):
     '''
@@ -73,6 +78,9 @@ def run(configurations):
     distribution_df = Data_Preparation.distribution.construct_distribution_feature(sell_out_distribution_df = sellOutDistribution_df,
                                                                                   configurations = configurations,
                                                                                   quantile_reference_level=0)
+    
+    distribution_df = distribution_df[["YEAR_WEEK","BRAND", "distribution"]]
+
     feature_df = feature_df.merge(distribution_df, on=["YEAR_WEEK","BRAND"])
     
     #drop touchpoint fiona since it does not have definitions allocated
@@ -86,7 +94,13 @@ def run(configurations):
     price_df = Data_Preparation.calculatePrice.calculatePrice(sellOut_df.copy(), configurations)
     feature_df = feature_df.merge(price_df, on=["YEAR_WEEK","BRAND"])
 
-    
+
+    covid_feature = covid_df[['YEAR_WEEK', 'OXFORD_INDEX']].rename(columns={'OXFORD_INDEX':'covid'})
+    control_df = control_df.merge(covid_feature, on='YEAR_WEEK', how='left')
+    control_df = control_df.fillna(0)
+    print(control_df)
+ 
+
     filteredFeature_df = filterByScope(feature_df,configurations)
 
 
@@ -107,5 +121,8 @@ def run(configurations):
     indexColumns = pd.DataFrame()
     indexColumns['YEAR_WEEK'] = filteredFeature_df['YEAR_WEEK']
     indexColumns['YEAR'] = filteredFeature_df['YEAR_WEEK'].astype(str).str[:4]
+
+    #print(control_df)
+    control_df.to_excel('output_df/control_df.xlsx')
 
     return spendings_df, seasonality_df, price_df, feature_df, control_df, targetRaw, indexColumns
