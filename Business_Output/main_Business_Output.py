@@ -12,7 +12,6 @@ def createBusinessOutputs(responseModel, outputConfig, price_df):
 
     #Decompose absolute contribution by touchpoint
     #LEGACY
-    #touchpointContribution_df, sales_prediction = Business_Output.decompose_contribution.decompose_absolute_contribution(responseModel = responseModel, plot=True)
     
     #Simulate uplifts
     upliftSimulation = Business_Output.simulateUplift.UpliftSimulation(responseModel = responseModel,

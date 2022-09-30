@@ -20,15 +20,7 @@ def applyParametersToData(raw_data,original_spendings, parameters, configuration
                                                         parameters=parameters, 
                                                         responseModelConfig=responseModelConfig)
 
-    # plt.plot(data['touchpoint_4_adstocked'], color='blue')
-    # plt.plot(media_shaped['touchpoint_4'], color='green')
-    # plt.plot(data['touchpoint_4_shaped'], color= 'orange')
-    # plt.savefig('testfig.png')
 
-    #Normalize adstocked media via max accross brands with  +1
-    #(adstock(touchpoint_x, param = estimated_parameters_x))/mean + 1
-
-    
     for touchpoint in scope:
         #media_shaped[touchpoint], data_norm = helper_functions.normalization.normalize_feature(media_shaped[touchpoint],media_shaped[touchpoint],responseModelConfig['NORMALIZATION_STEPS_TOUCHPOINTS'][touchpoint])
         
@@ -49,7 +41,6 @@ def applyParametersToData(raw_data,original_spendings, parameters, configuration
 
     # 2. calculate the product of all factors -> y_pred
     # baseline = intercept * control factor = e^tau * media_shaped[13]^beta[13]
-    #y_pred = baseline*((touchpoint_4_shaped)^Beta)*e^(seasonality*Beta)
     y_pred = factor_df.apply(np.prod, axis=1)*np.exp(np.dot(seasonality_df,seasonality_beta))
 
     #for now only the intercept makes up the baseline

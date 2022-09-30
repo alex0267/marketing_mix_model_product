@@ -5,11 +5,9 @@ import matplotlib.pyplot as plt
 
 plt.plot([1,2,3])
 plt.savefig('test.png')
-# print(np.array([1,2,3]))
 
 print(pd.DataFrame([1,2]))
 
-# print(pd.DataFrame([1,2,3]))
 schools_code = """
     data {
       int<lower=0> J;         // number of schools
@@ -37,7 +35,6 @@ schools_data = {"J": 8,
 
 posterior = stan.build(schools_code, data=schools_data)
 fit = posterior.sample(num_chains=4, num_samples=1000)
-# print(fit)
 extractFrame = fit.to_frame()
 
 print(extractFrame)

@@ -11,7 +11,6 @@ def calculatePrice(sell_out_df, configurations):
     priceFrame = pd.DataFrame()
     for brand in price_df['BRAND'].unique():
         for year in price_df['YEAR'].unique():
-            # print(price_df[price_df['BRAND']==brand])
             subset = price_df[price_df['BRAND']==brand]
             subset = subset[price_df['YEAR']==year]
             

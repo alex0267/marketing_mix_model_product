@@ -13,15 +13,12 @@ import Data_Preparation.seasonality
 import Data_Preparation.promotion
 import Data_Preparation.distribution
 import Data_Preparation.calculatePrice
-#import testing
 import pandas as pd
 import numpy as np
 import yaml
 
-#get current working directory
-#print(os.getcwd())
+# get current working directory
 
-#import data - we define a list of unique weeks that are subject to event & seasonality engineering
 media_exec_df = pd.read_csv('data/FRA_SPEND_MEDIA_EXECUTION_MAPPING.csv')
 unique_weeks = pd.DataFrame(media_exec_df['YEAR_WEEK'].unique())
 unique_weeks = unique_weeks.rename(columns={0:'YEAR_WEEK'})
@@ -43,7 +40,6 @@ def run(configurations):
     media_exec = media_exec_df[["YEAR_WEEK", "BRAND", "TOUCHPOINT", "SPEND"]]
 
     feature_df = feature_df.merge(media_exec, on=["YEAR_WEEK","BRAND"])
-        #turn media variables into columns with primary key ['YEAR_WEEK','BRAND','TOUCHPOINT'] by SPEND
     feature_df = feature_df.set_index(['YEAR_WEEK','BRAND','TOUCHPOINT'])['SPEND'].unstack().reset_index()
 
 
@@ -57,7 +53,6 @@ def run(configurations):
     feature_df = feature_df.merge(promotion_df, on=["YEAR_WEEK","BRAND"])
 
     #calculate competiton feature based on category
-    #comp = testing.construct_price_competitors_feature(sell_out_competition_df)
     distribution_df = Data_Preparation.distribution.construct_distribution_feature(sell_out_distribution_df = sell_out_distribution_df,
                                                                                   configurations = configurations,
                                                                                   quantile_reference_level=0)
@@ -88,8 +83,6 @@ def run(configurations):
     # final output dataframe
     feature_df.to_csv("feature_df.csv")
     
-    #print(feature_df)
-
     #define index columns as a reference for year scoping and dataset length
     indexColumns = pd.DataFrame()
     indexColumns['YEAR_WEEK'] = feature_df['YEAR_WEEK']

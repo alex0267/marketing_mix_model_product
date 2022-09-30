@@ -70,23 +70,8 @@ class ROS_Calculation:
                         self.ROS_Weekly[touchpoint] = valueContribution/totalSpendings
 
                     ratio = (valueContribution.sum()/totalSpendings.sum())
-                    # ratio.replace([np.inf, -np.inf], 0, inplace=True)
-                    # print(f'check_{touchpoint}_{scope}_{subset}')
-                    # print(totalVolumeContribution)
-                    # print(totalVolumeContribution.sum())
-                    # print(totalSpendings)
-                    # print(totalSpendings.sum())
-                    # print(totalVolumeContribution/totalSpendings)
 
                     self.ROS[(subset,scope, touchpoint)] = ratio
 
-            #     print('ROS')
-            #     print(subset)
-            #     print(touchpoint)
-            #     print(self.ROS_ALL[subset])
-
-            # (dataset,scope)
 
         print(self.ROS)
-            #print(self.volumeContribution.absoluteContributionCorrected[subset].iloc[ind])
-            #originalSpendingsInWindow = self.responseModel.spendingsFrame[touchpoint].iloc[ind]

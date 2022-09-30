@@ -90,24 +90,8 @@ touchpoints = [
 # Create features
 
 #Simulate true response curves
-'''
-#iterate through lift options (avoid Nan for first by making number close to 0)
-lifts = [0.0001, 0.2, 0.4, 0.6, 0.8, 1.0,
- 1.2, 1.4, 1.6, 1.8, 2.0,
- 2.2, 2.4, 2.6, 2.8, 3.0,
- 3.2, 3.4, 3.6, 3.8]
-
-result = []
-for lift in lifts:
-   data, spendingsFrame, controlFrame = test_suite.data_generation.simulateTouchpoints(touchpoints,'_shaped',baseSalesCoefficient_tp4=10000*lift, plot = False)
-   result.append(data['sales'][0:52].sum())
-pd.DataFrame(result).T.to_excel('result.xlsx')
-'''
-   # print(data['sales'][0:52].sum())
-#print(data)
 
 # data, spendingsFrame, controlFrame = test_suite.data_generation.simulateTouchpoints(touchpoints,'_shaped',baseSalesCoefficient_tp3=10000, plot = False)
-# print(data['sales'][0:52].sum())
 
 data, price_df, spendingsFrame, controlFrame, indexColumns = test_suite.data_generation.simulateTouchpoints(touchpoints, configurations, responseModelConfig, '_shaped',plot = True)
 
@@ -121,14 +105,6 @@ responseModel = ResponseModel(indexColumns = indexColumns,
                               target = data['sales'],
                               stan_code = Response_Model.stan_file.stan_code)
 
-
-
-# for key in stanDict.keys():
-#    print(key)
-#    print(stanDict[key])
-#    if type(stanDict[key]) is not int:
-#       print('shape')
-#       print((stanDict[key]).shape)
 
 #tp_4 shaped model: test_shape_7
 #tp_3 shaped model: tp_3_shaped_model
