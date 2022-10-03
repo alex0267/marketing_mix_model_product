@@ -9,26 +9,27 @@ TO BE DONE
 - Check whether all brands are there for all weeks
 '''
 
-import Data_Preparation.seasonality
-import Data_Preparation.promotion
-import Data_Preparation.distribution
-import Data_Preparation.calculatePrice
+# work by adding Data_preparation/ to extra path as a quick fix in VS Code
+# make the python interpreter look for module named seasonality if not found in usual module (ex: bin)
+from seasonality import construct_seasonality_and_event_features
+from promotion import compute_price_discount_feature
+from distribution import construct_distribution_feature
+from calculatePrice import calculatePrice
 import pandas as pd
 import numpy as np
-import yaml
-
-# get current working directory
-
-media_exec_df = pd.read_csv('data/FRA_SPEND_MEDIA_EXECUTION_MAPPING.csv')
-unique_weeks = pd.DataFrame(media_exec_df['YEAR_WEEK'].unique())
-unique_weeks = unique_weeks.rename(columns={0:'YEAR_WEEK'})
-
-sell_out_df = pd.read_csv('data/FRA_SELL_OUT_COMPANY_MAPPING.csv')
-sell_out_distribution_df = pd.read_csv('data/FRA_SELL_OUT_DISTRIBUTION_MAPPING.csv')
-sell_out_competition_df = pd.read_csv('data/FRA_SELL_OUT_COMPETITORS_MAPPING.csv')
+from yaml import load, Loader
 
 
 def run(configurations):
+
+    media_exec_df = pd.read_csv('../data/FRA_SPEND_MEDIA_EXECUTION_MAPPING.csv')
+    unique_weeks = pd.DataFrame(media_exec_df['YEAR_WEEK'].unique())
+    unique_weeks = unique_weeks.rename(columns={0:'YEAR_WEEK'})
+
+    sell_out_df = pd.read_csv('../data/FRA_SELL_OUT_COMPANY_MAPPING.csv')
+    sell_out_distribution_df = pd.read_csv('../data/FRA_SELL_OUT_DISTRIBUTION_MAPPING.csv')
+    sell_out_competition_df = pd.read_csv('../data/FRA_SELL_OUT_COMPETITORS_MAPPING.csv')
+
 
     #define basic feature table
     feature_df = sell_out_df[["YEAR_WEEK","BRAND"]]
@@ -44,16 +45,16 @@ def run(configurations):
 
 
     #calculate event & seasonality features AND merge
-    seasonality_df = Data_Preparation.seasonality.construct_seasonality_and_event_features(unique_weeks)
+    seasonality_df = construct_seasonality_and_event_features(unique_weeks)
     feature_df = feature_df.merge(seasonality_df, on="YEAR_WEEK")
 
     #calculate promotion feature with 0.9 percentile reference level AND merge
-    promotion_df = Data_Preparation.promotion.compute_price_discount_feature(sell_out_df.copy(), quantile_reference=0.9)
+    promotion_df = compute_price_discount_feature(sell_out_df.copy(), quantile_reference=0.9)
     promotion_df = promotion_df.rename(columns={"VOLUME_SO": "TARGET_VOL_SO", "relative_gap_to_90th_price": "PROMOTION_FEATURE"})
     feature_df = feature_df.merge(promotion_df, on=["YEAR_WEEK","BRAND"])
 
     #calculate competiton feature based on category
-    distribution_df = Data_Preparation.distribution.construct_distribution_feature(sell_out_distribution_df = sell_out_distribution_df,
+    distribution_df = construct_distribution_feature(sell_out_distribution_df = sell_out_distribution_df,
                                                                                   configurations = configurations,
                                                                                   quantile_reference_level=0)
 
@@ -72,7 +73,7 @@ def run(configurations):
     control_df = pd.concat([promotion_df, seasonality_df, distribution_df],axis=1)
 
     #create price_df
-    price_df = Data_Preparation.calculatePrice.calculatePrice(sell_out_df.copy(), configurations)
+    price_df = calculatePrice(sell_out_df.copy(), configurations)
 
     #define raw spendings dataframe
     spendings_df = feature_df[configurations['TOUCHPOINTS']]
@@ -89,5 +90,8 @@ def run(configurations):
     indexColumns['YEAR'] = feature_df['YEAR_WEEK'].astype(str).str[:4]
     
     return spendings_df, price_df, feature_df, control_df, target_raw, indexColumns
+
+configuration = load(open("../config/baseConfig.yaml"), Loader=Loader)
+run(configuration)
 
 
