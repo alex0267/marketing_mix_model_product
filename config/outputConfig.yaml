@@ -16,12 +16,12 @@ CONTRIBUTORS:
   - distribution
   - covid
   - tom
-  # - laura
+  - laura
   - lisa
   - mary
   - jack
   - marc
-  # - alex
+  - alex
 
 
 #  SPEND_UPLIFT_TO_TEST: [0.0, 0.2]

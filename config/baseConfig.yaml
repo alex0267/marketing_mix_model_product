@@ -15,8 +15,9 @@
 
 #Brands in scope
 BRANDS:
-  - fast_duck
+  # - fast_duck
   # - precious_liquid
+  - gold_plane
 
 # for predious_liquid - get rid of laura & alex
 TOUCHPOINTS:

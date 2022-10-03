@@ -54,9 +54,10 @@ responseModel = Response_Model.ResponseModel.ResponseModel(index_df = index_df,
 #first_attemps_V05_precious_liquid : = 04 but with changes naming convention
 #first_attemps_V06_precious_liquid : with covid
 #fast_duck_V1_1
+#gold_plane_V1_1
 
 #train bayesian Model
-responseModel.runModel(name ='fast_duck_V1_1', load=False)
+responseModel.runModel(name ='gold_plane_V1_1', load=False)
 responseModel.extractParameters(printOut=True)
 
 
