@@ -1,0 +1,51 @@
+MAX_LAG: 4
+
+
+#defining normalization steps of touchpoints
+NORMALIZATION_STEPS_TOUCHPOINTS:
+  tom: ['max_across_brands']
+  laura: ['max_across_brands']
+  lisa: ['max_across_brands']
+  mary: ['max_across_brands']
+  jack: ['max_across_brands']
+  lucy: ['max_across_brands']
+  marc: ['max_across_brands']
+  alex: ['max_across_brands']
+
+#defining normalization steps of touchpoints
+#the normalization steps will follow the order below:
+NORMALIZATION_STEPS_TARGET:
+  TARGET_VOL_SO: ['max_across_brands', 'logp1']
+
+
+#not functional yet
+ADSTOCK_FUNCTION_TYPE:
+  tom: 'impression_spendings'
+  laura: 'impression_spendings'
+  lisa: 'impression_spendings'
+  mary: 'impression_spendings'
+  jack: 'impression_spendings'
+  lucy: 'impression_spendings'
+  marc: 'impression_spendings'
+  alex: 'impression_spendings'
+
+
+SHAPE_THRESHOLD_VALUE:
+  tom: 7000
+  laura: 7000
+  lisa: 5000
+  mary: 3500
+  jack: 3500
+  lucy: 5000
+  marc: 50000
+  alex: 15000
+
+SHAPE_SATURATION_VALUE:
+  tom: 83000
+  laura: 90000
+  lisa: 120000
+  mary: 100000
+  jack: 90000
+  lucy: 150000
+  marc: 1000000
+  alex: 350000

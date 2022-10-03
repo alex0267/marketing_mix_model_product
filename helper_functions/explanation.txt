@@ -1,5 +1,0 @@
-Containing all functions that are generally used throughout  the program such as:
-- Normalization
-- Transformation
-- (Adstocking)
-- ...
