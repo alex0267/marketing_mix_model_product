@@ -6,21 +6,17 @@ See here: https://docs.google.com/spreadsheets/d/1fJwTlJimAz0p-UOnU5KAdRiDrSY5Jz
 
 '''
 import datetime as dt
-import Data_Preparation.datetime_module
 import numpy as np
 import pandas as pd
 
-from dateutil.easter import easter
-from datetime import timedelta
+from datetime_module import get_nb_weeks_in_year, get_year_week_day_timestamp
 from functools import partial
-from typing import List, Tuple, Union
-
 
 
 def _is_n_week_before_last_week(year_week: pd.Series, n_before: int) -> pd.Series:
     """Flags weeks corresponding to n week before the last one of the year"""
     years, weeks = year_week // 100, year_week.mod(100)
-    nb_weeks_in_year = years.apply(Data_Preparation.datetime_module.get_nb_weeks_in_year)
+    nb_weeks_in_year = years.apply(get_nb_weeks_in_year)
     return (weeks == (nb_weeks_in_year - n_before)).astype(int)
 
 
@@ -29,7 +25,7 @@ def add_monthly_seasonality(df: pd.DataFrame) -> pd.DataFrame:
     # If week starts on Sunday, middle of week is Wednesday
     #middle_day = "wednesday" if model_settings.IS_WEEK_START_SUNDAY else "thursday"
     middle_day = "wednesday"
-    get_year_week_middle_timestamp = partial(Data_Preparation.datetime_module.get_year_week_day_timestamp, day_name=middle_day)
+    get_year_week_middle_timestamp = partial(get_year_week_day_timestamp, day_name=middle_day)
     features = df.YEAR_WEEK.apply(get_year_week_middle_timestamp).dt.month
     features = pd.get_dummies(features)
     features.columns = [

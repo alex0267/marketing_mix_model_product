@@ -10,10 +10,8 @@ TO BE DONE
 
 '''
 
-from typing import Optional
 import pandas as pd
-
-from Data_Preparation.generic_features import create_feature_as_gap_to_brand_reference_level
+from generic_features import create_feature_as_gap_to_brand_reference_level
 
 
 def compute_price_discount_feature(
