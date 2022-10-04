@@ -17,12 +17,12 @@ CONTRIBUTORS:
   - covid
   - promotion
   - tom
-  # - laura
+  - laura
   - lisa
   - mary
-  - jack
   - marc
-  # - alex
+  - alex
+  - fiona
 
 
 #  SPEND_UPLIFT_TO_TEST: [0.0, 0.2]

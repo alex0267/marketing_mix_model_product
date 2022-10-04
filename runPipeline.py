@@ -51,10 +51,15 @@ responseModel = RESPONSE_MODEL.ResponseModel.ResponseModel(index_df = index_df,
 #WITH promotion feature
 #fast_duck_V1_2
 #gold_plane_V1_2
-#
+#precious_liquid_V1_2
+
+#WITH fiona (print & advertorial) and digital_vol - merged feature
+#fast_duck_V1_3
+#gold_plane_V1_3
+#precious_liquid_V1_3
 
 #train bayesian Model
-responseModel.runModel(name ='precious_liquid_V1_2_1', load=True)
+responseModel.runModel(name ='gold_plane_V1_3', load=True)
 responseModel.extractParameters(printOut=True)
 
 

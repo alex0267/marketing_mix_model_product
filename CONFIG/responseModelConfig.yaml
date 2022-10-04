@@ -8,7 +8,7 @@ NORMALIZATION_STEPS_TOUCHPOINTS:
   lisa: ['max_across_brands']
   mary: ['max_across_brands']
   jack: ['max_across_brands']
-  lucy: ['max_across_brands']
+  fiona: ['max_across_brands']
   marc: ['max_across_brands']
   alex: ['max_across_brands']
 
@@ -25,7 +25,7 @@ ADSTOCK_FUNCTION_TYPE:
   lisa: 'impression_spendings'
   mary: 'impression_spendings'
   jack: 'impression_spendings'
-  lucy: 'impression_spendings'
+  fiona: 'impression_spendings'
   marc: 'impression_spendings'
   alex: 'impression_spendings'
 
@@ -36,7 +36,7 @@ SHAPE_THRESHOLD_VALUE:
   lisa: 5000
   mary: 3500
   jack: 3500
-  lucy: 5000
+  fiona: 5000
   marc: 50000
   alex: 15000
 
@@ -46,6 +46,6 @@ SHAPE_SATURATION_VALUE:
   lisa: 120000
   mary: 100000
   jack: 90000
-  lucy: 150000
+  fiona: 150000
   marc: 1000000
   alex: 350000
