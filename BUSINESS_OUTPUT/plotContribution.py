@@ -22,7 +22,8 @@ def plotWeeklyContribution(volumeContribution):
     X = np.arange(0, len_X, 1) 
 
     plt.plot()
-    plt.stackplot(X, contributors, baseline="zero")
+    plt.stackplot(X, contributors, baseline="zero", labels=contributors.index)
+    plt.legend(loc='upper left')
     plt.plot(volumeContribution.responseModel.target, color='black')
     plt.title('Volume Contribution by contributor')
     plt.axis('tight')

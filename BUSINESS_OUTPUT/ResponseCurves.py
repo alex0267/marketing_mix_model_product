@@ -16,7 +16,7 @@ class ResponseCurves:
     - simulatedSales: Collection of simulated sales for a specific (subset, touchpoint, lift)-combination
     '''
 
-    def __init__(self, simulatedSpendings, simulatedSales, responseModel,outputConfig):
+    def __init__(self, simulatedSpendings, simulatedSales, responseModel,outputConfig, price_df):
         
         #initial response Model
 
@@ -25,6 +25,7 @@ class ResponseCurves:
 
         self.responseModel = responseModel
         self.outputConfig = outputConfig
+        self.price_df = price_df
 
         #Attributes
         self.spendings = {}
@@ -41,10 +42,6 @@ class ResponseCurves:
             plt.plot(self.spendings[(subset, touchpoint)].values(),self.deltaSales[(subset, touchpoint)].values(), label=touchpoint)
             plt.legend()
 
-            print(touchpoint)
-            print(subset)
-            print(self.spendings[(subset, touchpoint)].values())
-            print(self.deltaSales[(subset, touchpoint)].values())
 
         plt.savefig(f'BUSINESS_OUTPUT/RESPONSE_CURVE_PLOTS/responseCurve_{subset}.png')
         plt.clf()
@@ -54,7 +51,7 @@ class ResponseCurves:
     def run(self):
 
         #Execute calculation for different scopes (years individ. & all together)
-        for subset in self.outputConfig['CHANGE_PERIODS']:
+        for subset in self.outputConfig['RESPONSE_CURVE_PERIODS']:
             #Simulate sales for each touchpoint and lift level
 
             #get indexes of data for respective time frame
@@ -85,7 +82,11 @@ class ResponseCurves:
                     spendings[lift] = sum(spends)
 
                     #Still need to add the adstock length
-                    sales = self.simulatedSales[(subset, touchpoint, lift)].iloc[ind] - salesNoSpends
+                    vol = self.simulatedSales[(subset, touchpoint, lift)].iloc[ind] - salesNoSpends
+
+                    prices = self.price_df[self.price_df['BRAND']==self.responseModel.configurations['BRANDS'][0]].reset_index().iloc[ind]
+
+                    sales = (prices['AVERAGE_PRICE']*vol)
                     deltaSales[lift] = sum(sales)
 
                 self.spendings[(subset, touchpoint)]= spendings

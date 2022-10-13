@@ -74,7 +74,7 @@ parameters {
 
   //Shape parameters - distributed, impression-oriented spendings
   vector<lower=0>[num_touchpoints] shape;
-  real<lower=0> scale[num_touchpoints];
+  real<lower=0, upper=1> scale[num_touchpoints];
 }
 transformed parameters {
   // the cumulative media effect after adstock
@@ -114,7 +114,7 @@ model {
   }
 
   for (i in 1 : num_touchpoints) {
-    scale[i] ~ normal(5, 3);
+    scale[i] ~ beta(2, 2);
   }
   for (i in 1 : num_seasons) {
     beta_seasonality[i] ~ normal(0, 1);
