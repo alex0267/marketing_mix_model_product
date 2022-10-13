@@ -62,13 +62,12 @@ def run(configurations):
         #turn media variables into columns with primary key ['YEAR_WEEK','BRAND','TOUCHPOINT'] by SPEND
     feature_df = feature_df.set_index(['YEAR_WEEK','BRAND','TOUCHPOINT'])['SPEND'].unstack().reset_index()
 
-
     #calculate event & seasonality features AND merge
     seasonality_df = DATA_PREPARATION.seasonality.construct_seasonality_and_event_features(uniqueWeeks)
     feature_df = feature_df.merge(seasonality_df, on="YEAR_WEEK")
 
     #calculate promotion feature with 0.9 percentile reference level AND merge
-    promotion_df = DATA_PREPARATION.promotion.compute_price_discount_feature(sellOut_df.copy(), quantile_reference=0.9)
+    promotion_df = DATA_PREPARATION.promotion.compute_price_discount_feature(sellOut_df.copy(),configurations, quantile_reference=0.9)
     promotion_df = promotion_df.rename(columns={"VOLUME_SO": "TARGET_VOL_SO", "relative_gap_to_90th_price": "promotion"})
     feature_df = feature_df.merge(promotion_df, on=["YEAR_WEEK","BRAND"])
     control_df = brandIndices.merge(promotion_df[['YEAR_WEEK','BRAND', 'promotion']], how='inner', on=['YEAR_WEEK','BRAND'])

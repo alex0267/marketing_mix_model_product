@@ -1,13 +1,3 @@
-'''
-Current status of development - V01:
-
-DONE
-- create_feature_as_gap_to_brand_reference_level
-
-TO BE DONE
-/
-
-'''
 
 from typing import Tuple
 
@@ -51,9 +41,6 @@ def create_feature_as_gap_to_brand_reference_level(
         - feature_bulk_df: table with bulk of feature that was filtered out
     """
     assert (quantile_reference >= 0) & (quantile_reference <= 1)
-    #relevant_granularity = get_grouping_columns()
-    #keys = [key for key in relevant_granularity if key != n.F_YEAR_WEEK]
-    #logger.info(f"[FEATURES] Building `{col_feature}` feature as a gap to reference level")
 
     # 1. Compute the feature reference level
     #is_ref_column_returned = bool(col_feature_ref)
