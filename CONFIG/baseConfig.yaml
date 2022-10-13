@@ -1,22 +1,10 @@
 
 # Current status of development - V01:
-#
-# DONE
-# -
-
-#TO BE DONE
-#- Merge all user definable parameters from code to config file
-#  - channel in use
-#  - tuochpoints in use
-#  - normalization settings
-#  - bayesian settings
-#  - Seasonality
-#  - ...
 
 #Brands in scope
 BRANDS:
-  # - fast_duck
-  - gold_plane
+  - fast_duck
+  # - gold_plane
   # - precious_liquid
 
 
@@ -26,7 +14,6 @@ TOUCHPOINTS:
   - laura
   - lisa
   - mary
-#  - lucy - lucy is not defined in the SPEND_MEDIA_EXECUTION_MAPPING
   - marc
   - alex
   - fiona
@@ -46,7 +33,7 @@ SEASONALITY_VARIABLES_BASE:
  - is_october
  - is_november
  - is_december
-#  - is_last_week
+ - is_last_week
 
 #  - christmas
 #  - is_penultimate_week
@@ -56,6 +43,10 @@ CONTROL_VARIABLES_BASE:
    - distribution
    - covid
    - promotion
+
+#definition of price period ends for calculation of discount price reference levels
+PRICE_PERIOD_1_END: 201905
+PRICE_PERIOD_2_END: 202113
 
 
 
