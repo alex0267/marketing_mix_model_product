@@ -28,10 +28,11 @@ functions {
     return ((t^S) / (H^S+t^S));
   }
 }
+
 data {
   // the total number of observations
   int<lower=1> N;
-  //
+ 
   // the vector of sales
   array [N] real y;
   // the maximum duration of lag effect, in weeks
@@ -58,22 +59,22 @@ parameters {
   real<lower=0> noise_var;
   // the intercept
   real tau;
+
   // the coefficients for media variables
   vector<lower=0>[num_touchpoints] beta;
   // the coefficients for seasonality variables
   vector[num_seasons] beta_seasonality;
   // the coefficients for control variables
-  vector[num_control] beta_control;
+  vector<lower=0>[num_control] beta_control;
+
   // the decay and peak parameter for the adstock transformation of
-  // each media
+  // each media - (peak only relevant for specific adstock type)
   vector<lower=0,upper=1>[num_touchpoints] decay;
   vector<lower=0,upper=ceil(max_lag/2)>[num_touchpoints] peak;
-  //Shape parameter - spendings
-  //vector<lower=0,upper=10>[num_touchpoints] H; //Half saturation point
-  //vector<lower=0,upper=10>[num_touchpoints] S; //slope parameter
+
   //Shape parameters - distributed, impression-oriented spendings
-  vector<lower=0, upper = 3>[num_touchpoints] shape;
-  vector<lower=0, upper = 3>[num_touchpoints] scale;
+  vector<lower=0>[num_touchpoints] shape;
+  real<lower=0> scale[num_touchpoints];
 }
 transformed parameters {
   // the cumulative media effect after adstock
@@ -101,24 +102,25 @@ transformed parameters {
   } 
 }
 model {
-  decay ~ beta(3,3);
+  decay ~ normal(0.5,0.3);
   peak ~ uniform(0, ceil(max_lag/2));
   tau ~ normal(0, 5);
   //definition of beta variables - generic for now including media betas
   for (i in 1 : num_touchpoints) {
-    beta[i] ~ normal(1, 1);
+    beta[i] ~ normal(0, 1);
   }
   for (i in 1 : num_touchpoints) {
-    shape[i] ~ normal(1.5, 2);
+    shape[i] ~ gamma(4,4);
   }
+
   for (i in 1 : num_touchpoints) {
-    scale[i] ~ normal(1.5, 2);
+    scale[i] ~ normal(5, 3);
   }
   for (i in 1 : num_seasons) {
-    beta_seasonality[i] ~ normal(1, 1);
+    beta_seasonality[i] ~ normal(0, 1);
   }
   for (i in 1 : num_control) {
-    beta_control[i] ~ normal(1, 1);
+    beta_control[i] ~ normal(0, 1);
   }
   noise_var ~ inv_gamma(0.05, 0.05 * 0.01);
   y ~ normal(tau + X_media_adstocked * beta + seasonality*beta_seasonality + control*beta_control, sqrt(noise_var));

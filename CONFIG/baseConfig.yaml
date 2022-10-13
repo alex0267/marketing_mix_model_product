@@ -16,21 +16,20 @@
 #Brands in scope
 BRANDS:
   # - fast_duck
-  # - gold_plane
-  - precious_liquid
+  - gold_plane
+  # - precious_liquid
 
 
 # for predious_liquid - get rid of laura & alex
 TOUCHPOINTS:
   - tom
-  # - laura
+  - laura
   - lisa
   - mary
-  - jack
 #  - lucy - lucy is not defined in the SPEND_MEDIA_EXECUTION_MAPPING
   - marc
-  # - alex
-#  - fiona - fiona is missing in the definitions but has allocated touchpoint spendings
+  - alex
+  - fiona
 
 TARGET: TARGET_VOL_SO
 

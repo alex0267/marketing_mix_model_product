@@ -44,17 +44,17 @@ responseModel = RESPONSE_MODEL.ResponseModel.ResponseModel(index_df = index_df,
 
 
 #model savings
-#WITH COVID
-#fast_duck_V1_1
-#gold_plane_V1_1
+#First version with all touchpoints in correct form and all core control variables (promotion, distribution, COVID)
+#fast_duck_V1_3
+#gold_plane_V1_3
+#precious_liquid_V1_3
 
-#WITH promotion feature
-#fast_duck_V1_2
-#gold_plane_V1_2
-#
-
+#Changing prior on repsonse curves ; no hard constraints
+#gold_plane_V1_4 - shape[i] ~ uniform(0, 100) - Results in no (flat) response curves - values are in fifties
+#gold_plane_V1_4 - shape[i] ~ uniform(0, 10) - Results in no (flat) response curves - values are in fifties
+# shape[i] ~ gamma(4,4); scale[i] beta(2,2); priors according to PR model
 #train bayesian Model
-responseModel.runModel(name ='precious_liquid_V1_2_1', load=True)
+responseModel.runModel(name ='gold_plane_V1_4', load=True)
 responseModel.extractParameters(printOut=True)
 
 

@@ -83,11 +83,7 @@ def run(configurations):
     distribution_df = distribution_df[["YEAR_WEEK","BRAND", "distribution"]]
 
     feature_df = feature_df.merge(distribution_df, on=["YEAR_WEEK","BRAND"])
-    
-    #drop touchpoint fiona since it does not have definitions allocated
-    #feature_df = feature_df.drop('fiona', axis=1)
 
-    #control_df = brand_Indices.merge(promotion_df, how='inner', on=['YEAR_WEEK','BRAND'])
     control_df = control_df.merge(distribution_df, how='inner', on=['YEAR_WEEK','BRAND'])
 
 

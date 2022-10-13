@@ -4,9 +4,7 @@ CHANGE_PERIODS: [2018,2019,2020,2021, ALL]
 
 #Response Curve Parameters
 SPEND_UPLIFT_TO_TEST: [0.0, 0.2, 0.4, 0.6, 0.8, 1.0,
- 1.2, 1.4, 1.6, 1.8, 2.0,
- 2.2, 2.4, 2.6, 2.8, 3.0,
- 3.2, 3.4, 3.6, 3.8]
+ 1.2, 1.4, 1.6, 1.8]
 
 #define all contributors in scope to decompose contribution
 #all touchpoints, all control variables that should be decomposed (distribution = yes, seasonality = no)
@@ -17,12 +15,12 @@ CONTRIBUTORS:
   - covid
   - promotion
   - tom
-  # - laura
+  - laura
   - lisa
   - mary
-  - jack
   - marc
-  # - alex
+  - alex
+  - fiona
 
 
 #  SPEND_UPLIFT_TO_TEST: [0.0, 0.2]

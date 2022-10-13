@@ -65,8 +65,6 @@ class UpliftSimulation:
 
         #merge control variable window with the full window        
         zeroControl = pd.DataFrame(self.responseModel.control_df.copy())
-        print('zero')
-        print(zeroControl)
 
         #if control variables are changed, each variable has to be changed individually
         if isinstance(controlVariable, list):

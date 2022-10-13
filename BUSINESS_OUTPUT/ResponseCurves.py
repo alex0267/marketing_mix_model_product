@@ -35,10 +35,18 @@ class ResponseCurves:
 
 
         
-    def createResponseCurves(self, spendings, deltaSales, subset, touchpoint):
+    def createResponseCurves(self, subset):
 
-        plt.plot(spendings.values(),deltaSales.values())
-        plt.savefig(f'BUSINESS_OUTPUT/RESPONSE_CURVE_PLOTS/responseCurve_{subset}_{touchpoint}.png')
+        for touchpoint in self.responseModel.configurations['TOUCHPOINTS']:
+            plt.plot(self.spendings[(subset, touchpoint)].values(),self.deltaSales[(subset, touchpoint)].values(), label=touchpoint)
+            plt.legend()
+
+            print(touchpoint)
+            print(subset)
+            print(self.spendings[(subset, touchpoint)].values())
+            print(self.deltaSales[(subset, touchpoint)].values())
+
+        plt.savefig(f'BUSINESS_OUTPUT/RESPONSE_CURVE_PLOTS/responseCurve_{subset}.png')
         plt.clf()
         return 0
 
@@ -83,6 +91,6 @@ class ResponseCurves:
                 self.spendings[(subset, touchpoint)]= spendings
                 self.deltaSales[(subset, touchpoint)] = deltaSales
 
-                self.createResponseCurves(spendings, deltaSales, subset, touchpoint)
+            self.createResponseCurves(subset)
                         
 
