@@ -31,7 +31,8 @@ def createBusinessOutputs(responseModel, outputConfig, price_df):
     responseCurves = BUSINESS_OUTPUT.ResponseCurves.ResponseCurves(simulatedSpendings = upliftSimulation.spendings,
                                                                            simulatedSales = upliftSimulation.prediction, 
                                                                            responseModel = responseModel,
-                                                                           outputConfig = outputConfig)
+                                                                           outputConfig = outputConfig,
+                                                                           price_df = price_df)
 
     #Calculate ROS based on volume contribution
     ROS = BUSINESS_OUTPUT.ROSCalculation.ROSCalculation(responseModel = responseModel,

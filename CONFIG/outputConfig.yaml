@@ -1,6 +1,13 @@
 #here we define the starting weeks to test - since we are working with simulated data, we use the week index
 #in the original, this must be converted to years
 CHANGE_PERIODS: [2018,2019,2020,2021, ALL]
+RESPONSE_CURVE_PERIODS: [2019,2020,2021]
+
+#define back test parameters
+BACK_TEST_TRAIN: FALSE
+BACK_TEST_TEST: FALSE
+BACK_TEST_TRAIN_END: 201930
+BACK_TEST_TEST_END: 202008
 
 #Response Curve Parameters
 SPEND_UPLIFT_TO_TEST: [0.0, 0.2, 0.4, 0.6, 0.8, 1.0,
@@ -10,17 +17,28 @@ SPEND_UPLIFT_TO_TEST: [0.0, 0.2, 0.4, 0.6, 0.8, 1.0,
 #all touchpoints, all control variables that should be decomposed (distribution = yes, seasonality = no)
 #what is left is the baseline that is the delta of simulating all other contributors neutral
 CONTRIBUTORS:
-  - baseline
-  - distribution
+
   - covid
+  - distribution
+  - alex
+  - marc
+  - fiona
   - promotion
+  - baseline
   - tom
   - laura
   - lisa
   - mary
-  - marc
+
+#define touchpoints to plot
+RESPONSE_CURVE_TARGETS:
   - alex
+  - marc
   - fiona
+  - tom
+  - laura
+  - lisa
+  - mary
 
 
 #  SPEND_UPLIFT_TO_TEST: [0.0, 0.2]

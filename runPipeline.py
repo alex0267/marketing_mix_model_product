@@ -54,7 +54,8 @@ responseModel = RESPONSE_MODEL.ResponseModel.ResponseModel(index_df = index_df,
 #gold_plane_V1_4 - shape[i] ~ uniform(0, 10) - Results in no (flat) response curves - values are in fifties
 # shape[i] ~ gamma(4,4); scale[i] beta(2,2); priors according to PR model
 #train bayesian Model
-responseModel.runModel(name ='gold_plane_V1_4', load=True)
+#gold_plane_V1_6
+responseModel.runModel(name ='gold_plane_V1_6', load=True)
 responseModel.extractParameters(printOut=True)
 
 
