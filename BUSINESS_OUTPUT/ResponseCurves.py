@@ -38,7 +38,7 @@ class ResponseCurves:
         
     def createResponseCurves(self, subset):
 
-        for touchpoint in self.responseModel.configurations['TOUCHPOINTS']:
+        for touchpoint in self.outputConfig['RESPONSE_CURVE_TARGETS']:
             plt.plot(self.spendings[(subset, touchpoint)].values(),self.deltaSales[(subset, touchpoint)].values(), label=touchpoint)
             plt.legend()
 

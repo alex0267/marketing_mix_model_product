@@ -55,7 +55,10 @@ responseModel = RESPONSE_MODEL.ResponseModel.ResponseModel(index_df = index_df,
 # precious_liquid_V1_7
 #fast_duck_V1_7
 
-responseModel.runModel(name ='fast_duck_V1_7', load=False)
+#change norm to exclude saturation
+#fast_duck_V1_8
+
+responseModel.runModel(name ='fast_duck_V1_8', load=True)
 responseModel.extractParameters(printOut=True)
 
 

@@ -13,10 +13,11 @@ def shape_function(adstocked_spendings,shape, scale, threshold, saturation):
 
   shaped_spendings=[]
   for spend in adstocked_spendings:
+
     if spend > threshold:
       #define scale ()
 
-      scaled_form = (spend-threshold)/(scale*saturation)
+      scaled_form = (spend-threshold)/(scale)
 
       #high scaled_form-value leads to high shape value
       shaped = 1 - math.exp(-scaled_form**shape)
@@ -54,16 +55,9 @@ def hill_transform(data, raw_data, scope, parameters, responseModelConfig):
         #Return estimated parameters from dictionary
         shape,scale = parameters[f'{touchpoint}_shape']['shape'], parameters[f'{touchpoint}_shape']['scale']
         threshold, saturation = responseModelConfig['SHAPE_THRESHOLD_VALUE'][touchpoint], responseModelConfig['SHAPE_SATURATION_VALUE'][touchpoint]
-        threshold_normalized = HELPER_FUNCTIONS.normalization.normalize_value(threshold, raw_data[touchpoint], responseModelConfig['NORMALIZATION_STEPS_TOUCHPOINTS'][touchpoint])
-        saturation_normalized = HELPER_FUNCTIONS.normalization.normalize_value(saturation, raw_data[touchpoint], responseModelConfig['NORMALIZATION_STEPS_TOUCHPOINTS'][touchpoint])
+        threshold_normalized = HELPER_FUNCTIONS.normalization.normalize_value(threshold, raw_data[touchpoint], responseModelConfig['NORMALIZATION_STEPS_TOUCHPOINTS'][touchpoint], name = touchpoint)
+        saturation_normalized = HELPER_FUNCTIONS.normalization.normalize_value(saturation, raw_data[touchpoint], responseModelConfig['NORMALIZATION_STEPS_TOUCHPOINTS'][touchpoint], name = touchpoint)
         
-        # print('')
-        # print(touchpoint)
-        # print(shape)
-        # print(scale)
-        
-        # print(threshold_normalized)
-        # print(saturation_normalized)
 
         #normalize data
         data_normalized, data_norm = HELPER_FUNCTIONS.normalization.normalize_feature(feature_df = data[touchpoint],
@@ -72,6 +66,7 @@ def hill_transform(data, raw_data, scope, parameters, responseModelConfig):
                                                                            responseModelConfig = responseModelConfig)
 
         #shape transformation of normalized data
+
         data_shaped = shape_function(data_normalized, 
                                      shape = shape,
                                      scale = scale,

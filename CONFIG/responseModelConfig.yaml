@@ -3,13 +3,13 @@ MAX_LAG: 4
 
 #defining normalization steps of touchpoints
 NORMALIZATION_STEPS_TOUCHPOINTS:
-  tom: ['max_across_brands']
-  laura: ['max_across_brands']
-  lisa: ['max_across_brands']
-  mary: ['max_across_brands']
-  jack: ['max_across_brands']
+  tom: ['custom_normalization']
+  laura: ['custom_normalization']
+  lisa: ['custom_normalization']
+  mary: ['custom_normalization']
+  jack: ['custom_normalization']
   fiona: ['max_across_brands']
-  marc: ['max_across_brands']
+  marc: ['custom_normalization']
   alex: ['max_across_brands']
 
 #defining normalization steps of touchpoints

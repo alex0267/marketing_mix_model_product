@@ -18,7 +18,7 @@ functions {
             else
                 returned_value = 1 - exp(
                     - 1 * pow(
-                        (feature_value - threshold) / (scale_param*saturation),
+                        (feature_value - threshold) / (scale_param),
                         shape_param
                     )
                 );
