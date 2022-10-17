@@ -12,16 +12,12 @@ def normalize(normalized_feature, norm_data, normalization_steps):
     #iterate through all normalization steps and change column based on parameters
     for step in normalization_steps:
         
-
         #application of custom normalization according to defined parameter (user-defined saturation per touchpoint)
         if step == 'custom_normalization':
             scaling_factor = responseModelConfig['SHAPE_SATURATION_VALUE'][normalized_feature.name]
             #scaling_factor = 0
             normalized_feature = normalized_feature / scaling_factor
 
-
-
-        #application of mean
         elif step == 'mean_across_brands':
             #define norming based on input
             scaling_factor = norm_data.mean()
@@ -32,7 +28,6 @@ def normalize(normalized_feature, norm_data, normalization_steps):
             else:
                 normalized_feature = normalized_feature / scaling_factor
         
-        #application of max-based normalization
         elif step == 'max_across_brands':
             #define norming based on input
             scaling_factor = norm_data.max()
@@ -41,7 +36,6 @@ def normalize(normalized_feature, norm_data, normalization_steps):
                 normalized_feature = normalized_feature
             else:
                 normalized_feature = normalized_feature / scaling_factor
-
 
         #application of natural logarithm (ln(x)) to the series +1
         elif step == 'logp1':
@@ -80,7 +74,6 @@ def normalize_feature(
         scaling_factors = []
 
         for column in df:
-
 
             normalized_feature, scaling_factor = normalize(df[column],norm_data[column], normalization_steps[column])
             normalized_features.append(normalized_feature)

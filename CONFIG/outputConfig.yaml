@@ -33,7 +33,7 @@ CONTRIBUTORS:
 #define touchpoints to plot
 RESPONSE_CURVE_TARGETS:
   - alex
-  # - marc
+  - marc
   - fiona
   - tom
   - laura

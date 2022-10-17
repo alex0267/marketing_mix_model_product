@@ -8,9 +8,9 @@ NORMALIZATION_STEPS_TOUCHPOINTS:
   lisa: ['custom_normalization']
   mary: ['custom_normalization']
   jack: ['custom_normalization']
-  fiona: ['max_across_brands']
+  fiona: ['custom_normalization']
   marc: ['custom_normalization']
-  alex: ['max_across_brands']
+  alex: ['custom_normalization']
 
 #defining normalization steps of touchpoints
 #the normalization steps will follow the order below:
