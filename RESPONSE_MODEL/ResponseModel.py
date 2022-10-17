@@ -67,15 +67,6 @@ class ResponseModel:
             'control': np.array(self.control_df),
             'y': self.target_df_normalized.values
         }
-
-        print('norms - responsemodel (saturation)')
-        print(self.stanDict['touchpoint_norms'])
-        print('threshold - responsemodel (raw threshold)')
-        print(self.stanDict['touchpoint_thresholds'])
-        print('saturation - responsemodel (equal norm)')
-        print(self.stanDict['touchpoint_saturations'])
-
-
     
     def extractParameters(self, printOut=False):
         '''

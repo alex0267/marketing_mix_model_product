@@ -3,6 +3,7 @@ import DATA_PREPARATION.seasonality
 import DATA_PREPARATION.promotion
 import DATA_PREPARATION.distribution
 import DATA_PREPARATION.calculatePrice
+import DATA_PREPARATION.epros
 import pandas as pd
 import numpy as np
 import yaml
@@ -80,11 +81,16 @@ def run(configurations):
                                                                                   quantile_reference_level=0)
     
     distribution_df = distribution_df[["YEAR_WEEK","BRAND", "distribution"]]
-
     feature_df = feature_df.merge(distribution_df, on=["YEAR_WEEK","BRAND"])
-
     control_df = control_df.merge(distribution_df, how='inner', on=['YEAR_WEEK','BRAND'])
 
+    #Epros feature
+    print('DISTRIBUTION')
+    print(sellOutDistribution_df)
+    epros_df = DATA_PREPARATION.epros.constructEprosFeature(sellOutDistribution_df, column = 'DISTRIBUTION_FEATURE')
+    print(epros_df)
+    feature_df = feature_df.merge(epros_df, on=["YEAR_WEEK","BRAND"])
+    control_df = control_df.merge(epros_df, how='inner', on=['YEAR_WEEK','BRAND'])
 
     #create price_df
     price_df = DATA_PREPARATION.calculatePrice.calculatePrice(sellOut_df.copy(), configurations)

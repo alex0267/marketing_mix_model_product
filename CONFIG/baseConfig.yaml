@@ -44,6 +44,7 @@ CONTROL_VARIABLES_BASE:
    - distribution
    - covid
    - promotion
+   - epros
 
 #definition of price period ends for calculation of discount price reference levels
 PRICE_PERIOD_1_END: 201905

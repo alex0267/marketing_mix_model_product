@@ -59,9 +59,17 @@ responseModel = RESPONSE_MODEL.ResponseModel.ResponseModel(index_df = index_df,
 #fast_duck_V1_8
 #gold_plane_V1_8
 
-#test - all custom
+#all custom
+#test -> is fast_duck
+#gold_plane_V1_9
+#precious_liquid_V1_9
 
-responseModel.runModel(name ='test', load=False)
+#all custom + epros
+#fast_duck_V1_10
+#gold_plane_V1_10
+#precious_liquid_V1_10
+
+responseModel.runModel(name ='fast_duck_V1_10', load=False)
 responseModel.extractParameters(printOut=True)
 
 

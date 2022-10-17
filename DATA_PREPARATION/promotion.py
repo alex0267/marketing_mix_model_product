@@ -44,8 +44,7 @@ def compute_price_discount_feature(
         configurations['PRICE_PERIOD_2_END'],
     )
     )
-    print(sell_out_pr_agg_df)
-    sell_out_pr_agg_df.to_csv('promo.csv')
+
 
     col_feature = "relative_gap_to_90th_price"
     sell_out_pr_agg_df[col_feature] = sell_out_pr_agg_df["PRICE_ASP"].copy()
@@ -58,9 +57,7 @@ def compute_price_discount_feature(
         is_ratio_to_ref=True,
         force_positive_feature=False,
     )
-    print(sell_out_pr_agg_df)
 
-    sell_out_pr_agg_df.to_excel('promo.xlsx')
     # multiplication of columns *-1 to reverse the promotion logic
     # -> increasing ratio = increasing sales (by increasing promotion)
     sell_out_pr_agg_df[col_feature] = sell_out_pr_agg_df[col_feature] * (-1)

@@ -59,22 +59,12 @@ def hill_transform(data, raw_data, scope, parameters, responseModelConfig):
         saturation_normalized = HELPER_FUNCTIONS.normalization.normalize_value(saturation, raw_data[touchpoint], responseModelConfig['NORMALIZATION_STEPS_TOUCHPOINTS'][touchpoint], name = touchpoint)
         
 
-        print('raw')
-        print(threshold)
-        print(saturation)
-
-        print('norm')
-        print(threshold_normalized)
-        print(saturation_normalized)
-
         #normalize data
         data_normalized, data_norm = HELPER_FUNCTIONS.normalization.normalize_feature(feature_df = data[touchpoint],
                                                                            norm_data = raw_data[touchpoint],
                                                                            normalization_steps = responseModelConfig['NORMALIZATION_STEPS_TOUCHPOINTS'][touchpoint], 
                                                                            responseModelConfig = responseModelConfig)
 
-        print('data_normalized')
-        print(data_normalized)
         #shape transformation of normalized data
 
         data_shaped = shape_function(data_normalized, 
