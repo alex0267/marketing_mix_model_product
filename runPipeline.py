@@ -24,7 +24,7 @@ with open('CONFIG/outputConfig.yaml', 'r') as file:
 
 
 #Create features and prepare data
-spendings_df, seasonality_df, price_df, feature_df, control_df, target,index_df = DATA_PREPARATION.mainDataPreparation.run(configurations)
+spendings_df, seasonality_df, price_df, feature_df, control_df, target,index_df = DATA_PREPARATION.mainDataPreparation.run(configurations, responseModelConfig)
 
 
 feature_df.to_excel('OUTPUT_DF/feature_df.xlsx')
@@ -69,7 +69,12 @@ responseModel = RESPONSE_MODEL.ResponseModel.ResponseModel(index_df = index_df,
 #gold_plane_V1_10
 #precious_liquid_V1_10
 
-responseModel.runModel(name ='fast_duck_V1_10', load=False)
+#all custom + loyality card
+#fast_duck_V1_11
+#gold_plane_V1_11
+#precious_liquid_V1_11
+
+responseModel.runModel(name ='fast_duck_V1_11', load=True)
 responseModel.extractParameters(printOut=True)
 
 

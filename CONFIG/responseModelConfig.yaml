@@ -1,5 +1,28 @@
 MAX_LAG: 4
 
+NORMALIZATION_STEPS_CONTROL:
+  promotion: logp1
+  # epros: logp1
+  # covid: minus_mean
+
+  # covid_index:
+  #   - minus_mean
+  #   - std
+  #relative_gap_to_90th_price_off
+  #   - log
+  #   - minus_mean
+  #   - std
+  # discount_price_comp_to_pr_off:
+  #   - log
+  #   - minus_mean
+  #   - std
+  # off_trade_visibility:
+  #   - max
+  #   - log
+  # promo_epros:
+  #   - max
+  #   - log
+
 
 #defining normalization steps of touchpoints
 NORMALIZATION_STEPS_TOUCHPOINTS:

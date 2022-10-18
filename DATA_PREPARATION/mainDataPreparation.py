@@ -4,6 +4,7 @@ import DATA_PREPARATION.promotion
 import DATA_PREPARATION.distribution
 import DATA_PREPARATION.calculatePrice
 import DATA_PREPARATION.epros
+import HELPER_FUNCTIONS.normalization
 import pandas as pd
 import numpy as np
 import yaml
@@ -30,6 +31,14 @@ sellOutDistribution_df['BRAND'] = sellOutDistribution_df['BRAND'].replace(to_rep
 
 
 
+def normalizeControl(control_df, responseModelConfig):
+    
+    for controlVar in responseModelConfig['NORMALIZATION_STEPS_CONTROL']:
+        control_df[controlVar], scale = HELPER_FUNCTIONS.normalization.normalize_feature(control_df[controlVar],control_df[controlVar], [responseModelConfig['NORMALIZATION_STEPS_CONTROL'][controlVar]])
+
+
+    return control_df
+
 def filterByScope(df, configurations):
     '''
     Filter dataframe by brands and sort in order brand, year_week to
@@ -43,7 +52,7 @@ def filterByScope(df, configurations):
 
     return df
 
-def run(configurations):
+def run(configurations, responseModelConfig):
     '''
     Execute data preparation pipeline to create features according to the configurations
     that the models will be trained with.
@@ -68,7 +77,7 @@ def run(configurations):
     feature_df = feature_df.merge(seasonality_df, on="YEAR_WEEK")
 
     #calculate promotion feature with 0.9 percentile reference level AND merge
-    promotion_df = DATA_PREPARATION.promotion.compute_price_discount_feature(sellOut_df.copy(),configurations, quantile_reference=0.9)
+    promotion_df = DATA_PREPARATION.promotion.compute_price_discount_feature(sellOut_df.copy(),sellOutDistribution_df.copy(),configurations, quantile_reference=0.9)
     promotion_df = promotion_df.rename(columns={"VOLUME_SO": "TARGET_VOL_SO", "relative_gap_to_90th_price": "promotion"})
     feature_df = feature_df.merge(promotion_df, on=["YEAR_WEEK","BRAND"])
     control_df = brandIndices.merge(promotion_df[['YEAR_WEEK','BRAND', 'promotion']], how='inner', on=['YEAR_WEEK','BRAND'])
@@ -76,7 +85,7 @@ def run(configurations):
     #calculate competiton feature based on category
     #comp = testing.construct_price_competitors_feature(sell_out_competition_df)
     
-    distribution_df = DATA_PREPARATION.distribution.construct_distribution_feature(sell_out_distribution_df = sellOutDistribution_df,
+    distribution_df = DATA_PREPARATION.distribution.construct_distribution_feature(sell_out_distribution_df = sellOutDistribution_df.copy(),
                                                                                   configurations = configurations,
                                                                                   quantile_reference_level=0)
     
@@ -85,10 +94,9 @@ def run(configurations):
     control_df = control_df.merge(distribution_df, how='inner', on=['YEAR_WEEK','BRAND'])
 
     #Epros feature
-    print('DISTRIBUTION')
-    print(sellOutDistribution_df)
+
     epros_df = DATA_PREPARATION.epros.constructEprosFeature(sellOutDistribution_df, column = 'DISTRIBUTION_FEATURE')
-    print(epros_df)
+  
     feature_df = feature_df.merge(epros_df, on=["YEAR_WEEK","BRAND"])
     control_df = control_df.merge(epros_df, how='inner', on=['YEAR_WEEK','BRAND'])
 
@@ -100,7 +108,7 @@ def run(configurations):
     covid_feature = covid_df[['YEAR_WEEK', 'OXFORD_INDEX']].rename(columns={'OXFORD_INDEX':'covid'})
     control_df = control_df.merge(covid_feature, on='YEAR_WEEK', how='left')
     control_df = control_df.fillna(0)
-    print(control_df)
+    
  
 
     filteredFeature_df = filterByScope(feature_df,configurations)
@@ -114,6 +122,11 @@ def run(configurations):
 
     #control df
     control_df = filterByScope(control_df,configurations)
+    print(control_df)
+    control_df = normalizeControl(control_df, responseModelConfig)
+    print('after')
+    print(control_df)
+    
 
     #price df
     price_df = filterByScope(price_df,configurations)
