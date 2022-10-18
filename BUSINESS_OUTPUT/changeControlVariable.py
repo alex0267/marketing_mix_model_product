@@ -30,9 +30,15 @@ def changeControlVariable(originalControlWindow, controlVariable):
 
         if(variable == 'epros'):
             #create series of 0 for each element in scope
-            promotion_df = pd.Series([0 for x in range(len(originalControlWindow))]).rename('epros')
+            epros_df = pd.Series([0 for x in range(len(originalControlWindow))]).rename('epros')
             #merge with existing controlFrame
-            control_df = pd.concat([control_df,promotion_df], axis=1)
+            control_df = pd.concat([control_df,epros_df], axis=1)
+
+        if(variable == 'off_trade_visibility'):
+            #create series of 0 for each element in scope
+            off_trade_df = pd.Series([0 for x in range(len(originalControlWindow))]).rename('off_trade_visibility')
+            #merge with existing controlFrame
+            control_df = pd.concat([control_df,off_trade_df], axis=1)
 
 
     return control_df

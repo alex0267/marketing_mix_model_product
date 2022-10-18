@@ -74,7 +74,12 @@ responseModel = RESPONSE_MODEL.ResponseModel.ResponseModel(index_df = index_df,
 #gold_plane_V1_11
 #precious_liquid_V1_11
 
-responseModel.runModel(name ='fast_duck_V1_11', load=True)
+#off trade
+#fast_duck_V1_12
+#gold_plane_V1_12
+#precious_liquid_V1_12
+
+responseModel.runModel(name ='precious_liquid_V1_12', load=False)
 responseModel.extractParameters(printOut=True)
 
 

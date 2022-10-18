@@ -94,11 +94,16 @@ def run(configurations, responseModelConfig):
     control_df = control_df.merge(distribution_df, how='inner', on=['YEAR_WEEK','BRAND'])
 
     #Epros feature
-
     epros_df = DATA_PREPARATION.epros.constructEprosFeature(sellOutDistribution_df, column = 'DISTRIBUTION_FEATURE')
   
     feature_df = feature_df.merge(epros_df, on=["YEAR_WEEK","BRAND"])
     control_df = control_df.merge(epros_df, how='inner', on=['YEAR_WEEK','BRAND'])
+
+    #off trade visiblity
+    off_trade_visibility_df = DATA_PREPARATION.distribution.construct_off_trade_visibility_feature(sellOutDistribution_df.copy())
+
+    feature_df = feature_df.merge(off_trade_visibility_df, on=["YEAR_WEEK","BRAND"])
+    control_df = control_df.merge(off_trade_visibility_df, how='inner', on=['YEAR_WEEK','BRAND'])
 
     #create price_df
     price_df = DATA_PREPARATION.calculatePrice.calculatePrice(sellOut_df.copy(), configurations)
@@ -122,9 +127,9 @@ def run(configurations, responseModelConfig):
 
     #control df
     control_df = filterByScope(control_df,configurations)
-    print(control_df)
+
     control_df = normalizeControl(control_df, responseModelConfig)
-    print('after')
+
     print(control_df)
     
 

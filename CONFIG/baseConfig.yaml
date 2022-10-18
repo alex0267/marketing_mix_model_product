@@ -45,6 +45,7 @@ CONTROL_VARIABLES_BASE:
    - covid
    - promotion
    - epros
+   - off_trade_visibility
 
 #definition of price period ends for calculation of discount price reference levels
 PRICE_PERIOD_1_END: 201905
