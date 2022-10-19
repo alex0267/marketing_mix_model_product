@@ -1,6 +1,4 @@
 
-# Current status of development - V01:
-
 #Brands in scope
 BRANDS:
   - fast_duck
@@ -50,6 +48,8 @@ CONTROL_VARIABLES_BASE:
 #definition of price period ends for calculation of discount price reference levels
 PRICE_PERIOD_1_END: 201905
 PRICE_PERIOD_2_END: 202113
+
+#
 
 
 

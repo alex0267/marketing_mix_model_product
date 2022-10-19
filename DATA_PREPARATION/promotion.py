@@ -89,19 +89,20 @@ def compute_price_discount_feature(
         force_positive_feature=False,
     )
 
+
+
+    # multiplication of columns *-1 to reverse the promotion logic
+    # -> increasing ratio = increasing sales (by increasing promotion)
+    promotion_df[col_feature] = promotion_df[col_feature] * (-1)
+
     #the promotion is influenced by the loyality card (getting points for buying specific things)
     #The existance of a loyalty card in a specific week for a specific brand (nielsen proxy distribution)
     #affects promotional activities
 
-    # 
-    promotion_df[col_feature] = promotion_df[col_feature] * (-1)
     promotion_df = add_loyalty_card(promotion_df, distribution_df, col_feature, coef =1)
-
-    # multiplication of columns *-1 to reverse the promotion logic
-    # -> increasing ratio = increasing sales (by increasing promotion)
     
+    promotion_df = promotion_df.rename(columns={"VOLUME_SO": "TARGET_VOL_SO", "relative_gap_to_90th_price": "promotion"})
 
-    
 
     return promotion_df
 

@@ -12,23 +12,6 @@ import yaml
 #get current working directory
 #print(os.getcwd())
 
-#import data - we define a list of unique weeks that are subject to event & seasonality engineering
-mediaExec_df = pd.read_csv('DATA/FRA_SPEND_MEDIA_EXECUTION_MAPPING.csv')
-sellOut_df = pd.read_csv('DATA/FRA_SELL_OUT_COMPANY_MAPPING_EDIT.csv')
-sellOutDistribution_df = pd.read_csv('DATA/FRA_SELL_OUT_DISTRIBUTION_MAPPING.csv')
-sellOutCompetition_df = pd.read_csv('DATA/FRA_SELL_OUT_COMPETITORS_MAPPING.csv')
-covid_df = pd.read_csv('DATA/FRA_COVID_MEASURES.csv')
-
-    #clean data - replace mumm_champagne by precious_liquid
-mediaExec_df['BRAND'] = mediaExec_df['BRAND'].replace(to_replace='mumm_champagne', value='precious_liquid')
-
-uniqueWeeks = pd.DataFrame(mediaExec_df['YEAR_WEEK'].unique())
-uniqueWeeks = uniqueWeeks.rename(columns={0:'YEAR_WEEK'})
-
-
-#clean data - replace mumm_champagne by precious_liquid
-sellOutDistribution_df['BRAND'] = sellOutDistribution_df['BRAND'].replace(to_replace='mumm_champagne', value='precious_liquid')
-
 
 
 def normalizeControl(control_df, responseModelConfig):
@@ -52,97 +35,87 @@ def filterByScope(df, configurations):
 
     return df
 
-def run(configurations, responseModelConfig):
-    '''
-    Execute data preparation pipeline to create features according to the configurations
-    that the models will be trained with.
-    '''
-
-    #define basic feature table as all brand indices
-    brandIndices = sellOut_df[["YEAR_WEEK","BRAND"]]
-
-    #clean out empty brand rows
-    #feature_df.dropna(subset=["BRAND"], inplace=True)
-
-    #add media execution variables AND merge
-    mediaExec = mediaExec_df[["YEAR_WEEK", "BRAND", "TOUCHPOINT", "SPEND"]]
+def normalizeFeatureDf(configurations, feature_df):
 
 
-    feature_df = brandIndices.merge(mediaExec, on=["YEAR_WEEK","BRAND"])
-        #turn media variables into columns with primary key ['YEAR_WEEK','BRAND','TOUCHPOINT'] by SPEND
+    return 0
+
+def createFeatureDf(configurations, mediaExec_df, sellOut_df, sellOutDistribution_df, sellOutCompetition_df, covid_df, uniqueWeeks):
+    
+    #the media execution table is the basis of the feature_df
+    feature_df = mediaExec_df[["YEAR_WEEK", "BRAND", "TOUCHPOINT", "SPEND"]]
+
+    #turn touchpoint variables into columns (each touchpoint one column) with primary key ['YEAR_WEEK','BRAND','TOUCHPOINT'] by SPEND
+    #this is how the data will be interpreted
     feature_df = feature_df.set_index(['YEAR_WEEK','BRAND','TOUCHPOINT'])['SPEND'].unstack().reset_index()
 
-    #calculate event & seasonality features AND merge
+    feature_df = feature_df.merge(sellOut_df[["YEAR_WEEK","BRAND","VOLUME_SO"]], on=["YEAR_WEEK","BRAND"])
+    feature_df = feature_df.rename(columns={'VOLUME_SO':'TARGET_VOL_SO'})
+
     seasonality_df = DATA_PREPARATION.seasonality.construct_seasonality_and_event_features(uniqueWeeks)
     feature_df = feature_df.merge(seasonality_df, on="YEAR_WEEK")
 
-    #calculate promotion feature with 0.9 percentile reference level AND merge
     promotion_df = DATA_PREPARATION.promotion.compute_price_discount_feature(sellOut_df.copy(),sellOutDistribution_df.copy(),configurations, quantile_reference=0.9)
-    promotion_df = promotion_df.rename(columns={"VOLUME_SO": "TARGET_VOL_SO", "relative_gap_to_90th_price": "promotion"})
-    feature_df = feature_df.merge(promotion_df, on=["YEAR_WEEK","BRAND"])
-    control_df = brandIndices.merge(promotion_df[['YEAR_WEEK','BRAND', 'promotion']], how='inner', on=['YEAR_WEEK','BRAND'])
-
-    #calculate competiton feature based on category
-    #comp = testing.construct_price_competitors_feature(sell_out_competition_df)
+    feature_df = feature_df.merge(promotion_df[["YEAR_WEEK","BRAND","promotion"]], on=["YEAR_WEEK","BRAND"])
     
     distribution_df = DATA_PREPARATION.distribution.construct_distribution_feature(sell_out_distribution_df = sellOutDistribution_df.copy(),
                                                                                   configurations = configurations,
                                                                                   quantile_reference_level=0)
-    
-    distribution_df = distribution_df[["YEAR_WEEK","BRAND", "distribution"]]
-    feature_df = feature_df.merge(distribution_df, on=["YEAR_WEEK","BRAND"])
-    control_df = control_df.merge(distribution_df, how='inner', on=['YEAR_WEEK','BRAND'])
+    feature_df = feature_df.merge(distribution_df[["YEAR_WEEK","BRAND", "distribution"]], on=["YEAR_WEEK","BRAND"])
 
-    #Epros feature
-    epros_df = DATA_PREPARATION.epros.constructEprosFeature(sellOutDistribution_df, column = 'DISTRIBUTION_FEATURE')
-  
-    feature_df = feature_df.merge(epros_df, on=["YEAR_WEEK","BRAND"])
-    control_df = control_df.merge(epros_df, how='inner', on=['YEAR_WEEK','BRAND'])
+    epros_df = DATA_PREPARATION.epros.constructEprosFeature(sellOutDistribution_df.copy(), column = 'DISTRIBUTION_FEATURE')
+    feature_df = feature_df.merge(epros_df[["YEAR_WEEK","BRAND","epros"]], on=["YEAR_WEEK","BRAND"])
 
-    #off trade visiblity
     off_trade_visibility_df = DATA_PREPARATION.distribution.construct_off_trade_visibility_feature(sellOutDistribution_df.copy())
+    feature_df = feature_df.merge(off_trade_visibility_df[["YEAR_WEEK","BRAND","off_trade_visibility"]], on=["YEAR_WEEK","BRAND"])
 
-    feature_df = feature_df.merge(off_trade_visibility_df, on=["YEAR_WEEK","BRAND"])
-    control_df = control_df.merge(off_trade_visibility_df, how='inner', on=['YEAR_WEEK','BRAND'])
-
-    #create price_df
     price_df = DATA_PREPARATION.calculatePrice.calculatePrice(sellOut_df.copy(), configurations)
-    feature_df = feature_df.merge(price_df, on=["YEAR_WEEK","BRAND"])
+    feature_df = feature_df.merge(price_df[["YEAR_WEEK","BRAND","AVERAGE_PRICE"]], on=["YEAR_WEEK","BRAND"])
 
+    covid_df= covid_df[['YEAR_WEEK', 'OXFORD_INDEX']].rename(columns={'OXFORD_INDEX':'covid'})
+    feature_df = feature_df.merge(covid_df[['YEAR_WEEK','covid']], on='YEAR_WEEK', how='left')
 
-    covid_feature = covid_df[['YEAR_WEEK', 'OXFORD_INDEX']].rename(columns={'OXFORD_INDEX':'covid'})
-    control_df = control_df.merge(covid_feature, on='YEAR_WEEK', how='left')
-    control_df = control_df.fillna(0)
+    return feature_df, price_df, seasonality_df
+
+def run(configurations, responseModelConfig, mediaExec_df, sellOut_df, sellOutDistribution_df, sellOutCompetition_df, covid_df, uniqueWeeks):
+    '''
+    input:
+    Company-specific dataframes
+
+    Execute data preparation pipeline to:
+     - create features according to the configurations
+     - create the normalized features
+     - filter the data according to the scope
+
+     Output:
+     - feature_df
+     - normalized_feature_df
+     - normalized_filtered_feature_df
+
+    '''
+
+    feature_df, price_df,seasonality_df = createFeatureDf(configurations, mediaExec_df, sellOut_df, sellOutDistribution_df, sellOutCompetition_df, covid_df, uniqueWeeks)
+    feature_df = feature_df.fillna(0)
     
- 
+
+    normalizedFeature_df = normalizeFeatureDf(configurations, feature_df)
 
     filteredFeature_df = filterByScope(feature_df,configurations)
-
 
     #define raw spendings dataframe
     spendings_df = filteredFeature_df[configurations['TOUCHPOINTS']]
 
     #define target
     targetRaw = filteredFeature_df[configurations['TARGET']]
-
-    #control df
+    control_df = feature_df[['YEAR_WEEK','BRAND','distribution', 'promotion', 'epros', 'covid','off_trade_visibility']]
+    control_df = control_df.fillna(0)
     control_df = filterByScope(control_df,configurations)
-
-    #control_df = normalizeControl(control_df, responseModelConfig)
-
-    print(control_df)
-    
-
-    #price df
-    price_df = filterByScope(price_df,configurations)
-    
     
     #define index columns as a reference for year scoping and dataset length
     indexColumns = pd.DataFrame()
     indexColumns['YEAR_WEEK'] = filteredFeature_df['YEAR_WEEK']
     indexColumns['YEAR'] = filteredFeature_df['YEAR_WEEK'].astype(str).str[:4]
 
-    #print(control_df)
-    control_df.to_excel('OUTPUT_DF/control_df.xlsx')
 
-    return spendings_df, seasonality_df, price_df, feature_df, control_df, targetRaw, indexColumns
+
+    return spendings_df, seasonality_df, price_df, feature_df, targetRaw, indexColumns, control_df
