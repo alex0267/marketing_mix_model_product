@@ -128,7 +128,7 @@ def run(configurations, responseModelConfig):
     #control df
     control_df = filterByScope(control_df,configurations)
 
-    control_df = normalizeControl(control_df, responseModelConfig)
+    #control_df = normalizeControl(control_df, responseModelConfig)
 
     print(control_df)
     

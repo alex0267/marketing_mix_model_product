@@ -22,23 +22,23 @@ CONTRIBUTORS:
   - distribution
   - epros
   - off_trade_visibility
-  # - alex
+  - alex
   - marc
   - fiona
   - promotion
   - baseline
   - tom
-  # - laura
+  - laura
   - lisa
   - mary
 
 #define touchpoints to plot
 RESPONSE_CURVE_TARGETS:
-  # - alex
+  - alex
   - marc
   - fiona
   - tom
-  # - laura
+  - laura
   - lisa
   - mary
 

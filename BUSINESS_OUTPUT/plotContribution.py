@@ -16,8 +16,11 @@ def plotWeeklyContribution(volumeContribution):
     contributors = pd.DataFrame()
     for item in volumeContribution.outputConfig['CONTRIBUTORS']:
         contributors = pd.concat([contributors,volumeContribution.deltaToZeroDict['ALL'][item]], axis=1)
+        
     
     contributors = contributors.T
+    print('plot')
+    print(contributors)
 
     X = np.arange(0, len_X, 1) 
 

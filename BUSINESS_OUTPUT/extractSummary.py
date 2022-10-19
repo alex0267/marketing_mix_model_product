@@ -27,7 +27,8 @@ def extractSummary(responseModel, volumeContribution,ROS_Calculation, outputConf
 
         tp_df = pd.concat([responseModel.index_df['YEAR_WEEK'],spendings,responseModel.target], ignore_index=False, axis =1)
         tp_df['contributor'] = item
-        tp_df['absolute_contribution'] = volumeContribution.absoluteContributionCorrected['ALL'][item]
+        tp_df['absolute_contribution'] = volumeContribution.deltaToZeroDict['ALL'][item]
+        tp_df['absolute_contribution_corrected'] = volumeContribution.absoluteContributionCorrected['ALL'][item]
         tp_df['relative_contribution'] = volumeContribution.relativeContributions['ALL'][item]
         tp_df['ROS'] = ROS
 

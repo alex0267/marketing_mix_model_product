@@ -1,7 +1,7 @@
 MAX_LAG: 4
 
 NORMALIZATION_STEPS_CONTROL:
-  promotion: logp1
+  #promotion: logp1
   # epros: logp1
   # covid: minus_mean
 
