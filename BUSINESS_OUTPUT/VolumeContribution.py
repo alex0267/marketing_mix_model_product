@@ -43,7 +43,7 @@ class VolumeContribution:
         This requires a relative delta error correction.
         '''
         
-        for subset in self.upliftSimulation.outputConfig['CHANGE_PERIODS']:
+        for subset in self.outputConfig['CHANGE_PERIODS']:
 
             #collect all deltaToZero (lift(1)-lift(0) simulations (there is one for each touchpoint on a weekly level)
             #the sum should be close to the true sales for the respective week
@@ -83,7 +83,7 @@ class VolumeContribution:
         each factor will be adjusted with the relative delta error.
         '''
 
-        for subset in self.upliftSimulation.outputConfig['CHANGE_PERIODS']:
+        for subset in self.outputConfig['CHANGE_PERIODS']:
             deltaToZeroCorrected=pd.DataFrame()
 
             
@@ -112,7 +112,7 @@ class VolumeContribution:
         Calculate relative contribution for each subset based on the error corrected results
         '''
 
-        for subset in self.upliftSimulation.outputConfig['CHANGE_PERIODS']:
+        for subset in self.outputConfig['CHANGE_PERIODS']:
             relativeContribution=pd.DataFrame()
 
             for item in self.outputConfig['CONTRIBUTORS']:

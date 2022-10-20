@@ -102,4 +102,5 @@ def normalize_value(value, norm_data, normalization_steps,name):
         if step == 'custom_normalization':
             scaling_factor = responseModelConfig['SHAPE_SATURATION_VALUE'][name]
             #scaling_factor = 0
+
             return value / scaling_factor

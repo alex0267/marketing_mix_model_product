@@ -22,12 +22,11 @@ def normalizeControl(control_df, responseModelConfig):
 
     return control_df
 
-def filterByScope(df, configurations):
+def filterByBrands(df, configurations):
     '''
     Filter dataframe by brands and sort in order brand, year_week to
     fit the scope of the model and define a single source of truth for the order of brand & year_week
     '''
-    
 
     df = df[df['BRAND'].isin(configurations['BRANDS'])]
     df = df.sort_values(by=['BRAND', 'YEAR_WEEK'], ascending=True, inplace=False)
@@ -35,12 +34,30 @@ def filterByScope(df, configurations):
 
     return df
 
+def filterByWeeks(feature_df, configurations):
+    '''
+    Filter dataframe by Weeks to fit the scope of the model defined in the configurations
+    '''
+
+    feature_df = feature_df[(feature_df['YEAR_WEEK'] == configurations['DATA_START']).idxmax():].reset_index()
+    feature_df = feature_df[:(feature_df['YEAR_WEEK'] == configurations['DATA_END']).idxmax()+1] #+1 for inclusive
+
+
+    return feature_df
+
 def normalizeFeatureDf(configurations, feature_df):
 
+    #normalization via saturation parameters according to configurations
+    feature_df[configurations['TOUCHPOINTS']], touchpoint_norms = HELPER_FUNCTIONS.normalization.normalize_feature(feature_df[configurations['TOUCHPOINTS']],feature_df[configurations['TOUCHPOINTS']], configurations['NORMALIZATION_STEPS_TOUCHPOINTS'])
+    #normalization via max, logp1 according to configurations
+    feature_df[configurations['TARGET']], target_df_norm = HELPER_FUNCTIONS.normalization.normalize_feature(feature_df[configurations['TARGET']],feature_df[configurations['TARGET']], configurations['NORMALIZATION_STEPS_TARGET'])
 
-    return 0
+    return feature_df
 
 def createFeatureDf(configurations, mediaExec_df, sellOut_df, sellOutDistribution_df, sellOutCompetition_df, covid_df, uniqueWeeks):
+    '''
+    Performs transformations on input data to create the feature_df
+    '''
     
     #the media execution table is the basis of the feature_df
     feature_df = mediaExec_df[["YEAR_WEEK", "BRAND", "TOUCHPOINT", "SPEND"]]
@@ -74,8 +91,10 @@ def createFeatureDf(configurations, mediaExec_df, sellOut_df, sellOutDistributio
 
     covid_df= covid_df[['YEAR_WEEK', 'OXFORD_INDEX']].rename(columns={'OXFORD_INDEX':'covid'})
     feature_df = feature_df.merge(covid_df[['YEAR_WEEK','covid']], on='YEAR_WEEK', how='left')
+    #covid table does not start until beginning of 2020
+    feature_df = feature_df.fillna(0)
 
-    return feature_df, price_df, seasonality_df
+    return feature_df
 
 def run(configurations, responseModelConfig, mediaExec_df, sellOut_df, sellOutDistribution_df, sellOutCompetition_df, covid_df, uniqueWeeks):
     '''
@@ -88,34 +107,34 @@ def run(configurations, responseModelConfig, mediaExec_df, sellOut_df, sellOutDi
      - filter the data according to the scope
 
      Output:
-     - feature_df
-     - normalized_feature_df
-     - normalized_filtered_feature_df
+     - feature_df - for documentation
+     - filtered_feature_df - for simulation and output generation
+     - normalized_feature_df (might not be necessary)
+     - normalized_filtered_feature_df - for training
 
     '''
 
-    feature_df, price_df,seasonality_df = createFeatureDf(configurations, mediaExec_df, sellOut_df, sellOutDistribution_df, sellOutCompetition_df, covid_df, uniqueWeeks)
-    feature_df = feature_df.fillna(0)
+    feature_df = createFeatureDf(configurations, mediaExec_df, sellOut_df, sellOutDistribution_df, sellOutCompetition_df, covid_df, uniqueWeeks)
     
+    feature_df = filterByBrands(feature_df.copy(),configurations)
 
-    normalizedFeature_df = normalizeFeatureDf(configurations, feature_df)
+    normalizedFeature_df = normalizeFeatureDf(configurations, feature_df.copy())
 
-    filteredFeature_df = filterByScope(feature_df,configurations)
+    #normalized features require the total scope of weeks since the normalization 
+    #is done with maximum values across the entire dataset
+    filteredFeature_df = filterByWeeks(feature_df.copy(), configurations)
+    normalizedFilteredFeature_df = filterByWeeks(normalizedFeature_df.copy(), configurations)
 
-    #define raw spendings dataframe
+
+    price_df = filteredFeature_df['AVERAGE_PRICE']
+    seasonality_df = filteredFeature_df[configurations['SEASONALITY_VARIABLES_BASE']]
     spendings_df = filteredFeature_df[configurations['TOUCHPOINTS']]
-
-    #define target
     targetRaw = filteredFeature_df[configurations['TARGET']]
-    control_df = feature_df[['YEAR_WEEK','BRAND','distribution', 'promotion', 'epros', 'covid','off_trade_visibility']]
-    control_df = control_df.fillna(0)
-    control_df = filterByScope(control_df,configurations)
-    
-    #define index columns as a reference for year scoping and dataset length
-    indexColumns = pd.DataFrame()
-    indexColumns['YEAR_WEEK'] = filteredFeature_df['YEAR_WEEK']
-    indexColumns['YEAR'] = filteredFeature_df['YEAR_WEEK'].astype(str).str[:4]
+    control_df = filteredFeature_df[['YEAR_WEEK','BRAND','distribution', 'promotion', 'epros', 'covid','off_trade_visibility']]
+    #index dataframe to filter other frames based on brand or year specifications (necessary for output generation)
+    index_df = filteredFeature_df[['YEAR_WEEK','BRAND']]
+    index_df['YEAR'] = index_df['YEAR_WEEK'].astype(str).str[:4]
 
 
 
-    return spendings_df, seasonality_df, price_df, feature_df, targetRaw, indexColumns, control_df
+    return spendings_df, seasonality_df, price_df, feature_df, targetRaw, index_df, control_df

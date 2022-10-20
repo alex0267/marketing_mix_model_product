@@ -49,7 +49,48 @@ CONTROL_VARIABLES_BASE:
 PRICE_PERIOD_1_END: 201905
 PRICE_PERIOD_2_END: 202113
 
-#
+#define dataset start and end(inclusive)
+DATA_START: 201827
+DATA_END: 202126
+
+NORMALIZATION_STEPS_CONTROL:
+  #promotion: logp1
+  # epros: logp1
+  # covid: minus_mean
+
+  # covid_index:
+  #   - minus_mean
+  #   - std
+  #relative_gap_to_90th_price_off
+  #   - log
+  #   - minus_mean
+  #   - std
+  # discount_price_comp_to_pr_off:
+  #   - log
+  #   - minus_mean
+  #   - std
+  # off_trade_visibility:
+  #   - max
+  #   - log
+  # promo_epros:
+  #   - max
+  #   - log
+
+
+#defining normalization steps of touchpoints
+NORMALIZATION_STEPS_TOUCHPOINTS:
+  tom: ['custom_normalization']
+  laura: ['custom_normalization']
+  lisa: ['custom_normalization']
+  mary: ['custom_normalization']
+  jack: ['custom_normalization']
+  fiona: ['custom_normalization']
+  marc: ['custom_normalization']
+  alex: ['custom_normalization']
+
+#defining normalization steps of touchpoints
+#the normalization steps will follow the order below:
+NORMALIZATION_STEPS_TARGET: ['max_across_brands', 'logp1']
 
 
 

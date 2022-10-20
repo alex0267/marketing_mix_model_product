@@ -44,6 +44,7 @@ class ResponseModel:
         
     
     def createDict(self):
+
         '''
         create dictionary as input data for the stan model
         '''
@@ -67,6 +68,7 @@ class ResponseModel:
             'control': np.array(self.control_df),
             'y': self.target_df_normalized.values
         }
+
     
     def extractParameters(self, printOut=False):
         '''

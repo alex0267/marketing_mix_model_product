@@ -84,9 +84,9 @@ class ResponseCurves:
                     #Still need to add the adstock length
                     vol = self.simulatedSales[(subset, touchpoint, lift)].iloc[ind] - salesNoSpends
 
-                    prices = self.price_df[self.price_df['BRAND']==self.responseModel.configurations['BRANDS'][0]].reset_index().iloc[ind]
+                    prices = self.price_df.iloc[ind]
 
-                    sales = (prices['AVERAGE_PRICE']*vol)
+                    sales = (prices*vol)
                     deltaSales[lift] = sum(sales)
 
                 self.spendings[(subset, touchpoint)]= spendings

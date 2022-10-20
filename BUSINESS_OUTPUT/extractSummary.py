@@ -35,7 +35,8 @@ def extractSummary(responseModel, volumeContribution,ROS_Calculation, outputConf
         responseModelInit_df = pd.concat([responseModelInit_df, tp_df], ignore_index=False,axis=0)
     
     #add ROS ratio
-    responseModelInit_df = responseModelInit_df.merge(ROS_Calculation.prices_ALL[['YEAR_WEEK', 'AVERAGE_PRICE']], how='inner', on='YEAR_WEEK')
+    responseModelInit_df['AVERAGE_PRICE'] = ROS_Calculation.prices_ALL
+    responseModelInit_df = responseModelInit_df.sort_values(by=['YEAR_WEEK'])
 
     print(responseModelInit_df)
 

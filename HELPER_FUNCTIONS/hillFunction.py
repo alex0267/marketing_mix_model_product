@@ -9,7 +9,7 @@ import HELPER_FUNCTIONS.normalization
 import math
 
 
-def shape_function(adstocked_spendings,shape, scale, threshold, saturation):
+def shape_function(adstocked_spendings,shape, scale, threshold):
 
   shaped_spendings=[]
   for spend in adstocked_spendings:
@@ -54,9 +54,8 @@ def hill_transform(data, raw_data, scope, parameters, responseModelConfig):
 
         #Return estimated parameters from dictionary
         shape,scale = parameters[f'{touchpoint}_shape']['shape'], parameters[f'{touchpoint}_shape']['scale']
-        threshold, saturation = responseModelConfig['SHAPE_THRESHOLD_VALUE'][touchpoint], responseModelConfig['SHAPE_SATURATION_VALUE'][touchpoint]
+        threshold = responseModelConfig['SHAPE_THRESHOLD_VALUE'][touchpoint]
         threshold_normalized = HELPER_FUNCTIONS.normalization.normalize_value(threshold, raw_data[touchpoint], responseModelConfig['NORMALIZATION_STEPS_TOUCHPOINTS'][touchpoint], name = touchpoint)
-        saturation_normalized = HELPER_FUNCTIONS.normalization.normalize_value(saturation, raw_data[touchpoint], responseModelConfig['NORMALIZATION_STEPS_TOUCHPOINTS'][touchpoint], name = touchpoint)
         
 
         #normalize data
@@ -70,8 +69,7 @@ def hill_transform(data, raw_data, scope, parameters, responseModelConfig):
         data_shaped = shape_function(data_normalized, 
                                      shape = shape,
                                      scale = scale,
-                                     threshold = threshold_normalized,
-                                     saturation = saturation_normalized)
+                                     threshold = threshold_normalized)
 
 
         media_shaped[touchpoint] = data_shaped

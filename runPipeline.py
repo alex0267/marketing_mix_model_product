@@ -43,23 +43,24 @@ def run():
                                                                                                                     sellOutCompetition_df = sellOutCompetition_df.copy(),
                                                                                                                     covid_df = covid_df.copy(),
                                                                                                                     uniqueWeeks = uniqueWeeks.copy())
-    print('here')
-    print(control_df)
-    print(feature_df)
+
     feature_df.to_excel('OUTPUT_DF/feature_df.xlsx')
-
-
+    spendings_df.to_excel('OUTPUT_DF/spendings_df.xlsx')
+    seasonality_df.to_excel('OUTPUT_DF/seasonality_df.xlsx')
+    target.to_excel('OUTPUT_DF/target.xlsx')
+    index_df.to_excel('OUTPUT_DF/index_df.xlsx')
+    control_df.to_excel('OUTPUT_DF/control_df.xlsx')
+    price_df.to_excel('OUTPUT_DF/price_df.xlsx')
 
     # Initialize Model instance and Train Bayesian Model 
     responseModel = RESPONSE_MODEL.ResponseModel.ResponseModel(index_df = index_df,
-                                spendings_df = spendings_df, 
-                                seasonality_df = seasonality_df,
-                                control_df = control_df,
-                                configurations = configurations,
-                                responseModelConfig= responseModelConfig, 
-                                target = target,
-                                stanCode = RESPONSE_MODEL.stanFile.stanCode)
-
+                                                        spendings_df = spendings_df, 
+                                                        seasonality_df = seasonality_df,
+                                                        control_df = control_df,
+                                                        configurations = configurations,
+                                                        responseModelConfig= responseModelConfig, 
+                                                        target = target,
+                                                        stanCode = RESPONSE_MODEL.stanFile.stanCode)
 
 
     #model savings
@@ -84,9 +85,8 @@ def run():
     #gold_plane_V1_12
     #precious_liquid_V1_12
 
-
     
-    responseModel.runModel(name ='fast_duck_V1_TEST', load=False)
+    responseModel.runModel(name ='fast_duck_V1_TEST', load=True)
     responseModel.extractParameters(printOut=True)
 
     #calculate contribution decomposition via estimated parameters and original spendings/sales

@@ -52,11 +52,10 @@ class ROSCalculation:
                     
                     totalVolumeContribution = (self.volumeContribution.absoluteContributionCorrected[scope][touchpoint].iloc[ind])
                     
-                    prices = self.price_df[self.price_df['BRAND']==self.responseModel.configurations['BRANDS'][0]].reset_index().iloc[ind]
-                    averagePrice = prices['AVERAGE_PRICE']
+                    prices = self.price_df.iloc[ind]
                     
 
-                    valueContribution = averagePrice*totalVolumeContribution.values
+                    valueContribution = prices*totalVolumeContribution.values
 
                     totalSpendings = self.responseModel.spendings_df[touchpoint].iloc[ind].reset_index(drop = True)
 

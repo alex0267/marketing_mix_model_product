@@ -1,5 +1,6 @@
 import pandas as pd
 import sys
+import numpy as np
 
 def checkTable(truth_df, check_df):
     '''
@@ -37,7 +38,9 @@ def loadData():
     sellOut_df = pd.read_csv('DATA/FRA_SELL_OUT_COMPANY_MAPPING_EDIT.csv')
     
     #touchpoint spendings data
-    mediaExec_df = pd.read_csv('DATA/FRA_SPEND_MEDIA_EXECUTION_MAPPING.csv')
+    mediaExec_df = pd.read_csv('DATA/FRA_SPEND_MEDIA_EXECUTION_MAPPING_EDIT.csv')
+    #mediaExec has trailing zeros in year week - remove via int declaration
+    mediaExec_df['YEAR_WEEK'] = mediaExec_df['YEAR_WEEK'].astype(np.int64)
     mediaExec_df['BRAND'] = mediaExec_df['BRAND'].replace(to_replace='mumm_champagne', value='precious_liquid')
     checkTable(sellOut_df.copy(), mediaExec_df.copy())
 
