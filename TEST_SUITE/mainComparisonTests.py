@@ -79,6 +79,9 @@ def compareStanDicts(stanDict):
 
         if(masterStanDict['y'] != compareStanDict['y']):
             print('y different')
+            
+        if(compareStanDict['touchpointNorms'] != compareStanDict['touchpointNorms']):
+            print('norms')
         
 
     if(compareSizeDict == masterSizeDict):

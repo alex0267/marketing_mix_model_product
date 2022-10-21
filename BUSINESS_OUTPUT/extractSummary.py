@@ -16,7 +16,7 @@ def extractSummary(responseModel, volumeContribution,ROS_Calculation, outputConf
 
         #iterate through touchpoints and add spendings and ROS (touchpoint specific information)
         if item in responseModel.configurations['TOUCHPOINTS']:
-            spendings = responseModel.spendings_df[item].rename('spendings')
+            spendings = responseModel.filteredFeature_df[responseModel.configurations['TOUCHPOINTS']][item].rename('spendings')
             ROS = ROS_Calculation.ROS_Weekly[item]
             ROS.replace([np.inf, -np.inf], 0, inplace=True)
 
@@ -25,7 +25,7 @@ def extractSummary(responseModel, volumeContribution,ROS_Calculation, outputConf
             spendings = pd.Series([0 for x in range(len(responseModel.index_df['YEAR_WEEK']))]).rename('spendings')
             ROS = pd.Series([0 for x in range(len(responseModel.index_df['YEAR_WEEK']))])
 
-        tp_df = pd.concat([responseModel.index_df['YEAR_WEEK'],spendings,responseModel.target], ignore_index=False, axis =1)
+        tp_df = pd.concat([responseModel.index_df['YEAR_WEEK'],spendings,responseModel.filteredFeature_df['TARGET_VOL_SO']], ignore_index=False, axis =1)
         tp_df['contributor'] = item
         tp_df['absolute_contribution'] = volumeContribution.deltaToZeroDict['ALL'][item]
         tp_df['absolute_contribution_corrected'] = volumeContribution.absoluteContributionCorrected['ALL'][item]

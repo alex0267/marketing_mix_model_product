@@ -57,7 +57,7 @@ class ROSCalculation:
 
                     valueContribution = prices*totalVolumeContribution.values
 
-                    totalSpendings = self.responseModel.spendings_df[touchpoint].iloc[ind].reset_index(drop = True)
+                    totalSpendings = self.responseModel.filteredFeature_df[self.responseModel.configurations['TOUCHPOINTS']][touchpoint].iloc[ind].reset_index(drop = True)
 
                     if (subset=='ALL' and scope == 'ALL'):
                         self.prices_ALL = prices

@@ -67,7 +67,7 @@ class VolumeContribution:
             deltaToZeroSimulations['total_predict'] = deltaToZeroSimulations.sum(axis=1)
             
             #include the target
-            deltaToZeroSimulations['total_target'] = self.responseModel.target
+            deltaToZeroSimulations['total_target'] = self.responseModel.filteredFeature_df['TARGET_VOL_SO']
 
             #add the subset simulation table to the collection
             self.deltaToZeroDict[subset] = deltaToZeroSimulations
