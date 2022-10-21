@@ -12,7 +12,8 @@ def createBusinessOutputs(responseModel, outputConfig, price_df):
     
     #Simulate uplifts
     upliftSimulation = BUSINESS_OUTPUT.UpliftSimulation.UpliftSimulation(responseModel = responseModel,
-                                                                       outputConfig = outputConfig) #define configurations for response Curve generation
+                                                                        configurations = responseModel.configurations,
+                                                                        outputConfig = outputConfig) #define configurations for response Curve generation
   
     #Calculate volume contributions based on uplifts
     volumeContribution = BUSINESS_OUTPUT.VolumeContribution.VolumeContribution(upliftSimulation = upliftSimulation, 

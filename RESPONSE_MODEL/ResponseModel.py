@@ -3,6 +3,8 @@ import pandas as pd
 import numpy as np
 import HELPER_FUNCTIONS.normalization
 import HELPER_FUNCTIONS.summarize
+import TEST_SUITE.mainComparisonTests
+import json
 
 #class that contains the input and output data of a specific response model with respective model settings
 #Also contains the functions to estimate and extract parameters
@@ -43,6 +45,7 @@ class ResponseModel:
         self.stanCode = stanCode
         
     
+
     def createDict(self):
 
         '''
@@ -64,11 +67,12 @@ class ResponseModel:
             'num_seasons': len(self.configurations['SEASONALITY_VARIABLES_BASE']),
             'seasonality': np.array(self.filteredFeature_df[self.configurations['SEASONALITY_VARIABLES_BASE']]),
             'num_control': len(self.configurations['CONTROL_VARIABLES_BASE']),
-            'control': np.array(self.filteredFeature_df[['YEAR_WEEK','BRAND','distribution', 'promotion', 'epros', 'covid','off_trade_visibility']]),
+            'control': np.array(self.filteredFeature_df[self.configurations['CONTROL_VARIABLES_BASE']]),
             'y': self.target_df_normalized.values
         }
 
-    
+        TEST_SUITE.mainComparisonTests.compareStanDicts(self.stanDict)
+
     def extractParameters(self, printOut=False):
         '''
         Extract parameters from trained model

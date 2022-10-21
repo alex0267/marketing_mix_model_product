@@ -94,13 +94,14 @@ def run():
     #fast_duck_V1_TEST - all good version
 
     
-    responseModel.runModel(name ='fast_duck_V1_TEST_2010', load=False)
+    responseModel.runModel(name ='fast_duck_V1_TEST_2010', load=True)
     responseModel.extractParameters(printOut=True)
-    '''
+    
     #calculate contribution decomposition via estimated parameters and original spendings/sales
     BUSINESS_OUTPUT.mainBusinessOutput.createBusinessOutputs(responseModel = responseModel, 
                                                             outputConfig = outputConfig,
                                                             price_df = price_df)
+    '''
     '''
 
 run()

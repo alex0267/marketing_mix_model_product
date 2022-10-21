@@ -1,5 +1,6 @@
 import BUSINESS_OUTPUT.applyParameters
 import BUSINESS_OUTPUT.changeControlVariable
+import TEST_SUITE.mainComparisonTests
 import HELPER_FUNCTIONS.getIndex
 import numpy as np
 import matplotlib.pyplot as plt
@@ -58,21 +59,19 @@ class UpliftSimulation:
 
 
         #extract the control dataframe window that needs to be changed    
-        originalControlWindow = self.responseModel.control_df[controlVariable].iloc[ind]
+        originalControlWindow = self.responseModel.filteredFeature_df[self.responseModel.configurations['CONTROL_VARIABLES_BASE']][controlVariable].iloc[ind]
 
         #change control variable window to neutral position depending on control variable definition
         changedControl = BUSINESS_OUTPUT.changeControlVariable.changeControlVariable(originalControlWindow, controlVariable)
 
         #merge control variable window with the full window        
-        zeroControl = pd.DataFrame(self.responseModel.control_df.copy())
+        zeroControl = pd.DataFrame(self.responseModel.filteredFeature_df[self.responseModel.configurations['CONTROL_VARIABLES_BASE']].copy())
 
         #if control variables are changed, each variable has to be changed individually
         if isinstance(controlVariable, list):
             for ctrl in controlVariable: 
                 zeroControl[ctrl].loc[changedControl.index] = changedControl[ctrl]
-        
         else:
-
             zeroControl[controlVariable].loc[changedControl.index] = changedControl[:]
         
         
@@ -92,14 +91,14 @@ class UpliftSimulation:
         
 
 
-        originalSpendingsInWindow = self.responseModel.spendings_df[touchpoint].iloc[ind]
+        originalSpendingsInWindow = self.responseModel.filteredFeature_df[self.responseModel.configurations['TOUCHPOINTS']][touchpoint].iloc[ind]
 
 
         #apply change
         changedSpendings = originalSpendingsInWindow*lift
 
         #change entire dataframe according to change
-        spendings = self.responseModel.spendings_df.copy()
+        spendings = self.responseModel.filteredFeature_df[self.responseModel.configurations['TOUCHPOINTS']].copy()
         
         #merge the changed section with the rest of the data
 
@@ -116,23 +115,24 @@ class UpliftSimulation:
         '''take the changed spendings and simulate the sales based on the estimated parameters'''
 
         #use the existing control_df values if no changed are specified
-        if spendings is None: spendings = self.responseModel.spendings_df
-        if control_df is None: control_df = self.responseModel.control_df
+        if spendings is None: spendings = self.responseModel.filteredFeature_df[self.responseModel.configurations['TOUCHPOINTS']].copy()
+        if control_df is None: control_df = self.responseModel.filteredFeature_df[self.responseModel.configurations['CONTROL_VARIABLES_BASE']].copy()
 
         #extract sales predictions from changed spendingsFrame
         factor_df, y_pred = BUSINESS_OUTPUT.applyParameters.applyParametersToData(raw_data = spendings,
-                                                            original_spendings = self.responseModel.spendings_df.copy(),
+                                                            original_spendings = self.responseModel.feature_df[self.responseModel.configurations['TOUCHPOINTS']].copy(),
                                                             parameters = self.responseModel.parameters,
                                                             configurations= self.responseModel.configurations,
                                                             responseModelConfig = self.responseModel.responseModelConfig,
                                                             scope = self.responseModel.configurations['TOUCHPOINTS'],
-                                                            seasonality_df = self.responseModel.seasonality_df,
+                                                            seasonality_df = self.responseModel.filteredFeature_df[self.responseModel.configurations['SEASONALITY_VARIABLES_BASE']],
                                                             beta_seasonality= self.responseModel.beta_seasonality,
                                                             control_df = control_df,
                                                             beta_control = self.responseModel.beta_control)
         
         #prediction is equal to the (normalized prediction -1)*raw_sales.max()
-        prediction = (y_pred-1)*self.responseModel.target.max()
+        #we are taking the feature_df since the max value must be based on the entire dataset, not just the weeks applied
+        prediction = (y_pred-1)*self.responseModel.feature_df['TARGET_VOL_SO'].max()
             
         return prediction
 
@@ -142,7 +142,6 @@ class UpliftSimulation:
         Scope : touchpoints
         '''
 
-        summary = pd.DataFrame()
         #Execute calculation for different scopes (years individ. & all together)
         for subset in self.outputConfig['CHANGE_PERIODS']:
             #Simulate sales for each touchpoint and lift level
@@ -155,10 +154,7 @@ class UpliftSimulation:
                     #predict induced sales based on changed spendings with estimated parameters
                     prediction = self.simulateSales(spendings=spendings)
 
-                    #extract summary for checking correctness of approach
-                    if (touchpoint == 'touchpoint_5'):
-                        summary = pd.concat([summary,spendings['touchpoint_5'].rename(f'tp_5_{lift}_{subset}'),spendings['touchpoint_6'].rename(f'tp_6'),prediction], axis=1)
-
+                    
                     #extract weekly changed spendings and predictions for each spending lift, touchpoint and subset combination
                     self.spendings[(subset,touchpoint,lift)] = spendings
                     self.prediction[(subset,touchpoint,lift)] = prediction
@@ -167,7 +163,7 @@ class UpliftSimulation:
                 #for each touchpoint
                 self.deltaCurrentToZero[(subset,touchpoint)] = self.prediction[(subset,touchpoint,1.0)]-self.prediction[(subset,touchpoint,0.0)]
 
-                summary.to_excel('OUTPUT_DF/TP5_upliftSummary.xlsx')         
+        TEST_SUITE.mainComparisonTests.compareUplifts(self.spendings, self.prediction, self.outputConfig, self.responseModel.configurations)        
 
     def runBaselineExtract(self):
         '''
