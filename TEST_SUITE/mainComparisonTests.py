@@ -7,20 +7,18 @@ import json
 def compareUplifts(spendings, prediction, subset, touchpoint,lift):
 
     masterSpendings = pd.read_csv(f'TEST_SUITE/COMPARE_FRAMES/UPLIFT_COMPARISON/spendings_{subset}_{touchpoint}_{lift}.csv').iloc[:,1:]
-    # masterPrediction = pd.read_csv(f'TEST_SUITE/COMPARE_FRAMES/UPLIFT_COMPARISON/prediction{subset}_{touchpoint}_{lift}.csv').iloc[:,1:]
+    masterPrediction = pd.read_csv(f'TEST_SUITE/COMPARE_FRAMES/UPLIFT_COMPARISON/prediction{subset}_{touchpoint}_{lift}.csv').iloc[:,1:]
 
-    # print('compare')
-    # print(spendings)
-    # print(masterSpendings)
+    if(subset=='ALL' and touchpoint=='alex' and lift ==1.8):
+           prediction.to_csv('ALL_alex_18.csv')
 
-    # print(prediction)
-    # print(masterPrediction)
+    if(prediction.round().equals(masterPrediction.round())==False):
+        print(f'Prediction for: {subset}_{touchpoint}—{lift} are different')
+        # print(spendings)
+        # print(masterSpendings)
+    else:
+        print(f'Prediction for: {subset}_{touchpoint}—{lift} are same')
 
-    if(spendings.equals(masterSpendings)):
-        print(f'Spendings for: {subset}_{touchpoint}—{lift} are different')
-
-    # if(prediction != masterPrediction):
-    #     print(f'Prediction for: {subset}_{touchpoint}—{lift} are different')
                       
     return 0
 

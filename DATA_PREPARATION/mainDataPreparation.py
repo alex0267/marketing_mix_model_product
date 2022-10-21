@@ -9,11 +9,6 @@ import pandas as pd
 import numpy as np
 import yaml
 
-#get current working directory
-#print(os.getcwd())
-
-
-
 def normalizeControl(control_df, responseModelConfig):
     
     for controlVar in responseModelConfig['NORMALIZATION_STEPS_CONTROL']:

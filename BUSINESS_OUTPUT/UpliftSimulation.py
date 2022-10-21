@@ -111,7 +111,7 @@ class UpliftSimulation:
 
         return spendings
         
-    def simulateSales(self, spendings=None,control_df=None):
+    def simulateSales(self,subset=None, touchpoint=None, lift=None, spendings=None,control_df=None):
         '''take the changed spendings and simulate the sales based on the estimated parameters'''
 
         #use the existing control_df values if no changed are specified
@@ -119,6 +119,14 @@ class UpliftSimulation:
         if control_df is None: control_df = self.responseModel.filteredFeature_df[self.responseModel.configurations['CONTROL_VARIABLES_BASE']].copy()
 
         #extract sales predictions from changed spendingsFrame
+
+        if(subset=='ALL' and touchpoint=='alex' and lift ==1.8):
+            spendings.to_csv(f'TEST_SUITE/COMPARE_FRAMES/APPLY_COMPARISON/raw_data_{subset}_{touchpoint}_{lift}.csv')
+            self.responseModel.feature_df[self.responseModel.configurations['TOUCHPOINTS']].to_csv(f'TEST_SUITE/COMPARE_FRAMES/APPLY_COMPARISON/original_spendings_{subset}_{touchpoint}_{lift}.csv')
+            self.responseModel.filteredFeature_df[self.responseModel.configurations['SEASONALITY_VARIABLES_BASE']].to_csv(f'TEST_SUITE/COMPARE_FRAMES/APPLY_COMPARISON/seasonality_df_{subset}_{touchpoint}_{lift}.csv')
+            control_df.to_csv(f'TEST_SUITE/COMPARE_FRAMES/APPLY_COMPARISON/control_df_{subset}_{touchpoint}_{lift}.csv')
+
+
         factor_df, y_pred = BUSINESS_OUTPUT.applyParameters.applyParametersToData(raw_data = spendings,
                                                             original_spendings = self.responseModel.feature_df[self.responseModel.configurations['TOUCHPOINTS']].copy(),
                                                             parameters = self.responseModel.parameters,
@@ -152,7 +160,7 @@ class UpliftSimulation:
                     spendings = self.changeSpendings(touchpoint = touchpoint, lift=lift, subset=subset)
 
                     #predict induced sales based on changed spendings with estimated parameters
-                    prediction = self.simulateSales(spendings=spendings)
+                    prediction = self.simulateSales(subset, touchpoint, lift,spendings=spendings)
 
                     
                     #extract weekly changed spendings and predictions for each spending lift, touchpoint and subset combination
