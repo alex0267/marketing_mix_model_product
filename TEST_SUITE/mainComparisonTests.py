@@ -4,19 +4,24 @@ import json
 
 
 
-def compareUplifts(spendings, prediction, outputConfig, configurations):
+def compareUplifts(spendings, prediction, subset, touchpoint,lift):
 
-    for subset in outputConfig['CHANGE_PERIODS']:
-            #Simulate sales for each touchpoint and lift level
-        for touchpoint in configurations['TOUCHPOINTS']:
-            for lift in outputConfig['SPEND_UPLIFT_TO_TEST']:
+    masterSpendings = pd.read_csv(f'TEST_SUITE/COMPARE_FRAMES/UPLIFT_COMPARISON/spendings_{subset}_{touchpoint}_{lift}.csv').iloc[:,1:]
+    # masterPrediction = pd.read_csv(f'TEST_SUITE/COMPARE_FRAMES/UPLIFT_COMPARISON/prediction{subset}_{touchpoint}_{lift}.csv').iloc[:,1:]
 
-                #spendings[(subset,touchpoint,lift)]
-                
+    # print('compare')
+    # print(spendings)
+    # print(masterSpendings)
 
+    # print(prediction)
+    # print(masterPrediction)
 
+    if(spendings.equals(masterSpendings)):
+        print(f'Spendings for: {subset}_{touchpoint}—{lift} are different')
 
-
+    # if(prediction != masterPrediction):
+    #     print(f'Prediction for: {subset}_{touchpoint}—{lift} are different')
+                      
     return 0
 
 def extractDict(stanDict):

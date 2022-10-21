@@ -1,10 +1,11 @@
-
+#if true, the generated dataframes will become the new reference points for comparison
+#if false -> test mode
+SET_MASTER: False
 #Brands in scope
 BRANDS:
   - fast_duck
   # - gold_plane
   # - precious_liquid
-
 
 # for predious_liquid - get rid of laura & alex
 TOUCHPOINTS:
@@ -15,7 +16,6 @@ TOUCHPOINTS:
   - fiona
   - marc
   - alex
-
 
 TARGET: TARGET_VOL_SO
 

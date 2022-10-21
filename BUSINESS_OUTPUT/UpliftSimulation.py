@@ -159,11 +159,16 @@ class UpliftSimulation:
                     self.spendings[(subset,touchpoint,lift)] = spendings
                     self.prediction[(subset,touchpoint,lift)] = prediction
 
+                    if(self.responseModel.configurations['SET_MASTER'] == True):
+                        spendings.to_csv(f'TEST_SUITE/COMPARE_FRAMES/UPLIFT_COMPARISON/spendings_{subset}_{touchpoint}_{lift}.csv')
+                        prediction.to_csv(f'TEST_SUITE/COMPARE_FRAMES/UPLIFT_COMPARISON/prediction{subset}_{touchpoint}_{lift}.csv')
+                    else:
+                        TEST_SUITE.mainComparisonTests.compareUplifts(spendings, prediction, subset, touchpoint,lift)
+
+
                 #calculate the calculateDeltaCurrentToZero as the difference between uplift(1) and uplift(0)
                 #for each touchpoint
-                self.deltaCurrentToZero[(subset,touchpoint)] = self.prediction[(subset,touchpoint,1.0)]-self.prediction[(subset,touchpoint,0.0)]
-
-        TEST_SUITE.mainComparisonTests.compareUplifts(self.spendings, self.prediction, self.outputConfig, self.responseModel.configurations)        
+                self.deltaCurrentToZero[(subset,touchpoint)] = self.prediction[(subset,touchpoint,1.0)]-self.prediction[(subset,touchpoint,0.0)]      
 
     def runBaselineExtract(self):
         '''
