@@ -40,11 +40,11 @@ data {
   // the number of media channels
   int<lower=0> num_touchpoints;
   // matrix of media variables
-  matrix[N+max_lag-1, num_touchpoints] touchpoint_spendings;
+  matrix[N+max_lag-1, num_touchpoints] touchpointSpend_df;
   // threshold values
-  vector [num_touchpoints] touchpoint_thresholds;
+  vector [num_touchpoints] touchpointThresholds;
   // saturation values
-  vector [num_touchpoints] touchpoint_saturations;
+  vector [num_touchpoints] touchpointSaturations;
   // matrix of seasonality variables
   int<lower=0> num_seasons;
   matrix[N,num_seasons] seasonality;
@@ -52,7 +52,7 @@ data {
   int<lower=0> num_control;
   matrix[N,num_control] control;
   // list of mean values of media (raw data)
-  vector [num_touchpoints] touchpoint_norms;
+  vector [num_touchpoints] touchpointNorms;
 }
 parameters {
   // residual variance
@@ -94,9 +94,9 @@ transformed parameters {
       for (lag in 0 : max_lag-1) {
         lag_weights[max_lag-lag] = pow(decay[media], lag);
       }
-      cum_effect = Adstock(sub_col(touchpoint_spendings, nn, media, max_lag), lag_weights);
-      normalized_data = cum_effect/touchpoint_norms[media];
-      shape_effect = shape_with_threshold(normalized_data,shape[media], scale[media], touchpoint_thresholds[media]/touchpoint_norms[media], touchpoint_saturations[media]/touchpoint_norms[media]);
+      cum_effect = Adstock(sub_col(touchpointSpend_df, nn, media, max_lag), lag_weights);
+      normalized_data = cum_effect/touchpointNorms[media];
+      shape_effect = shape_with_threshold(normalized_data,shape[media], scale[media], touchpointThresholds[media]/touchpointNorms[media], touchpointSaturations[media]/touchpointNorms[media]);
       X_media_adstocked[nn, media] = log1p(shape_effect);
     }
   } 

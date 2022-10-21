@@ -8,21 +8,21 @@ import HELPER_FUNCTIONS.summarize
 #Also contains the functions to estimate and extract parameters
 class ResponseModel:
 
-    def __init__(self, index_df, spendings_df, seasonality_df, control_df, configurations, responseModelConfig, target, stanCode):
+    def __init__(self,configurations, responseModelConfig, feature_df, filteredFeature_df, normalizedFeature_df, normalizedFilteredFeature_df, index_df, stanCode):
         #define configurations
         self.configurations = configurations
         self.responseModelConfig = responseModelConfig
 
         #data
-        self.index_df = index_df #columns to be used as index references when filtering the database by e.g. year
-        self.seasonality_df = seasonality_df[configurations['SEASONALITY_VARIABLES_BASE']]
-        self.control_df = control_df[configurations['CONTROL_VARIABLES_BASE']]
-        self.target = target #raw sales (target) variable with no transformation
-        self.spendings_df = spendings_df #raw touchpoint spending data
+        self.feature_df = feature_df
+        self.filteredFeature_df = filteredFeature_df
+        self.normalizedFeature_df = normalizedFeature_df
+        self.normalizedFilteredFeature_df = normalizedFilteredFeature_df
+        self.index_df = index_df
 
         #define data normalized
-        self.spendings_df_normalized, self.touchpoint_norms = HELPER_FUNCTIONS.normalization.normalize_feature(self.spendings_df,self.spendings_df, self.responseModelConfig['NORMALIZATION_STEPS_TOUCHPOINTS'])
-        self.target_df_normalized, self.target_df_norm = HELPER_FUNCTIONS.normalization.normalize_feature(self.target,self.target, self.responseModelConfig['NORMALIZATION_STEPS_TARGET'][self.target.name])
+        self.spendings_df_normalized, self.touchpointNorms = HELPER_FUNCTIONS.normalization.normalize_feature(filteredFeature_df[configurations['TOUCHPOINTS']],filteredFeature_df[configurations['TOUCHPOINTS']], self.responseModelConfig['NORMALIZATION_STEPS_TOUCHPOINTS'])
+        self.target_df_normalized, self.target_df_norm = HELPER_FUNCTIONS.normalization.normalize_feature(filteredFeature_df[configurations['TARGET']],filteredFeature_df[configurations['TARGET']], self.responseModelConfig['NORMALIZATION_STEPS_TARGET'][filteredFeature_df[configurations['TARGET']].name])
         
         #easy access variables
         self.num_touchpoints = None
@@ -49,23 +49,22 @@ class ResponseModel:
         create dictionary as input data for the stan model
         '''
         num_touchpoints = len(self.configurations['TOUCHPOINTS'])
-        touchpoint_norms = self.touchpoint_norms
-        touchpoint_spendings = self.spendings_df[self.configurations['TOUCHPOINTS']]
+        touchpointSpend_df = self.filteredFeature_df[self.configurations['TOUCHPOINTS']]
         #add zeros to beginning of media dataframe to account for padding (weight application of adstock)
-        touchpoint_spendings = np.concatenate((np.zeros((self.responseModelConfig['MAX_LAG']-1, num_touchpoints)), np.array(touchpoint_spendings)),axis=0)
+        touchpointSpend_df = np.concatenate((np.zeros((self.responseModelConfig['MAX_LAG']-1, num_touchpoints)), np.array(touchpointSpend_df)),axis=0)
 
         self.stanDict = {
-            'N': len(self.spendings_df),
+            'N': len(self.filteredFeature_df[self.configurations['TOUCHPOINTS']]),
             'max_lag': self.responseModelConfig['MAX_LAG'], 
             'num_touchpoints': num_touchpoints,
-            'touchpoint_spendings': touchpoint_spendings,
-            'touchpoint_norms': touchpoint_norms,
-            'touchpoint_thresholds': [self.responseModelConfig['SHAPE_THRESHOLD_VALUE'][tp] for tp in self.configurations['TOUCHPOINTS']],
-            'touchpoint_saturations': [self.responseModelConfig['SHAPE_SATURATION_VALUE'][tp] for tp in self.configurations['TOUCHPOINTS']],
+            'touchpointSpend_df': touchpointSpend_df,
+            'touchpointNorms': self.touchpointNorms,
+            'touchpointThresholds': [self.responseModelConfig['SHAPE_THRESHOLD_VALUE'][tp] for tp in self.configurations['TOUCHPOINTS']],
+            'touchpointSaturations': [self.responseModelConfig['SHAPE_SATURATION_VALUE'][tp] for tp in self.configurations['TOUCHPOINTS']],
             'num_seasons': len(self.configurations['SEASONALITY_VARIABLES_BASE']),
-            'seasonality': np.array(self.seasonality_df),
+            'seasonality': np.array(self.filteredFeature_df[self.configurations['SEASONALITY_VARIABLES_BASE']]),
             'num_control': len(self.configurations['CONTROL_VARIABLES_BASE']),
-            'control': np.array(self.control_df),
+            'control': np.array(self.filteredFeature_df[['YEAR_WEEK','BRAND','distribution', 'promotion', 'epros', 'covid','off_trade_visibility']]),
             'y': self.target_df_normalized.values
         }
 

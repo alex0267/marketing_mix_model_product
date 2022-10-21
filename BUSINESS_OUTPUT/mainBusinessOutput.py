@@ -26,7 +26,6 @@ def createBusinessOutputs(responseModel, outputConfig, price_df):
     BUSINESS_OUTPUT.plotContribution.plotContribution(volumeContribution)
 
 
-
     #Generate response curves based on uplifts
     responseCurves = BUSINESS_OUTPUT.ResponseCurves.ResponseCurves(simulatedSpendings = upliftSimulation.spendings,
                                                                            simulatedSales = upliftSimulation.prediction, 

@@ -54,7 +54,7 @@ def normalizeFeatureDf(configurations, feature_df):
 
     return feature_df
 
-def createFeatureDf(configurations, mediaExec_df, sellOut_df, sellOutDistribution_df, sellOutCompetition_df, covid_df, uniqueWeeks):
+def createFeatureDf(configurations, mediaExec_df, sellOut_df, sellOutDistribution_df, sellOutCompetition_df, covid_df, uniqueWeeks_df):
     '''
     Performs transformations on input data to create the feature_df
     '''
@@ -69,7 +69,7 @@ def createFeatureDf(configurations, mediaExec_df, sellOut_df, sellOutDistributio
     feature_df = feature_df.merge(sellOut_df[["YEAR_WEEK","BRAND","VOLUME_SO"]], on=["YEAR_WEEK","BRAND"])
     feature_df = feature_df.rename(columns={'VOLUME_SO':'TARGET_VOL_SO'})
 
-    seasonality_df = DATA_PREPARATION.seasonality.construct_seasonality_and_event_features(uniqueWeeks)
+    seasonality_df = DATA_PREPARATION.seasonality.construct_seasonality_and_event_features(uniqueWeeks_df)
     feature_df = feature_df.merge(seasonality_df, on="YEAR_WEEK")
 
     promotion_df = DATA_PREPARATION.promotion.compute_price_discount_feature(sellOut_df.copy(),sellOutDistribution_df.copy(),configurations, quantile_reference=0.9)
@@ -96,7 +96,7 @@ def createFeatureDf(configurations, mediaExec_df, sellOut_df, sellOutDistributio
 
     return feature_df
 
-def run(configurations, responseModelConfig, mediaExec_df, sellOut_df, sellOutDistribution_df, sellOutCompetition_df, covid_df, uniqueWeeks):
+def run(configurations, responseModelConfig, mediaExec_df, sellOut_df, sellOutDistribution_df, sellOutCompetition_df, covid_df, uniqueWeeks_df):
     '''
     input:
     Company-specific dataframes
@@ -114,7 +114,7 @@ def run(configurations, responseModelConfig, mediaExec_df, sellOut_df, sellOutDi
 
     '''
 
-    feature_df = createFeatureDf(configurations, mediaExec_df, sellOut_df, sellOutDistribution_df, sellOutCompetition_df, covid_df, uniqueWeeks)
+    feature_df = createFeatureDf(configurations, mediaExec_df, sellOut_df, sellOutDistribution_df, sellOutCompetition_df, covid_df, uniqueWeeks_df)
     
     feature_df = filterByBrands(feature_df.copy(),configurations)
 
@@ -125,16 +125,9 @@ def run(configurations, responseModelConfig, mediaExec_df, sellOut_df, sellOutDi
     filteredFeature_df = filterByWeeks(feature_df.copy(), configurations)
     normalizedFilteredFeature_df = filterByWeeks(normalizedFeature_df.copy(), configurations)
 
-
-    price_df = filteredFeature_df['AVERAGE_PRICE']
-    seasonality_df = filteredFeature_df[configurations['SEASONALITY_VARIABLES_BASE']]
-    spendings_df = filteredFeature_df[configurations['TOUCHPOINTS']]
-    targetRaw = filteredFeature_df[configurations['TARGET']]
-    control_df = filteredFeature_df[['YEAR_WEEK','BRAND','distribution', 'promotion', 'epros', 'covid','off_trade_visibility']]
     #index dataframe to filter other frames based on brand or year specifications (necessary for output generation)
     index_df = filteredFeature_df[['YEAR_WEEK','BRAND']]
     index_df['YEAR'] = index_df['YEAR_WEEK'].astype(str).str[:4]
 
 
-
-    return spendings_df, seasonality_df, price_df, feature_df, targetRaw, index_df, control_df
+    return feature_df, filteredFeature_df, normalizedFeature_df, normalizedFilteredFeature_df, index_df

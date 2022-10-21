@@ -56,9 +56,9 @@ def loadData():
     covid_df = pd.read_csv('DATA/FRA_COVID_MEASURES.csv')
 
     #list of unique weeks that are subject to event & seasonality engineering
-    uniqueWeeks = pd.DataFrame(mediaExec_df['YEAR_WEEK'].unique())
-    uniqueWeeks = uniqueWeeks.rename(columns={0:'YEAR_WEEK'})
+    uniqueWeeks_df = pd.DataFrame(mediaExec_df['YEAR_WEEK'].unique())
+    uniqueWeeks_df = uniqueWeeks_df.rename(columns={0:'YEAR_WEEK'})
 
 
     
-    return mediaExec_df, sellOut_df, sellOutDistribution_df, sellOutCompetition_df, covid_df, uniqueWeeks
+    return mediaExec_df, sellOut_df, sellOutDistribution_df, sellOutCompetition_df, covid_df, uniqueWeeks_df

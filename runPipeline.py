@@ -31,35 +31,40 @@ def run():
                 outputConfig = yaml.safe_load(file)
     
     
-    mediaExec_df, sellOut_df, sellOutDistribution_df, sellOutCompetition_df, covid_df, uniqueWeeks = DATA_PREPARATION.loadData.loadData()
+    mediaExec_df, sellOut_df, sellOutDistribution_df, sellOutCompetition_df, covid_df, uniqueWeeks_df = DATA_PREPARATION.loadData.loadData()
 
 
     #Create features and prepare data
-    spendings_df, seasonality_df, price_df, feature_df, target,index_df, control_df = DATA_PREPARATION.mainDataPreparation.run(configurations = configurations,
+    feature_df, filteredFeature_df, normalizedFeature_df, normalizedFilteredFeature_df, index_df = DATA_PREPARATION.mainDataPreparation.run(configurations = configurations,
                                                                                                                     responseModelConfig =  responseModelConfig,
                                                                                                                     mediaExec_df = mediaExec_df.copy(),
                                                                                                                     sellOut_df = sellOut_df.copy(),
                                                                                                                     sellOutDistribution_df = sellOutDistribution_df.copy(),
                                                                                                                     sellOutCompetition_df = sellOutCompetition_df.copy(),
                                                                                                                     covid_df = covid_df.copy(),
-                                                                                                                    uniqueWeeks = uniqueWeeks.copy())
+                                                                                                                    uniqueWeeks_df = uniqueWeeks_df.copy())
 
     feature_df.to_excel('OUTPUT_DF/feature_df.xlsx')
-    spendings_df.to_excel('OUTPUT_DF/spendings_df.xlsx')
-    seasonality_df.to_excel('OUTPUT_DF/seasonality_df.xlsx')
-    target.to_excel('OUTPUT_DF/target.xlsx')
+    filteredFeature_df.to_excel('OUTPUT_DF/filteredFeature_df.xlsx')
+    normalizedFeature_df.to_excel('OUTPUT_DF/normalizedFeature_df.xlsx')
+    normalizedFilteredFeature_df.to_excel('OUTPUT_DF/normalizedFilteredFeature_df.xlsx')
     index_df.to_excel('OUTPUT_DF/index_df.xlsx')
-    control_df.to_excel('OUTPUT_DF/control_df.xlsx')
-    price_df.to_excel('OUTPUT_DF/price_df.xlsx')
+
+
+    price_df = filteredFeature_df['AVERAGE_PRICE']
+    seasonality_df = filteredFeature_df[configurations['SEASONALITY_VARIABLES_BASE']]
+    spendings_df = filteredFeature_df[configurations['TOUCHPOINTS']]
+    target = filteredFeature_df[configurations['TARGET']]
+    control_df = filteredFeature_df[['YEAR_WEEK','BRAND','distribution', 'promotion', 'epros', 'covid','off_trade_visibility']]
 
     # Initialize Model instance and Train Bayesian Model 
-    responseModel = RESPONSE_MODEL.ResponseModel.ResponseModel(index_df = index_df,
-                                                        spendings_df = spendings_df, 
-                                                        seasonality_df = seasonality_df,
-                                                        control_df = control_df,
-                                                        configurations = configurations,
-                                                        responseModelConfig= responseModelConfig, 
-                                                        target = target,
+    responseModel = RESPONSE_MODEL.ResponseModel.ResponseModel(configurations = configurations,
+                                                        responseModelConfig= responseModelConfig,
+                                                        feature_df = feature_df,
+                                                        filteredFeature_df = filteredFeature_df,
+                                                        normalizedFeature_df = normalizedFeature_df,
+                                                        normalizedFilteredFeature_df = normalizedFilteredFeature_df,
+                                                        index_df = index_df,
                                                         stanCode = RESPONSE_MODEL.stanFile.stanCode)
 
 
@@ -85,14 +90,17 @@ def run():
     #gold_plane_V1_12
     #precious_liquid_V1_12
 
-    
-    responseModel.runModel(name ='fast_duck_V1_TEST', load=True)
-    responseModel.extractParameters(printOut=True)
+    #testing
+    #fast_duck_V1_TEST - all good version
 
+    
+    responseModel.runModel(name ='fast_duck_V1_TEST_2010', load=False)
+    responseModel.extractParameters(printOut=True)
+    '''
     #calculate contribution decomposition via estimated parameters and original spendings/sales
     BUSINESS_OUTPUT.mainBusinessOutput.createBusinessOutputs(responseModel = responseModel, 
                                                             outputConfig = outputConfig,
                                                             price_df = price_df)
-    ''''''
+    '''
 
 run()
