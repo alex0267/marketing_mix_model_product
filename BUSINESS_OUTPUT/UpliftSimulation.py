@@ -1,6 +1,6 @@
 import BUSINESS_OUTPUT.applyParameters
 import BUSINESS_OUTPUT.changeControlVariable
-import TEST_SUITE.mainComparisonTests
+import PYTEST.extractUplifts
 import HELPER_FUNCTIONS.getIndex
 import numpy as np
 import matplotlib.pyplot as plt
@@ -119,14 +119,6 @@ class UpliftSimulation:
         if control_df is None: control_df = self.responseModel.filteredFeature_df[self.responseModel.configurations['CONTROL_VARIABLES_BASE']].copy()
 
         #extract sales predictions from changed spendingsFrame
-
-        # if(subset=='ALL' and touchpoint=='alex' and lift ==1.8):
-        #     spendings.to_csv(f'TEST_SUITE/COMPARE_FRAMES/APPLY_COMPARISON/raw_data_{subset}_{touchpoint}_{lift}.csv')
-        #     self.responseModel.feature_df[self.responseModel.configurations['TOUCHPOINTS']].to_csv(f'TEST_SUITE/COMPARE_FRAMES/APPLY_COMPARISON/original_spendings_{subset}_{touchpoint}_{lift}.csv')
-        #     self.responseModel.filteredFeature_df[self.responseModel.configurations['SEASONALITY_VARIABLES_BASE']].to_csv(f'TEST_SUITE/COMPARE_FRAMES/APPLY_COMPARISON/seasonality_df_{subset}_{touchpoint}_{lift}.csv')
-        #     control_df.to_csv(f'TEST_SUITE/COMPARE_FRAMES/APPLY_COMPARISON/control_df_{subset}_{touchpoint}_{lift}.csv')
-
-
         factor_df, y_pred = BUSINESS_OUTPUT.applyParameters.applyParametersToData(raw_data = spendings,
                                                             original_spendings = self.responseModel.feature_df[self.responseModel.configurations['TOUCHPOINTS']].copy(),
                                                             parameters = self.responseModel.parameters,
@@ -141,8 +133,6 @@ class UpliftSimulation:
         #prediction is equal to the (normalized prediction -1)*raw_sales.max()
         #we are taking the feature_df since the max value must be based on the entire dataset, not just the weeks applied
         prediction = (y_pred-1)*self.responseModel.feature_df['TARGET_VOL_SO'].max()
-        print('TARGET')
-        print(self.responseModel.feature_df['TARGET_VOL_SO'].max())
             
         return prediction
 
@@ -169,16 +159,20 @@ class UpliftSimulation:
                     self.spendings[(subset,touchpoint,lift)] = spendings
                     self.prediction[(subset,touchpoint,lift)] = prediction
 
-                    if(self.responseModel.configurations['SET_MASTER'] == True):
-                        spendings.to_csv(f'TEST_SUITE/COMPARE_FRAMES/UPLIFT_COMPARISON/spendings_{subset}_{touchpoint}_{lift}.csv')
-                        prediction.to_csv(f'TEST_SUITE/COMPARE_FRAMES/UPLIFT_COMPARISON/prediction{subset}_{touchpoint}_{lift}.csv')
-                    else:
-                        TEST_SUITE.mainComparisonTests.compareUplifts(spendings, prediction, subset, touchpoint,lift)
+                    
+                #extraction of uplifts for result comparison
+                if(self.responseModel.configurations['SET_MASTER'] == True):
+                    TEST_SUITE.extractUplifts.extractUplifts(self.spendings,self.prediction, subset, touchpoint,'MASTER')
+                else:
+                    TEST_SUITE.extractUplifts.extractUplifts(self.spendings,self.prediction, subset, touchpoint,'TEST')
+                    
 
 
                 #calculate the calculateDeltaCurrentToZero as the difference between uplift(1) and uplift(0)
                 #for each touchpoint
-                self.deltaCurrentToZero[(subset,touchpoint)] = self.prediction[(subset,touchpoint,1.0)]-self.prediction[(subset,touchpoint,0.0)]      
+                self.deltaCurrentToZero[(subset,touchpoint)] = self.prediction[(subset,touchpoint,1.0)]-self.prediction[(subset,touchpoint,0.0)]  
+
+        
 
     def runBaselineExtract(self):
         '''

@@ -3,7 +3,8 @@ import pandas as pd
 import numpy as np
 import HELPER_FUNCTIONS.normalization
 import HELPER_FUNCTIONS.summarize
-import TEST_SUITE.mainComparisonTests
+import PYTEST.extractEntryData
+import PYTEST.mainComparisonTests
 import json
 
 #class that contains the input and output data of a specific response model with respective model settings
@@ -70,8 +71,9 @@ class ResponseModel:
             'control': np.array(self.filteredFeature_df[self.configurations['CONTROL_VARIABLES_BASE']]),
             'y': self.target_df_normalized.values
         }
-
-        TEST_SUITE.mainComparisonTests.compareStanDicts(self.stanDict)
+        
+        PYTEST.extractEntryData.extractEntryData(self.stanDict, 'stanDict', self.configurations['SET_MASTER'])
+        
 
     def extractParameters(self, printOut=False):
         '''

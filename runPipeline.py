@@ -2,13 +2,11 @@ import DATA_PREPARATION.mainDataPreparation
 import RESPONSE_MODEL.ResponseModel
 import RESPONSE_MODEL.stanFile
 import BUSINESS_OUTPUT.mainBusinessOutput
-import DATA_PREPARATION.loadData
+import DATA_PREPARATION.dataLoader
+import PYTEST.mainComparisonTests
+
 import yaml
-
-
 import pandas as pd
-
-
 
 
 def run():
@@ -31,7 +29,7 @@ def run():
                 outputConfig = yaml.safe_load(file)
     
     
-    mediaExec_df, sellOut_df, sellOutDistribution_df, sellOutCompetition_df, covid_df, uniqueWeeks_df = DATA_PREPARATION.loadData.loadData()
+    mediaExec_df, sellOut_df, sellOutDistribution_df, sellOutCompetition_df, covid_df, uniqueWeeks_df = DATA_PREPARATION.dataLoader.loadData()
 
 
     #Create features and prepare data
@@ -44,6 +42,9 @@ def run():
                                                                                                                     covid_df = covid_df.copy(),
                                                                                                                     uniqueWeeks_df = uniqueWeeks_df.copy())
 
+    
+    
+    
     feature_df.to_excel('OUTPUT_DF/feature_df.xlsx')
     filteredFeature_df.to_excel('OUTPUT_DF/filteredFeature_df.xlsx')
     normalizedFeature_df.to_excel('OUTPUT_DF/normalizedFeature_df.xlsx')
@@ -57,6 +58,7 @@ def run():
     target = filteredFeature_df[configurations['TARGET']]
     control_df = filteredFeature_df[['YEAR_WEEK','BRAND','distribution', 'promotion', 'epros', 'covid','off_trade_visibility']]
 
+    
     # Initialize Model instance and Train Bayesian Model 
     responseModel = RESPONSE_MODEL.ResponseModel.ResponseModel(configurations = configurations,
                                                         responseModelConfig= responseModelConfig,
@@ -67,7 +69,9 @@ def run():
                                                         index_df = index_df,
                                                         stanCode = RESPONSE_MODEL.stanFile.stanCode)
 
-
+    #checkpoint test
+    PYTEST.mainComparisonTests.compareEntryData()
+    '''
     #model savings
 
     #all custom
@@ -93,15 +97,27 @@ def run():
     #testing
     #fast_duck_V1_TEST - all good version
 
+    #fast_duck_V1_TEST_2010 - should also be good version (contains test of mary merged)
+    #fast_duck_V1_TEST_2010_2_SAME - Same for comparison of variability
+    #fast_duck_V1_TEST_2010_3_SAME
+
+
+    #test if taking away part of the beginning results in correct frames and visualisations - YES 
+    #(didn't test for exclusion of responsecurve relevant years yet)
+     #fast_duck_V1_TEST_201901-START
     
-    responseModel.runModel(name ='fast_duck_V1_TEST_2010', load=True)
+    responseModel.runModel(name ='fast_duck_V1_TEST_2010_3_SAME', load=True)
     responseModel.extractParameters(printOut=True)
     
     #calculate contribution decomposition via estimated parameters and original spendings/sales
     BUSINESS_OUTPUT.mainBusinessOutput.createBusinessOutputs(responseModel = responseModel, 
                                                             outputConfig = outputConfig,
                                                             price_df = price_df)
-    '''
+    
+    #run tests
+    #TEST_SUITE.mainComparisonTests.runComparisonTests() 
+    
+    
     '''
 
 run()

@@ -2,9 +2,10 @@ from tkinter import S
 import DATA_PREPARATION.seasonality
 import DATA_PREPARATION.promotion
 import DATA_PREPARATION.distribution
-import DATA_PREPARATION.calculatePrice
+import DATA_PREPARATION.price
 import DATA_PREPARATION.epros
 import HELPER_FUNCTIONS.normalization
+import PYTEST.extractEntryData
 import pandas as pd
 import numpy as np
 import yaml
@@ -81,7 +82,7 @@ def createFeatureDf(configurations, mediaExec_df, sellOut_df, sellOutDistributio
     off_trade_visibility_df = DATA_PREPARATION.distribution.construct_off_trade_visibility_feature(sellOutDistribution_df.copy())
     feature_df = feature_df.merge(off_trade_visibility_df[["YEAR_WEEK","BRAND","off_trade_visibility"]], on=["YEAR_WEEK","BRAND"])
 
-    price_df = DATA_PREPARATION.calculatePrice.calculatePrice(sellOut_df.copy(), configurations)
+    price_df = DATA_PREPARATION.price.calculatePrice(sellOut_df.copy(), configurations)
     feature_df = feature_df.merge(price_df[["YEAR_WEEK","BRAND","AVERAGE_PRICE"]], on=["YEAR_WEEK","BRAND"])
 
     covid_df= covid_df[['YEAR_WEEK', 'OXFORD_INDEX']].rename(columns={'OXFORD_INDEX':'covid'})
@@ -123,6 +124,9 @@ def run(configurations, responseModelConfig, mediaExec_df, sellOut_df, sellOutDi
     #index dataframe to filter other frames based on brand or year specifications (necessary for output generation)
     index_df = filteredFeature_df[['YEAR_WEEK','BRAND']]
     index_df['YEAR'] = index_df['YEAR_WEEK'].astype(str).str[:4]
+
+    PYTEST.extractEntryData.extractEntryData(feature_df, 'feature_df', configurations['SET_MASTER'])
+    PYTEST.extractEntryData.extractEntryData(normalizedFilteredFeature_df, 'normalizedFilteredFeature_df', configurations['SET_MASTER'])
 
 
     return feature_df, filteredFeature_df, normalizedFeature_df, normalizedFilteredFeature_df, index_df
