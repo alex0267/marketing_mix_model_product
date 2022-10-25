@@ -70,8 +70,8 @@ def run():
                                                         stanCode = RESPONSE_MODEL.stanFile.stanCode)
 
     #checkpoint test
-    PYTEST.mainComparisonTests.compareEntryData()
-    '''
+    #PYTEST.mainComparisonTests.compareEntryData()
+    
     #model savings
 
     #all custom
@@ -106,7 +106,7 @@ def run():
     #(didn't test for exclusion of responsecurve relevant years yet)
      #fast_duck_V1_TEST_201901-START
     
-    responseModel.runModel(name ='fast_duck_V1_TEST_2010_3_SAME', load=True)
+    responseModel.runModel(name ='fast_duck_V1_TEST_2010', load=True)
     responseModel.extractParameters(printOut=True)
     
     #calculate contribution decomposition via estimated parameters and original spendings/sales
@@ -115,9 +115,9 @@ def run():
                                                             price_df = price_df)
     
     #run tests
-    #TEST_SUITE.mainComparisonTests.runComparisonTests() 
+    PYTEST.mainComparisonTests.runComparisonTests() 
     
     
-    '''
+    ''''''
 
 run()

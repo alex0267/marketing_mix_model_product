@@ -141,7 +141,10 @@ class UpliftSimulation:
         Run the uplift simulation pipeline according to the configurations
         Scope : touchpoints
         '''
-
+        meansPerPredictionCollect = []
+        meanOfTotalPredictionCollect = []
+        weeklyPredictionCollect = []
+        spendsCollect = []
         #Execute calculation for different scopes (years individ. & all together)
         for subset in self.outputConfig['CHANGE_PERIODS']:
             #Simulate sales for each touchpoint and lift level
@@ -161,18 +164,26 @@ class UpliftSimulation:
 
                     
                 #extraction of uplifts for result comparison
-                if(self.responseModel.configurations['SET_MASTER'] == True):
-                    TEST_SUITE.extractUplifts.extractUplifts(self.spendings,self.prediction, subset, touchpoint,'MASTER')
-                else:
-                    TEST_SUITE.extractUplifts.extractUplifts(self.spendings,self.prediction, subset, touchpoint,'TEST')
-                    
+                
+                meansPerPrediction, meanOfTotalPrediction, weeklyPrediction, spends = PYTEST.extractUplifts.extractUplifts(self.spendings,self.prediction, subset, touchpoint,self.outputConfig['SPEND_UPLIFT_TO_TEST'])
+                meansPerPredictionCollect.append(meansPerPrediction)
+                meanOfTotalPredictionCollect.append(meanOfTotalPrediction)
+                weeklyPredictionCollect.append(weeklyPrediction)
+                spendsCollect.append(spends)
 
 
                 #calculate the calculateDeltaCurrentToZero as the difference between uplift(1) and uplift(0)
                 #for each touchpoint
-                self.deltaCurrentToZero[(subset,touchpoint)] = self.prediction[(subset,touchpoint,1.0)]-self.prediction[(subset,touchpoint,0.0)]  
 
+                self.deltaCurrentToZero[(subset,touchpoint)] = self.prediction[(subset,touchpoint,1.0)]-self.prediction[(subset,touchpoint,0.0)] 
         
+        datasets = [(meansPerPredictionCollect, 'meansPerPredictionCollect'), 
+                    (meanOfTotalPredictionCollect, 'meanOfTotalPredictionCollect')]
+                    # (weeklyPredictionCollect, 'weeklyPredictionCollect')] 
+        
+        
+        PYTEST.extractUplifts.setPredictData(datasets, self.responseModel.configurations['SET_MASTER'])
+        PYTEST.extractUplifts.setSpendingsData((spendsCollect, 'spendsCollect'), self.responseModel.configurations['SET_MASTER'])
 
     def runBaselineExtract(self):
         '''

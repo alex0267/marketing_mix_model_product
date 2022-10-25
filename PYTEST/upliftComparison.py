@@ -22,6 +22,7 @@ def compareTables(df1,df2,quant,round=False):
         total_df = pd.concat([df1.round(),df2.round()], axis =1)
     else:
         total_df = pd.concat([df1,df2], axis =1)
+    print(total_df)
 
     total_df = total_df.loc[~(total_df==0).all(axis=1)]
     total_df['DIFF'] = total_df.iloc[:,0] - total_df.iloc[:,1]
@@ -35,7 +36,7 @@ def compareTables(df1,df2,quant,round=False):
     difference = total_df['REL_DIFF'].quantile(q=quant)
 
 
-    return difference
+    return difference,total_df
 
 def compareSpendings(directory_1, directory_2, round):
 
@@ -60,7 +61,10 @@ def comparePrediction(directory_1, directory_2, quant, maxDiff, round):
     df_1 = createFrame(directory_1, 'prediction')
     df_2 = createFrame(directory_2, 'prediction')
 
-    difference = compareTables(df_1,df_2,quant=quant,round=round)  
+    difference , total_df= compareTables(df_1,df_2,quant=quant,round=round)  
+
+    print('prediction comparison')
+    print(total_df.describe)  
      
 
     #check if 95% quantile has below 10% of difference
@@ -70,6 +74,29 @@ def comparePrediction(directory_1, directory_2, quant, maxDiff, round):
         print('¨Predictions seem to converge.')
 
     print(f'Difference at quantile: {difference}') 
+
+def comparePredictionMeans(directory_1, directory_2,maxDiff,scope):
+    df_1 = createFrame(directory_1, scope)
+    df_2 = createFrame(directory_2, scope)
+
+    difference ,total_df= compareTables(df_1,df_2,quant=0.9,round=False)
+
+    print('mean comparison')
+    print(scope)
+    print(total_df.describe())  
+    print(total_df['REL_DIFF'].quantile(0.95))
+    print(total_df['REL_DIFF'].quantile(0.9))
+
+    total_df.to_excel('total_df_means.xlsx')
+    # if (total_df['REL_DIFF'] > maxDiff):
+    #     print('Predictions DO NOT seem to be similar')
+    # else:
+    #     print('¨Predictions seem to converge.')
+
+    # print(f'Difference at quantile: {difference}') 
+
+    
+
 
 
 def compareUplifts():
@@ -90,7 +117,9 @@ def compareUplifts():
     directory_1 = 'PYTEST/COMPARE_FRAMES/UPLIFT_COMPARISON_MASTER'
     directory_2 = 'PYTEST/COMPARE_FRAMES/UPLIFT_COMPARISON_TEST'
 
-    comparePrediction(directory_1, directory_2, quant=0.95, maxDiff = 0.1, round=False)
+    #comparePrediction(directory_1, directory_2, quant=0.95, maxDiff = 0.1, round=False)
+    comparePredictionMeans(directory_1, directory_2,maxDiff = 0.05, scope = 'prediction_meansPerPrediction')
+    comparePredictionMeans(directory_1, directory_2,maxDiff = 0.05, scope = 'prediction_meanOfTotalPrediction')
     compareSpendings(directory_1, directory_2, round=False)
 
                       

@@ -1,32 +1,74 @@
+import pandas as pd
 
-def extractUplifts(spendings, prediction, subset, touchpoint, scope):
-    '''extracting all dataframes for testing'''
+def setPredictData(dataSets, master):
+    ''' Set the datasets of master or test depending on the scope'''
 
+    if (master):
+        scope = 'MASTER'
+    else:
+        scope = 'TEST'
 
-    #extract one for each touchpoint to test touchpoint accuracy
-
-    spendings[(subset,touchpoint,1.0)].to_csv(f'PYTEST/COMPARE_FRAMES/UPLIFT_COMPARISON_{scope}/spendings_COMPARE_{subset}_{touchpoint}.csv')
-    pred = prediction[(subset,touchpoint,1.0)] - prediction[(subset,touchpoint,0.0)]
-    pred.to_csv(f'PYTEST/COMPARE_FRAMES/UPLIFT_COMPARISON_{scope}/prediction_COMPARE_{subset}_{touchpoint}.csv')
-
-
-    #extract one for two lift levels (0.6 & 1.6 times the original spendings)
-    #to test for uplift capability
-
-    spendings[(subset,touchpoint,0.6)].to_csv(f'PYTEST/COMPARE_FRAMES/UPLIFT_COMPARISON_{scope}/spendings_COMPARE_LIFTS_{subset}_{touchpoint}_lift_06.csv')
-    pred = prediction[(subset,touchpoint,0.6)] - prediction[(subset,touchpoint,0.0)]
-                    
-    pred.to_csv(f'PYTEST/COMPARE_FRAMES/UPLIFT_COMPARISON_{scope}/prediction_COMPARE_LIFTS_{subset}_{touchpoint}_lift_06.csv')
-
-    spendings[(subset,touchpoint,1.6)].to_csv(f'PYTEST/COMPARE_FRAMES/UPLIFT_COMPARISON_{scope}/spendings_COMPARE_LIFTS_{subset}_{touchpoint}_lift_16.csv')
-    pred = prediction[(subset,touchpoint,1.6)] - prediction[(subset,touchpoint,0.0)]
-    pred.to_csv(f'PYTEST/COMPARE_FRAMES/UPLIFT_COMPARISON_{scope}/prediction_COMPARE_LIFTS_{subset}_{touchpoint}_lift_16.csv')
+    for data in dataSets:
+        data_flat = [val for sublist in data[0] for val in sublist]
     
-    return 0
+        pd.DataFrame(data_flat).to_csv(f'PYTEST/COMPARE_FRAMES/UPLIFT_COMPARISON_{scope}/prediction_{data[1]}.csv')
 
+def setSpendingsData(spends,master):
+    if (master):
+        scope = 'MASTER'
+    else:
+        scope = 'TEST'
+    
+    spends_datasets = [val for sublist in spends[0] for val in sublist]
+
+    for i,spend in enumerate(spends_datasets):
+        pd.DataFrame(spend).to_csv(f'PYTEST/COMPARE_FRAMES/UPLIFT_COMPARISON_{scope}/spendings_{i}.csv')
+
+
+def extractSpendings(spendings, subset, touchpoint, lift):
+
+    spend = spendings[(subset,touchpoint,lift)]
+
+    return spend
+
+def extractMeanPerPrediction(prediction, subset, touchpoint, lift):
+    deltaWeeklyPred = prediction[(subset,touchpoint,lift)] - prediction[(subset,touchpoint,0.0)]
+    deltaMeanPerPrediction = deltaWeeklyPred.mean()
+
+    return deltaMeanPerPrediction
+
+def extractMeanOfTotalPrediction(prediction, subset, touchpoint, lift):
+    weeklyPred = prediction[(subset,touchpoint,lift)]
+    meanPerPrediction = weeklyPred.mean()
+
+    return meanPerPrediction
+
+def extractWeeklyPrediction(prediction, subset, touchpoint, lift):
+    weeklyPred = prediction[(subset,touchpoint,lift)] - prediction[(subset,touchpoint,0.0)]
+
+    return weeklyPred
+
+def extractUplifts(spendings, prediction, subset, touchpoint,lifts):
+    '''extracting all dataframes for testing'''
+    
+    meansPerPrediction = []
+    meanOfTotalPrediction = []
+    weeklyPrediction = []
+    spends = []
+
+    for lift in lifts:
+        meansPerPrediction.append(extractMeanPerPrediction(prediction, subset, touchpoint, lift))
+        meanOfTotalPrediction.append(extractMeanOfTotalPrediction(prediction, subset, touchpoint, lift))
+        weeklyPrediction.append(extractWeeklyPrediction(prediction, subset, touchpoint, lift))
+        spends.append(extractSpendings(spendings, subset, touchpoint, lift))
+
+    return meansPerPrediction, meanOfTotalPrediction, weeklyPrediction, spends
+
+
+'''
 def extractUpliftsSummary(spendings, prediction, subset, touchpoint):
-    '''this uplift extraction is more targeted to reduce the amount of data to analyze while allowing to 
-    test the entire scope of functionality'''
+    # his uplift extraction is more targeted to reduce the amount of data to analyze while allowing to 
+    # test the entire scope of functionality
 
     #extract one for each year
     #which defines response cuves
@@ -56,3 +98,4 @@ def extractUpliftsSummary(spendings, prediction, subset, touchpoint):
         pred.to_csv(f'PYTEST/COMPARE_FRAMES/2/prediction_COMPARE_LIFTS_{subset}_{touchpoint}_lift_16.csv')
     
     return 0
+'''

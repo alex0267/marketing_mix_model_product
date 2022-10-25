@@ -30,23 +30,22 @@ def compareEntryData():
                 print(f'{str(file)} equal')
             
         elif str(file_1)[-4:] == '.csv':
-            file_1 = pd.read_csv(file_1)
-            file_2 = pd.read_csv(file_2)
+            f1 = pd.read_csv(file_1)
+            f2 = pd.read_csv(file_1)
 
-
-            if (file_1.round().equals(file_2.round())):
-                print(f'{str(file)} not equal')
-                print(file_1)
-                print(file_2)
-            else:
+            if (f1.equals(f2)):
                 print(f'{str(file)} equal')
 
-
+            else:
+                print(f'{str(file)} not equal')
+                print(f1)
+                print(f2)
+                
     
 
 def runComparisonTests():
 
-    PYTEST.compareEntryData()
+    compareEntryData()
     PYTEST.upliftComparison.compareUplifts()
     '''
     The function is providing the pipeline for comparisonTests to assure that the dataframes do not change after commit.
