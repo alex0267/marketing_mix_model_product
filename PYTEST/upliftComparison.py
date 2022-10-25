@@ -95,7 +95,21 @@ def comparePredictionMeans(directory_1, directory_2,maxDiff,scope):
 
     # print(f'Difference at quantile: {difference}') 
 
-    
+
+def comparePredictionMeans2(directory_1, directory_2,maxDiff,scope):
+    df_1 = pd.read_csv(f'{directory_1}/{scope}.csv')
+    df_2 = pd.read_csv(f'{directory_2}/{scope}.csv')
+
+    total_df = df_1.merge(df_2, on ='index')
+    total_df['DIFF'] = total_df.iloc[:,1] - total_df.iloc[:,2]
+    total_df['AVG'] = (total_df.iloc[:,1]+total_df.iloc[:,2])/2 
+    total_df['REL_DIFF'] =total_df['DIFF']/total_df['AVG']
+
+    if (total_df['REL_DIFF'].describe()['max'] > maxDiff):
+        print(f'Test unsuccessful for {scope}- {total_df["REL_DIFF"].describe()["max"]} is above allowed threhold {maxDiff}')
+        print(total_df['REL_DIFF'].describe())
+    else:
+        print(f'test successful for {scope}')
 
 
 
@@ -118,8 +132,8 @@ def compareUplifts():
     directory_2 = 'PYTEST/COMPARE_FRAMES/UPLIFT_COMPARISON_TEST'
 
     #comparePrediction(directory_1, directory_2, quant=0.95, maxDiff = 0.1, round=False)
-    comparePredictionMeans(directory_1, directory_2,maxDiff = 0.05, scope = 'prediction_meansPerPrediction')
-    comparePredictionMeans(directory_1, directory_2,maxDiff = 0.05, scope = 'prediction_meanOfTotalPrediction')
+    comparePredictionMeans2(directory_1, directory_2,maxDiff = 0.05, scope = 'prediction_meansPerPredictionCollect')
+    comparePredictionMeans2(directory_1, directory_2,maxDiff = 0.001, scope = 'prediction_meanOfTotalPredictionCollect')
     compareSpendings(directory_1, directory_2, round=False)
 
                       

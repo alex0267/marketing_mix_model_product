@@ -141,8 +141,8 @@ class UpliftSimulation:
         Run the uplift simulation pipeline according to the configurations
         Scope : touchpoints
         '''
-        meansPerPredictionCollect = []
-        meanOfTotalPredictionCollect = []
+        meansPerPredictionCollect = pd.DataFrame()
+        meanOfTotalPredictionCollect = pd.DataFrame()
         weeklyPredictionCollect = []
         spendsCollect = []
         #Execute calculation for different scopes (years individ. & all together)
@@ -166,8 +166,8 @@ class UpliftSimulation:
                 #extraction of uplifts for result comparison
                 
                 meansPerPrediction, meanOfTotalPrediction, weeklyPrediction, spends = PYTEST.extractUplifts.extractUplifts(self.spendings,self.prediction, subset, touchpoint,self.outputConfig['SPEND_UPLIFT_TO_TEST'])
-                meansPerPredictionCollect.append(meansPerPrediction)
-                meanOfTotalPredictionCollect.append(meanOfTotalPrediction)
+                meansPerPredictionCollect = pd.concat([meansPerPredictionCollect, meansPerPrediction],axis=0)
+                meanOfTotalPredictionCollect = pd.concat([meanOfTotalPredictionCollect, meanOfTotalPrediction],axis=0)
                 weeklyPredictionCollect.append(weeklyPrediction)
                 spendsCollect.append(spends)
 
@@ -177,6 +177,9 @@ class UpliftSimulation:
 
                 self.deltaCurrentToZero[(subset,touchpoint)] = self.prediction[(subset,touchpoint,1.0)]-self.prediction[(subset,touchpoint,0.0)] 
         
+
+        meansPerPredictionCollect = meansPerPredictionCollect.rename(columns={0:'index',1:'predict'})
+        meanOfTotalPredictionCollect = meanOfTotalPredictionCollect.rename(columns={0:'index',1:'predict'})
         datasets = [(meansPerPredictionCollect, 'meansPerPredictionCollect'), 
                     (meanOfTotalPredictionCollect, 'meanOfTotalPredictionCollect')]
                     # (weeklyPredictionCollect, 'weeklyPredictionCollect')] 

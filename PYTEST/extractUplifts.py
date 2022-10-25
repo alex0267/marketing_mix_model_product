@@ -8,10 +8,12 @@ def setPredictData(dataSets, master):
     else:
         scope = 'TEST'
 
+
     for data in dataSets:
-        data_flat = [val for sublist in data[0] for val in sublist]
+        # data_flat = [val for sublist in data[0] for val in sublist]
+
     
-        pd.DataFrame(data_flat).to_csv(f'PYTEST/COMPARE_FRAMES/UPLIFT_COMPARISON_{scope}/prediction_{data[1]}.csv')
+        data[0].to_csv(f'PYTEST/COMPARE_FRAMES/UPLIFT_COMPARISON_{scope}/prediction_{data[1]}.csv',index=False)
 
 def setSpendingsData(spends,master):
     if (master):
@@ -51,14 +53,18 @@ def extractWeeklyPrediction(prediction, subset, touchpoint, lift):
 def extractUplifts(spendings, prediction, subset, touchpoint,lifts):
     '''extracting all dataframes for testing'''
     
-    meansPerPrediction = []
-    meanOfTotalPrediction = []
+    meansPerPrediction = pd.DataFrame()
+    meanOfTotalPrediction = pd.DataFrame()
     weeklyPrediction = []
     spends = []
 
     for lift in lifts:
-        meansPerPrediction.append(extractMeanPerPrediction(prediction, subset, touchpoint, lift))
-        meanOfTotalPrediction.append(extractMeanOfTotalPrediction(prediction, subset, touchpoint, lift))
+        new = pd.DataFrame([[f'{touchpoint}_{subset}_{lift}', extractMeanPerPrediction(prediction, subset, touchpoint, lift)]])
+        meansPerPrediction = pd.concat([meansPerPrediction,new], axis = 0)
+
+        new = pd.DataFrame([[f'{touchpoint}_{subset}_{lift}', extractMeanOfTotalPrediction(prediction, subset, touchpoint, lift)]])
+        meanOfTotalPrediction = pd.concat([meanOfTotalPrediction,new], axis = 0)
+
         weeklyPrediction.append(extractWeeklyPrediction(prediction, subset, touchpoint, lift))
         spends.append(extractSpendings(spendings, subset, touchpoint, lift))
 
