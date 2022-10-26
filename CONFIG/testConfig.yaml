@@ -1,3 +1,5 @@
+#number of train-test folds applied
+#it is not advised to choose a number which is evenly dividable by the number of years in scope
 NUMBER_OF_FOLDS: 5
 
 

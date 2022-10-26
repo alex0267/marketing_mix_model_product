@@ -1,3 +1,4 @@
+
 from tkinter import S
 import DATA_PREPARATION.seasonality
 import DATA_PREPARATION.promotion
@@ -30,13 +31,18 @@ def filterByBrands(df, configurations):
 
     return df
 
-def filterByWeeks(feature_df, configurations):
+def filterByWeeks(feature_df, configurations, runBackTest, split):
     '''
     Filter dataframe by Weeks to fit the scope of the model defined in the configurations
     '''
-
+    
     feature_df = feature_df[(feature_df['YEAR_WEEK'] == configurations['DATA_START']).idxmax():].reset_index()
     feature_df = feature_df[:(feature_df['YEAR_WEEK'] == configurations['DATA_END']).idxmax()+1] #+1 for inclusive
+    
+    if (runBackTest == True):
+        feature_df = feature_df[(feature_df['YEAR_WEEK'].isin(split))].reset_index()
+        feature_df.to_excel('feat.xlsx')
+        print(feature_df)
 
 
     return feature_df
@@ -92,7 +98,7 @@ def createFeatureDf(configurations, mediaExec_df, sellOut_df, sellOutDistributio
 
     return feature_df
 
-def run(configurations, responseModelConfig, mediaExec_df, sellOut_df, sellOutDistribution_df, sellOutCompetition_df, covid_df, uniqueWeeks_df):
+def run(configurations, responseModelConfig, mediaExec_df, sellOut_df, sellOutDistribution_df, sellOutCompetition_df, covid_df, uniqueWeeks_df, runBackTest,split):
     '''
     input:
     Company-specific dataframes
@@ -118,15 +124,16 @@ def run(configurations, responseModelConfig, mediaExec_df, sellOut_df, sellOutDi
 
     #normalized features require the total scope of weeks since the normalization 
     #is done with maximum values across the entire dataset
-    filteredFeature_df = filterByWeeks(feature_df.copy(), configurations)
-    normalizedFilteredFeature_df = filterByWeeks(normalizedFeature_df.copy(), configurations)
+    filteredFeature_df = filterByWeeks(feature_df.copy(), configurations, runBackTest, split)
+    normalizedFilteredFeature_df = filterByWeeks(normalizedFeature_df.copy(), configurations,runBackTest, split)
 
     #index dataframe to filter other frames based on brand or year specifications (necessary for output generation)
     index_df = filteredFeature_df[['YEAR_WEEK','BRAND']]
     index_df['YEAR'] = index_df['YEAR_WEEK'].astype(str).str[:4]
 
+    index_df.to_excel('ind.xlsx')
+
     PYTEST.extractEntryData.extractEntryData(feature_df, 'feature_df', configurations['SET_MASTER'])
     PYTEST.extractEntryData.extractEntryData(normalizedFilteredFeature_df, 'normalizedFilteredFeature_df', configurations['SET_MASTER'])
-
 
     return feature_df, filteredFeature_df, normalizedFeature_df, normalizedFilteredFeature_df, index_df

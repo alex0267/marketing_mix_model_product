@@ -55,7 +55,7 @@ class UpliftSimulation:
         '''
 
         #get indexes of data for respective time frame
-        ind = HELPER_FUNCTIONS.getIndex.getIndex(indexColumns = self.responseModel.index_df,scope='YEAR' , subset=subset)
+        ind, cont = HELPER_FUNCTIONS.getIndex.getIndex(indexColumns = self.responseModel.index_df,scope='YEAR' , subset=subset)
 
 
         #extract the control dataframe window that needs to be changed    
@@ -87,9 +87,8 @@ class UpliftSimulation:
         '''
 
         #get indexes of data for respective time frame
-        ind = HELPER_FUNCTIONS.getIndex.getIndex(indexColumns = self.responseModel.index_df,scope='YEAR' , subset=subset)
+        ind, cont = HELPER_FUNCTIONS.getIndex.getIndex(indexColumns = self.responseModel.index_df,scope='YEAR' , subset=subset)
         
-
 
         originalSpendingsInWindow = self.responseModel.filteredFeature_df[self.responseModel.configurations['TOUCHPOINTS']][touchpoint].iloc[ind]
 

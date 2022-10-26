@@ -46,7 +46,8 @@ class ROSCalculation:
             for scope in scopes:
 
                 #get indexes of data for respective time frame
-                ind = HELPER_FUNCTIONS.getIndex.getIndex(indexColumns = self.responseModel.index_df,scope='YEAR' , subset=scope)
+                ind, cont = HELPER_FUNCTIONS.getIndex.getIndex(indexColumns = self.responseModel.index_df,scope='YEAR' , subset=scope)
+                if cont == True: continue
 
                 for touchpoint in self.responseModel.configurations['TOUCHPOINTS']:
                     

@@ -16,7 +16,7 @@ class ResponseCurves:
     - simulatedSales: Collection of simulated sales for a specific (subset, touchpoint, lift)-combination
     '''
 
-    def __init__(self, simulatedSpendings, simulatedSales, responseModel,outputConfig, price_df):
+    def __init__(self, simulatedSpendings, simulatedSales, responseModel,outputConfig, price_df,name):
         
         #initial response Model
 
@@ -26,6 +26,7 @@ class ResponseCurves:
         self.responseModel = responseModel
         self.outputConfig = outputConfig
         self.price_df = price_df
+        self.name = name
 
         #Attributes
         self.spendings = {}
@@ -43,7 +44,7 @@ class ResponseCurves:
             plt.legend()
 
 
-        plt.savefig(f'BUSINESS_OUTPUT/RESPONSE_CURVE_PLOTS/responseCurve_{subset}.png')
+        plt.savefig(f'BUSINESS_OUTPUT/RESPONSE_CURVE_PLOTS/responseCurve_{subset}_{self.name}.png')
         plt.clf()
         return 0
 
@@ -55,7 +56,8 @@ class ResponseCurves:
             #Simulate sales for each touchpoint and lift level
 
             #get indexes of data for respective time frame
-            ind = HELPER_FUNCTIONS.getIndex.getIndex(indexColumns = self.responseModel.index_df,scope='YEAR' , subset=subset)
+            ind, cont = HELPER_FUNCTIONS.getIndex.getIndex(indexColumns = self.responseModel.index_df,scope='YEAR' , subset=subset)
+            if cont == True: continue
             adstock_length = self.responseModel.responseModelConfig['MAX_LAG']
             index = self.responseModel.index_df.index
 

@@ -8,7 +8,7 @@ def plotYearlyContribution(volumeContribution):
     return 0
 
 
-def plotWeeklyContribution(volumeContribution):
+def plotWeeklyContribution(volumeContribution,name):
     #define X-axis
     len_X = len(volumeContribution.responseModel.index_df['YEAR_WEEK'])
 
@@ -19,8 +19,7 @@ def plotWeeklyContribution(volumeContribution):
         
     
     contributors = contributors.T
-    print('plot')
-    print(contributors)
+
 
     X = np.arange(0, len_X, 1) 
 
@@ -31,10 +30,10 @@ def plotWeeklyContribution(volumeContribution):
     plt.plot(volumeContribution.responseModel.filteredFeature_df['TARGET_VOL_SO'], color='black')
     plt.title('Volume Contribution by contributor')
     plt.axis('tight')
-    plt.savefig('PLOTS/Contribution_Stacked_Area_Plot.png', bbox_extra_artists=(lgd,), bbox_inches='tight')
+    plt.savefig(f'PLOTS/Contribution_Stacked_Area_Plot_{name}.png', bbox_extra_artists=(lgd,), bbox_inches='tight')
     plt.clf()
 
 
-def plotContribution(volumeContribution):
-    plotWeeklyContribution(volumeContribution)
+def plotContribution(volumeContribution, name):
+    plotWeeklyContribution(volumeContribution,name)
     plotYearlyContribution(volumeContribution)

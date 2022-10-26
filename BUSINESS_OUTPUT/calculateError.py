@@ -13,4 +13,7 @@ def calculateError(responseModel, volumeContribution):
     print(HELPER_FUNCTIONS.transformations.mean_absolute_percentage_error(prediction, target))
 
     print('R2')
-    print(sklearn.metrics.r2_score(target, prediction))
+    r2 = sklearn.metrics.r2_score(target, prediction)
+    print(r2)
+
+    return r2

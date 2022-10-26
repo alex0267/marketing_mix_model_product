@@ -9,7 +9,8 @@ import yaml
 import pandas as pd
 
 
-def run():
+def run(runBackTest=False, split = False, name = False, load = True):
+    
     '''
     Execution of main MMM pipeline:
         - Data Loading
@@ -29,7 +30,7 @@ def run():
                 outputConfig = yaml.safe_load(file)
     
     
-    mediaExec_df, sellOut_df, sellOutDistribution_df, sellOutCompetition_df, covid_df, uniqueWeeks_df = DATA_PREPARATION.dataLoader.loadData()
+    mediaExec_df, sellOut_df, sellOutDistribution_df, sellOutCompetition_df, covid_df, uniqueWeeks_df, filteredUniqueWeeks_df = DATA_PREPARATION.dataLoader.loadData(configurations)
 
 
     #Create features and prepare data
@@ -40,23 +41,13 @@ def run():
                                                                                                                     sellOutDistribution_df = sellOutDistribution_df.copy(),
                                                                                                                     sellOutCompetition_df = sellOutCompetition_df.copy(),
                                                                                                                     covid_df = covid_df.copy(),
-                                                                                                                    uniqueWeeks_df = uniqueWeeks_df.copy())
+                                                                                                                    uniqueWeeks_df = uniqueWeeks_df.copy(),
+                                                                                                                    runBackTest = runBackTest,
+                                                                                                                    split = split)
 
-    
-    
-    
-    feature_df.to_excel('OUTPUT_DF/feature_df.xlsx')
-    filteredFeature_df.to_excel('OUTPUT_DF/filteredFeature_df.xlsx')
-    normalizedFeature_df.to_excel('OUTPUT_DF/normalizedFeature_df.xlsx')
-    normalizedFilteredFeature_df.to_excel('OUTPUT_DF/normalizedFilteredFeature_df.xlsx')
-    index_df.to_excel('OUTPUT_DF/index_df.xlsx')
 
 
     price_df = filteredFeature_df['AVERAGE_PRICE']
-    seasonality_df = filteredFeature_df[configurations['SEASONALITY_VARIABLES_BASE']]
-    spendings_df = filteredFeature_df[configurations['TOUCHPOINTS']]
-    target = filteredFeature_df[configurations['TARGET']]
-    control_df = filteredFeature_df[['YEAR_WEEK','BRAND','distribution', 'promotion', 'epros', 'covid','off_trade_visibility']]
 
     
     # Initialize Model instance and Train Bayesian Model 
@@ -105,20 +96,28 @@ def run():
     #test if taking away part of the beginning results in correct frames and visualisations - YES 
     #(didn't test for exclusion of responsecurve relevant years yet)
      #fast_duck_V1_TEST_201901-START
+
+    #taking out norm of stan
+    #fast_duck_V1_GETNORMOUT
+    #fast_duck_V1_GETNORMOUT2
     
-    responseModel.runModel(name ='fast_duck_V1_TEST_2010_2_SAME', load=True)
-    responseModel.extractParameters(printOut=True)
+    responseModel.runModel(name =name, load=load)
+    responseModel.extractParameters(printOut=False)
+
+    outputName = f'{name}_{str(load)}'
     
     #calculate contribution decomposition via estimated parameters and original spendings/sales
-    BUSINESS_OUTPUT.mainBusinessOutput.createBusinessOutputs(responseModel = responseModel, 
-                                                            outputConfig = outputConfig,
-                                                            price_df = price_df)
+    r2 = BUSINESS_OUTPUT.mainBusinessOutput.createBusinessOutputs(responseModel = responseModel, 
+                                                                  outputConfig = outputConfig,
+                                                                  price_df = price_df,
+                                                                  name = outputName)
     
     #run tests
-    print('running tests')
-    PYTEST.mainComparisonTests.runComparisonTests() 
+    print('running tests ...')
+    #PYTEST.mainComparisonTests.runComparisonTests() 
+
+    return r2
     
     
     ''''''
 
-run()

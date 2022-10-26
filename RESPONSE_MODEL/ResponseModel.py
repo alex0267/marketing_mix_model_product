@@ -25,8 +25,7 @@ class ResponseModel:
 
         #define data normalized
         self.spendings_df_normalized, self.touchpointNorms = HELPER_FUNCTIONS.normalization.normalize_feature(filteredFeature_df[configurations['TOUCHPOINTS']],filteredFeature_df[configurations['TOUCHPOINTS']], self.responseModelConfig['NORMALIZATION_STEPS_TOUCHPOINTS'])
-        self.target_df_normalized, self.target_df_norm = HELPER_FUNCTIONS.normalization.normalize_feature(filteredFeature_df[configurations['TARGET']],filteredFeature_df[configurations['TARGET']], self.responseModelConfig['NORMALIZATION_STEPS_TARGET'][filteredFeature_df[configurations['TARGET']].name])
-        
+                
         #easy access variables
         self.num_touchpoints = None
         self.beta = []
@@ -53,7 +52,7 @@ class ResponseModel:
         create dictionary as input data for the stan model
         '''
         num_touchpoints = len(self.configurations['TOUCHPOINTS'])
-        touchpointSpend_df = self.filteredFeature_df[self.configurations['TOUCHPOINTS']]
+        touchpointSpend_df = self.normalizedFilteredFeature_df[self.configurations['TOUCHPOINTS']]
         #add zeros to beginning of media dataframe to account for padding (weight application of adstock)
         touchpointSpend_df = np.concatenate((np.zeros((self.responseModelConfig['MAX_LAG']-1, num_touchpoints)), np.array(touchpointSpend_df)),axis=0)
 
@@ -64,12 +63,11 @@ class ResponseModel:
             'touchpointSpend_df': touchpointSpend_df,
             'touchpointNorms': self.touchpointNorms,
             'touchpointThresholds': [self.responseModelConfig['SHAPE_THRESHOLD_VALUE'][tp] for tp in self.configurations['TOUCHPOINTS']],
-            'touchpointSaturations': [self.responseModelConfig['SHAPE_SATURATION_VALUE'][tp] for tp in self.configurations['TOUCHPOINTS']],
             'num_seasons': len(self.configurations['SEASONALITY_VARIABLES_BASE']),
             'seasonality': np.array(self.filteredFeature_df[self.configurations['SEASONALITY_VARIABLES_BASE']]),
             'num_control': len(self.configurations['CONTROL_VARIABLES_BASE']),
             'control': np.array(self.filteredFeature_df[self.configurations['CONTROL_VARIABLES_BASE']]),
-            'y': self.target_df_normalized.values
+            'y': np.array(self.normalizedFilteredFeature_df[self.configurations['TARGET']])
         }
         
         PYTEST.extractEntryData.extractEntryData(self.stanDict, 'stanDict', self.configurations['SET_MASTER'])

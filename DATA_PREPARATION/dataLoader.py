@@ -2,6 +2,17 @@ import pandas as pd
 import sys
 import numpy as np
 
+def filterByWeeks(uniqueWeeks, configurations):
+    '''
+    Filter dataframe by Weeks to fit the scope of the model defined in the configurations
+    '''
+
+    uniqueWeeks_df = uniqueWeeks[(uniqueWeeks['YEAR_WEEK'] == configurations['DATA_START']).idxmax():].reset_index()
+    uniqueWeeks_df = uniqueWeeks_df[:(uniqueWeeks_df['YEAR_WEEK'] == configurations['DATA_END']).idxmax()+1] #+1 for inclusive
+
+
+    return uniqueWeeks_df
+
 def treatCheckDf(check_df, truth_df):
 
     truth_df_brands = truth_df['BRAND'].unique()
@@ -36,7 +47,7 @@ def checkTable(truth_df, check_df):
 
     return 0
 
-def loadData():
+def loadData(configurations):
     '''
     Load the dataframes that make up all parts of the model.
     Might include basic data cleaning tasks to change dataframes
@@ -69,6 +80,8 @@ def loadData():
     uniqueWeeks_df = pd.DataFrame(mediaExec_df['YEAR_WEEK'].unique())
     uniqueWeeks_df = uniqueWeeks_df.rename(columns={0:'YEAR_WEEK'})
 
+    filteredUniqueWeeks_df = filterByWeeks(uniqueWeeks_df, configurations)
+
 
     
-    return mediaExec_df, sellOut_df, sellOutDistribution_df, sellOutCompetition_df, covid_df, uniqueWeeks_df
+    return mediaExec_df, sellOut_df, sellOutDistribution_df, sellOutCompetition_df, covid_df, uniqueWeeks_df, filteredUniqueWeeks_df

@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 #launch data extraction
-def extractSummary(responseModel, volumeContribution,ROS_Calculation, outputConfig):
+def extractSummary(responseModel, volumeContribution,ROS_Calculation, outputConfig, name):
     '''
     Create a summary of all KPIs by week including
     - sales
@@ -40,4 +40,4 @@ def extractSummary(responseModel, volumeContribution,ROS_Calculation, outputConf
 
     print(responseModelInit_df)
 
-    responseModelInit_df.to_excel('OUTPUT_DF/resultSummary_df.xlsx')
+    responseModelInit_df.to_excel(f'OUTPUT_DF/resultSummary_df_{name}.xlsx')
