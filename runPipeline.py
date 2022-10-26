@@ -106,7 +106,7 @@ def run():
     #(didn't test for exclusion of responsecurve relevant years yet)
      #fast_duck_V1_TEST_201901-START
     
-    responseModel.runModel(name ='fast_duck_V1_TEST_2010_3_SAME', load=True)
+    responseModel.runModel(name ='fast_duck_V1_TEST_2010_2_SAME', load=True)
     responseModel.extractParameters(printOut=True)
     
     #calculate contribution decomposition via estimated parameters and original spendings/sales
@@ -115,6 +115,7 @@ def run():
                                                             price_df = price_df)
     
     #run tests
+    print('running tests')
     PYTEST.mainComparisonTests.runComparisonTests() 
     
     

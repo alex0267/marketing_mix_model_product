@@ -47,15 +47,17 @@ def extractMeanOfTotalPrediction(prediction, subset, touchpoint, lift):
 
 def extractWeeklyPrediction(prediction, subset, touchpoint, lift):
     weeklyPred = prediction[(subset,touchpoint,lift)] - prediction[(subset,touchpoint,0.0)]
+    index = pd.Series([f'{touchpoint}_{subset}_{lift}_{x}' for x in range(len(weeklyPred))]).rename('index')
+    weeklyPred_df = pd.concat([index,weeklyPred],axis=1)
 
-    return weeklyPred
+    return weeklyPred_df
 
 def extractUplifts(spendings, prediction, subset, touchpoint,lifts):
     '''extracting all dataframes for testing'''
     
     meansPerPrediction = pd.DataFrame()
     meanOfTotalPrediction = pd.DataFrame()
-    weeklyPrediction = []
+    weeklyPrediction = pd.DataFrame()
     spends = []
 
     for lift in lifts:
@@ -65,7 +67,9 @@ def extractUplifts(spendings, prediction, subset, touchpoint,lifts):
         new = pd.DataFrame([[f'{touchpoint}_{subset}_{lift}', extractMeanOfTotalPrediction(prediction, subset, touchpoint, lift)]])
         meanOfTotalPrediction = pd.concat([meanOfTotalPrediction,new], axis = 0)
 
-        weeklyPrediction.append(extractWeeklyPrediction(prediction, subset, touchpoint, lift))
+        new = extractWeeklyPrediction(prediction, subset, touchpoint, lift)
+        weeklyPrediction = pd.concat([weeklyPrediction,new], axis = 0)
+
         spends.append(extractSpendings(spendings, subset, touchpoint, lift))
 
     return meansPerPrediction, meanOfTotalPrediction, weeklyPrediction, spends

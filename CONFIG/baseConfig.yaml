@@ -1,6 +1,6 @@
 #if true, the generated dataframes will become the new reference points for comparison
 #if false -> test mode
-SET_MASTER: True
+SET_MASTER: False
 #Brands in scope
 BRANDS:
   - fast_duck

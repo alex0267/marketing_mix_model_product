@@ -17,6 +17,7 @@ def createFrame(directory,scope):
 
     return df.iloc[:,1:].rename(columns={'0':str(directory)[33:]})
 
+
 def compareTables(df1,df2,quant,round=False):
     if round:
         total_df = pd.concat([df1.round(),df2.round()], axis =1)
@@ -55,7 +56,6 @@ def compareSpendings(directory_1, directory_2, round):
         print('Spendings DO NOT seem to be similar')
         
 
-
 def comparePrediction(directory_1, directory_2, quant, maxDiff, round):
 
     df_1 = createFrame(directory_1, 'prediction')
@@ -75,28 +75,8 @@ def comparePrediction(directory_1, directory_2, quant, maxDiff, round):
 
     print(f'Difference at quantile: {difference}') 
 
-def comparePredictionMeans(directory_1, directory_2,maxDiff,scope):
-    df_1 = createFrame(directory_1, scope)
-    df_2 = createFrame(directory_2, scope)
 
-    difference ,total_df= compareTables(df_1,df_2,quant=0.9,round=False)
-
-    print('mean comparison')
-    print(scope)
-    print(total_df.describe())  
-    print(total_df['REL_DIFF'].quantile(0.95))
-    print(total_df['REL_DIFF'].quantile(0.9))
-
-    total_df.to_excel('total_df_means.xlsx')
-    # if (total_df['REL_DIFF'] > maxDiff):
-    #     print('Predictions DO NOT seem to be similar')
-    # else:
-    #     print('¨Predictions seem to converge.')
-
-    # print(f'Difference at quantile: {difference}') 
-
-
-def comparePredictionMeans2(directory_1, directory_2,maxDiff,scope):
+def comparePredictions(directory_1, directory_2,maxDiff,scope):
     df_1 = pd.read_csv(f'{directory_1}/{scope}.csv')
     df_2 = pd.read_csv(f'{directory_2}/{scope}.csv')
 
@@ -104,12 +84,21 @@ def comparePredictionMeans2(directory_1, directory_2,maxDiff,scope):
     total_df['DIFF'] = total_df.iloc[:,1] - total_df.iloc[:,2]
     total_df['AVG'] = (total_df.iloc[:,1]+total_df.iloc[:,2])/2 
     total_df['REL_DIFF'] =total_df['DIFF']/total_df['AVG']
+    total_df = total_df.fillna(0)
+    total_df = total_df[total_df['AVG'] != 0]
 
     if (total_df['REL_DIFF'].describe()['max'] > maxDiff):
         print(f'Test unsuccessful for {scope}- {total_df["REL_DIFF"].describe()["max"]} is above allowed threhold {maxDiff}')
         print(total_df['REL_DIFF'].describe())
     else:
         print(f'test successful for {scope}')
+    
+    print(scope)
+    print(total_df)
+    print(total_df['REL_DIFF'].describe())
+    print(total_df['REL_DIFF'].quantile(q=0.9))
+    print(total_df['REL_DIFF'].quantile(q=0.95))
+    total_df.to_excel('total_df.xlsx')
 
 
 
@@ -132,8 +121,9 @@ def compareUplifts():
     directory_2 = 'PYTEST/COMPARE_FRAMES/UPLIFT_COMPARISON_TEST'
 
     #comparePrediction(directory_1, directory_2, quant=0.95, maxDiff = 0.1, round=False)
-    comparePredictionMeans2(directory_1, directory_2,maxDiff = 0.05, scope = 'prediction_meansPerPredictionCollect')
-    comparePredictionMeans2(directory_1, directory_2,maxDiff = 0.001, scope = 'prediction_meanOfTotalPredictionCollect')
+    comparePredictions(directory_1, directory_2,maxDiff = 0.05, scope = 'prediction_meansPerPredictionCollect')
+    comparePredictions(directory_1, directory_2,maxDiff = 0.001, scope = 'prediction_meanOfTotalPredictionCollect')
+    comparePredictions(directory_1, directory_2,maxDiff = 0.1, scope = 'prediction_weeklyPredictionCollect')
     compareSpendings(directory_1, directory_2, round=False)
 
                       

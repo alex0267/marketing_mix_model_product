@@ -143,7 +143,7 @@ class UpliftSimulation:
         '''
         meansPerPredictionCollect = pd.DataFrame()
         meanOfTotalPredictionCollect = pd.DataFrame()
-        weeklyPredictionCollect = []
+        weeklyPredictionCollect = pd.DataFrame()
         spendsCollect = []
         #Execute calculation for different scopes (years individ. & all together)
         for subset in self.outputConfig['CHANGE_PERIODS']:
@@ -168,7 +168,7 @@ class UpliftSimulation:
                 meansPerPrediction, meanOfTotalPrediction, weeklyPrediction, spends = PYTEST.extractUplifts.extractUplifts(self.spendings,self.prediction, subset, touchpoint,self.outputConfig['SPEND_UPLIFT_TO_TEST'])
                 meansPerPredictionCollect = pd.concat([meansPerPredictionCollect, meansPerPrediction],axis=0)
                 meanOfTotalPredictionCollect = pd.concat([meanOfTotalPredictionCollect, meanOfTotalPrediction],axis=0)
-                weeklyPredictionCollect.append(weeklyPrediction)
+                weeklyPredictionCollect = pd.concat([weeklyPredictionCollect, weeklyPrediction],axis=0)
                 spendsCollect.append(spends)
 
 
@@ -180,9 +180,10 @@ class UpliftSimulation:
 
         meansPerPredictionCollect = meansPerPredictionCollect.rename(columns={0:'index',1:'predict'})
         meanOfTotalPredictionCollect = meanOfTotalPredictionCollect.rename(columns={0:'index',1:'predict'})
+        
         datasets = [(meansPerPredictionCollect, 'meansPerPredictionCollect'), 
-                    (meanOfTotalPredictionCollect, 'meanOfTotalPredictionCollect')]
-                    # (weeklyPredictionCollect, 'weeklyPredictionCollect')] 
+                    (meanOfTotalPredictionCollect, 'meanOfTotalPredictionCollect'),
+                    (weeklyPredictionCollect, 'weeklyPredictionCollect')] 
         
         
         PYTEST.extractUplifts.setPredictData(datasets, self.responseModel.configurations['SET_MASTER'])
