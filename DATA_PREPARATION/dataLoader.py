@@ -6,8 +6,10 @@ def filterByWeeks(uniqueWeeks, configurations):
     '''
     Filter dataframe by Weeks to fit the scope of the model defined in the configurations
     '''
-
     uniqueWeeks_df = uniqueWeeks[(uniqueWeeks['YEAR_WEEK'] == configurations['DATA_START']).idxmax():].reset_index()
+    uniqueWeeks_df = uniqueWeeks_df[:(uniqueWeeks_df['YEAR_WEEK'] == configurations['DATA_END']).idxmax()+1] #+1 for inclusive
+
+    uniqueWeeks_df = uniqueWeeks_df[(uniqueWeeks_df['YEAR_WEEK'] == configurations['DATA_START']).idxmax():].reset_index()
     uniqueWeeks_df = uniqueWeeks_df[:(uniqueWeeks_df['YEAR_WEEK'] == configurations['DATA_END']).idxmax()+1] #+1 for inclusive
 
 

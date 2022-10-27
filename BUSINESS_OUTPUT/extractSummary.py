@@ -38,6 +38,6 @@ def extractSummary(responseModel, volumeContribution,ROS_Calculation, outputConf
     responseModelInit_df['AVERAGE_PRICE'] = ROS_Calculation.prices_ALL
     responseModelInit_df = responseModelInit_df.sort_values(by=['YEAR_WEEK'])
 
-    print(responseModelInit_df)
+    #print(responseModelInit_df)
 
     responseModelInit_df.to_excel(f'OUTPUT_DF/resultSummary_df_{name}.xlsx')

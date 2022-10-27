@@ -42,7 +42,7 @@ def filterByWeeks(feature_df, configurations, runBackTest, split):
     if (runBackTest == True):
         feature_df = feature_df[(feature_df['YEAR_WEEK'].isin(split))].reset_index()
         feature_df.to_excel('feat.xlsx')
-        print(feature_df)
+    print(feature_df)
 
 
     return feature_df

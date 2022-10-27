@@ -66,6 +66,7 @@ def runBackTest():
         kf = KFold(n_splits=testConfig['NUMBER_OF_FOLDS'], shuffle=True, random_state=3)
 
         nrFold = 0
+        results_dict={}
 
         for train_index, test_index in (kf.split(splits)):
                 nrFold = nrFold +1
@@ -73,17 +74,23 @@ def runBackTest():
 
                 train_split = split_df(filteredUniqueWeeks_df,train_index,splits)
 
-                r2 = runPipeline.run(runBackTest = True, split = train_split, name = f'r2_Backtest_fold_{nrFold}', load = False)
-                print(f'TRAIN - r2_Backtest_fold_{nrFold}: {r2}')
+                r2 = runPipeline.run(runBackTest = True, split = train_split, name = f'r2_Backtest_fold_NO_COVID_{nrFold}', load = False)
+                print(f'TRAIN - r2_Backtest_fold_NO_COVID_{nrFold}: {r2}')
+                results_dict[f'TRAIN - r2_Backtest_fold_NO_COVID_{nrFold}'] = r2
                 
                 test_split = split_df(filteredUniqueWeeks_df,test_index,splits)
 
-                r2 = runPipeline.run(runBackTest = True, split = test_split, name = f'r2_Backtest_fold_{nrFold}', load = True)
-                print(f'TEST - r2_Backtest_fold_{nrFold}: {r2}')
+                r2 = runPipeline.run(runBackTest = True, split = test_split, name = f'r2_Backtest_fold_NO_COVID_{nrFold}', load = True)
+                print(f'TEST - r2_Backtest_fold_NO_COVID_{nrFold}: {r2}')
+                results_dict[f'TEST - r2_Backtest_fold_NO_COVID_{nrFold}'] = r2
+
+        print(results_dict)
 
  
 
 
         return 0    
+
+
 
 runBackTest()

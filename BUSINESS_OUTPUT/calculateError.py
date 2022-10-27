@@ -14,6 +14,6 @@ def calculateError(responseModel, volumeContribution):
 
     print('R2')
     r2 = sklearn.metrics.r2_score(target, prediction)
-    print(r2)
+    
 
     return r2
