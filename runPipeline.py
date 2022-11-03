@@ -66,41 +66,18 @@ def run(runBackTest=False, split = False, name = False, load = True):
     
     #model savings
 
-    #all custom
-    #test -> is fast_duck
-    #gold_plane_V1_9
-    #precious_liquid_V1_9
 
-    #all custom + epros
-    #fast_duck_V1_10
-    #gold_plane_V1_10
-    #precious_liquid_V1_10
-
-    #all custom + loyality card
-    #fast_duck_V1_11
-    #gold_plane_V1_11
-    #precious_liquid_V1_11
 
     #off trade
     #fast_duck_V1_12
     #gold_plane_V1_12
     #precious_liquid_V1_12
 
-    #testing
-    #fast_duck_V1_TEST - all good version
 
     #fast_duck_V1_TEST_2010 - should also be good version (contains test of mary merged)
     #fast_duck_V1_TEST_2010_2_SAME - Same for comparison of variability
     #fast_duck_V1_TEST_2010_3_SAME
 
-
-    #test if taking away part of the beginning results in correct frames and visualisations - YES 
-    #(didn't test for exclusion of responsecurve relevant years yet)
-     #fast_duck_V1_TEST_201901-START
-
-    #taking out norm of stan
-    #fast_duck_V1_GETNORMOUT
-    #fast_duck_V1_GETNORMOUT2
 
     #first attempt in multi brand vectorized version - all still one brand but brand capability is built in
     #test_multi-vector
@@ -109,7 +86,7 @@ def run(runBackTest=False, split = False, name = False, load = True):
     responseModel.extractParameters(printOut=False)
     
     outputName = f'{name}_{str(load)}'
-    
+    '''
     #calculate contribution decomposition via estimated parameters and original spendings/sales
     r2 = BUSINESS_OUTPUT.mainBusinessOutput.createBusinessOutputs(responseModel = responseModel, 
                                                                   outputConfig = outputConfig,
@@ -117,12 +94,13 @@ def run(runBackTest=False, split = False, name = False, load = True):
                                                                   name = outputName)
     
     #run tests
-    print('running tests ...')
+    #print('running tests ...')
     #PYTEST.mainComparisonTests.runComparisonTests() 
 
     return r2
     ''''''
     
-    ''''''
-run(name = 'test_multi-vector03',load=False)
+    '''
+run(name = 'test_multi-vector03',load=True)
+# print(f'r2: {r2}')
 

@@ -93,7 +93,7 @@ parameters {
   
   // the beta coefficients
   vector[num_seasons] beta_seasonality;
-  vector<lower=0>[num_control] beta_control;
+  
   real beta_tom;
   real beta_laura;
   real beta_lisa;
@@ -160,9 +160,7 @@ model {
   for (i in 1 : num_seasons) {
     beta_seasonality[i] ~ normal(0, 1);
   }
-  for (i in 1 : num_control) {
-    beta_control[i] ~ normal(0, 1);
-  }
+  
   noise_var ~ inv_gamma(0.05, 0.05 * 0.01);
   y[1] ~ normal(tau + 
                 to_vector(tom_transformed[1]) * beta_tom +

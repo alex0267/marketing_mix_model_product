@@ -126,7 +126,18 @@ class ResponseModel:
             'y': targetVar
         }
         
+        
+        dictTPSummary = pd.DataFrame()
+        dictCTRLSummary = pd.DataFrame()
+        for key in self.stanDict.keys():
+            if key in self.configurations['TOUCHPOINTS'] :
+                dictTPSummary[key] = self.stanDict[key][0]
+            if key in self.configurations['CONTROL_VARIABLES_BASE'] :
+                dictCTRLSummary[key] = self.stanDict[key][0]
 
+        dictTPSummary.to_excel('TP_summary.xlsx')
+        dictCTRLSummary.to_excel('CTRL_summary.xlsx')
+        # print(dictCTRLSummary)
         
         PYTEST.extractEntryData.extractEntryData(self.stanDict, 'stanDict', self.configurations['SET_MASTER'])
         
