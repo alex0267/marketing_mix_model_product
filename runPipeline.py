@@ -81,12 +81,14 @@ def run(runBackTest=False, split = False, name = False, load = True):
 
     #first attempt in multi brand vectorized version - all still one brand but brand capability is built in
     #test_multi-vector
+    # test_multi-vector03 - first successful run, but results are wrong
+    # test_multi-vector04 - now changed the adstock to beginning
     
     responseModel.runModel(name =name, load=load)
     responseModel.extractParameters(printOut=False)
     
     outputName = f'{name}_{str(load)}'
-    '''
+    
     #calculate contribution decomposition via estimated parameters and original spendings/sales
     r2 = BUSINESS_OUTPUT.mainBusinessOutput.createBusinessOutputs(responseModel = responseModel, 
                                                                   outputConfig = outputConfig,
@@ -98,9 +100,8 @@ def run(runBackTest=False, split = False, name = False, load = True):
     #PYTEST.mainComparisonTests.runComparisonTests() 
 
     return r2
-    ''''''
     
-    '''
-run(name = 'test_multi-vector03',load=True)
+    ''''''
+run(name = 'test_multi-vector04',load=True)
 # print(f'r2: {r2}')
 

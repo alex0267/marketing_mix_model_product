@@ -67,7 +67,8 @@ class ResponseModel:
         #add trailing 0's to account for adstock overlap
         array = np.array(array)
         if(column in (self.configurations['TOUCHPOINTS'])):
-            array = np.concatenate((array,np.zeros((len(self.configurations['BRANDS']),self.responseModelConfig['MAX_LAG']-1))),axis=1)
+            array = np.concatenate((np.zeros((len(self.configurations['BRANDS']),self.responseModelConfig['MAX_LAG']-1)),array),axis=1)
+            
         
         return array
 
