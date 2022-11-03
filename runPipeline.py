@@ -106,7 +106,7 @@ def run(runBackTest=False, split = False, name = False, load = True):
     #test_multi-vector
     
     responseModel.runModel(name =name, load=load)
-    #responseModel.extractParameters(printOut=False)
+    responseModel.extractParameters(printOut=False)
     
     outputName = f'{name}_{str(load)}'
     
@@ -124,5 +124,5 @@ def run(runBackTest=False, split = False, name = False, load = True):
     ''''''
     
     ''''''
-run(name = 'test_multi-vector',load=True)
+run(name = 'test_multi-vector03',load=False)
 

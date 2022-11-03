@@ -89,7 +89,7 @@ parameters {
   // residual variance
   real<lower=0> noise_var;
   // the intercept
-  vector[N] tau;
+  real tau;
   
   // the beta coefficients
   vector[num_seasons] beta_seasonality;

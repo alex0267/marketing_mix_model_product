@@ -97,8 +97,6 @@ class ResponseModel:
         season = self.createArrayPerBrand(self.configurations['SEASONALITY_VARIABLES_BASE'])
         targetVar = self.createArrayPerBrand(self.configurations['TARGET'])
 
-        print(promotion)
-        print(promotion.shape)
         # print(season.shape)
         
 
@@ -134,7 +132,7 @@ class ResponseModel:
         
 
     def extractParameters(self, printOut=False):
-        print(self.extractFrame)
+        
         '''
         Extract parameters from trained model
         '''
@@ -159,15 +157,17 @@ class ResponseModel:
         #Create control variable
         for i, control in enumerate(self.configurations['CONTROL_VARIABLES_BASE'],start = 1):
             #append to general parameters list
-            self.parameters[f'{control}_beta'] = self.extractFrame[f'beta_control.{i}'].mean(axis=0)
+            #self.parameters[f'{control}_beta'] = self.extractFrame[f'beta_control.{i}'].mean(axis=0)
+            self.parameters[f'{control}_beta'] = self.extractFrame[f'beta_{control}'].mean(axis=0)
             #append to easy access beta_control list
-            self.beta_control.append(self.extractFrame[f'beta_control.{i}'].mean(axis=0))
+            #self.beta_control.append(self.extractFrame[f'beta_control.{i}'].mean(axis=0))
+            self.beta_control.append(self.extractFrame[f'beta_{control}'].mean(axis=0))
 
         for i, touchpoint in enumerate(self.configurations['TOUCHPOINTS'],start = 1):
 
             peak = self.extractFrame[f'peak.{i}'].mean(axis=0)
             decay = self.extractFrame[f'decay.{i}'].mean(axis=0)
-            beta = self.extractFrame[f'beta.{i}'].mean(axis=0)
+            beta = self.extractFrame[f'beta_{touchpoint}'].mean(axis=0)
 
 
             #Collect per touchpoint parameters in dictionary
@@ -229,6 +229,6 @@ class ResponseModel:
 
         else:
             self.extractFrame = pd.read_csv(f'MODEL_SAVINGS/extract{name}.csv')
-            print(self.extractFrame)
+            
         
         return 0
