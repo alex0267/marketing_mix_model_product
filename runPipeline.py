@@ -1,6 +1,7 @@
 import DATA_PREPARATION.mainDataPreparation
 import RESPONSE_MODEL.ResponseModel
 import RESPONSE_MODEL.stanFile
+import RESPONSE_MODEL.stan2
 import BUSINESS_OUTPUT.mainBusinessOutput
 import DATA_PREPARATION.dataLoader
 import PYTEST.mainComparisonTests
@@ -58,7 +59,7 @@ def run(runBackTest=False, split = False, name = False, load = True):
                                                         normalizedFeature_df = normalizedFeature_df,
                                                         normalizedFilteredFeature_df = normalizedFilteredFeature_df,
                                                         index_df = index_df,
-                                                        stanCode = RESPONSE_MODEL.stanFile.stanCode)
+                                                        stanCode = RESPONSE_MODEL.stan2.stanCode)
 
     #checkpoint test
     #PYTEST.mainComparisonTests.compareEntryData()
@@ -100,10 +101,13 @@ def run(runBackTest=False, split = False, name = False, load = True):
     #taking out norm of stan
     #fast_duck_V1_GETNORMOUT
     #fast_duck_V1_GETNORMOUT2
+
+    #first attempt in multi brand vectorized version - all still one brand but brand capability is built in
+    #test_multi-vector
     
     responseModel.runModel(name =name, load=load)
-    responseModel.extractParameters(printOut=False)
-
+    #responseModel.extractParameters(printOut=False)
+    
     outputName = f'{name}_{str(load)}'
     
     #calculate contribution decomposition via estimated parameters and original spendings/sales
@@ -117,7 +121,8 @@ def run(runBackTest=False, split = False, name = False, load = True):
     #PYTEST.mainComparisonTests.runComparisonTests() 
 
     return r2
-    
+    ''''''
     
     ''''''
+run(name = 'test_multi-vector',load=True)
 

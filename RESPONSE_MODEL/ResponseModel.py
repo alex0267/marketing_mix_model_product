@@ -46,6 +46,32 @@ class ResponseModel:
         
     
 
+    def createArrayPerBrand(self, column):
+        '''
+        The stan model requires a slightly different table setup.
+        Since columns cannot be named in stan, indexing becomes quite difficult to oversee.
+        This approach creates arrays of size [N, BRANDS] for each touchpoint to keep indexing simple.
+        '''
+
+        array = []
+        for brand in self.configurations['BRANDS']:
+            feature_df = self.normalizedFilteredFeature_df.copy()
+            element = feature_df[feature_df['BRAND']== brand][column]
+
+            #in case there are no associated spendings for a specific touchpoint, add a 0 column (we need complete dataframes for stan)
+            if(len(element) == 0):
+                element =  [0 for x in range(len(feature_df[self.configurations['TOUCHPOINTS']]))]
+
+            array.append(element)
+
+        #add trailing 0's to account for adstock overlap
+        array = np.array(array)
+        if(column in (self.configurations['TOUCHPOINTS'])):
+            array = np.concatenate((array,np.zeros((len(self.configurations['BRANDS']),self.responseModelConfig['MAX_LAG']-1))),axis=1)
+        
+        return array
+
+
     def createDict(self):
 
         '''
@@ -53,27 +79,62 @@ class ResponseModel:
         '''
         num_touchpoints = len(self.configurations['TOUCHPOINTS'])
         touchpointSpend_df = self.normalizedFilteredFeature_df[self.configurations['TOUCHPOINTS']]
-        #add zeros to beginning of media dataframe to account for padding (weight application of adstock)
-        touchpointSpend_df = np.concatenate((np.zeros((self.responseModelConfig['MAX_LAG']-1, num_touchpoints)), np.array(touchpointSpend_df)),axis=0)
+
+        #the arrays have to be appended to account for the adstock overlap (last elements of series need to be adstocked as well)
+        tom = self.createArrayPerBrand('tom')
+        laura = self.createArrayPerBrand('laura')
+        lisa = self.createArrayPerBrand('lisa')
+        mary = self.createArrayPerBrand('mary')
+        fiona = self.createArrayPerBrand('fiona')
+        marc = self.createArrayPerBrand('marc')
+        alex = self.createArrayPerBrand('alex')
+        epros = self.createArrayPerBrand('epros')
+        covid = self.createArrayPerBrand('covid')
+        distribution = self.createArrayPerBrand('distribution')
+        promotion = self.createArrayPerBrand('promotion')
+        off_trade_visibility = self.createArrayPerBrand('off_trade_visibility')
+        control = self.createArrayPerBrand(self.configurations['CONTROL_VARIABLES_BASE'])
+        season = self.createArrayPerBrand(self.configurations['SEASONALITY_VARIABLES_BASE'])
+        targetVar = self.createArrayPerBrand(self.configurations['TARGET'])
+
+        print(promotion)
+        print(promotion.shape)
+        # print(season.shape)
+        
 
         self.stanDict = {
-            'N': len(self.filteredFeature_df[self.configurations['TOUCHPOINTS']]),
+            'N': len(targetVar[0]),
+            'B' : len(self.configurations['BRANDS']),
             'max_lag': self.responseModelConfig['MAX_LAG'], 
             'num_touchpoints': num_touchpoints,
-            'touchpointSpend_df': touchpointSpend_df,
+            'tom': tom,
+            'laura':laura,
+            'lisa':lisa,
+            'mary':mary,
+            'fiona':fiona,
+            'marc':marc,
+            'alex':alex,
+            'epros':epros,
+            'distribution':distribution,
+            'promotion':promotion,
+            'off_trade_visibility':off_trade_visibility,
+            'covid':covid,
             'touchpointNorms': self.touchpointNorms,
             'touchpointThresholds': [self.responseModelConfig['SHAPE_THRESHOLD_VALUE'][tp] for tp in self.configurations['TOUCHPOINTS']],
             'num_seasons': len(self.configurations['SEASONALITY_VARIABLES_BASE']),
-            'seasonality': np.array(self.filteredFeature_df[self.configurations['SEASONALITY_VARIABLES_BASE']]),
+            'seasonality': season[0],
             'num_control': len(self.configurations['CONTROL_VARIABLES_BASE']),
-            'control': np.array(self.filteredFeature_df[self.configurations['CONTROL_VARIABLES_BASE']]),
-            'y': np.array(self.normalizedFilteredFeature_df[self.configurations['TARGET']])
+            'control': control,
+            'y': targetVar
         }
+        
+
         
         PYTEST.extractEntryData.extractEntryData(self.stanDict, 'stanDict', self.configurations['SET_MASTER'])
         
 
     def extractParameters(self, printOut=False):
+        print(self.extractFrame)
         '''
         Extract parameters from trained model
         '''
@@ -168,5 +229,6 @@ class ResponseModel:
 
         else:
             self.extractFrame = pd.read_csv(f'MODEL_SAVINGS/extract{name}.csv')
+            print(self.extractFrame)
         
         return 0
