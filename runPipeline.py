@@ -82,7 +82,8 @@ def run(runBackTest=False, split = False, name = False, load = True):
     #first attempt in multi brand vectorized version - all still one brand but brand capability is built in
     #test_multi-vector
     # test_multi-vector03 - first successful run, but results are wrong
-    # test_multi-vector04 - now changed the adstock to beginning
+    # test_multi-vector04 - now changed the adstock to beginning - still wrong
+    # test_multi-vector05 - trying stuff
     
     responseModel.runModel(name =name, load=load)
     responseModel.extractParameters(printOut=False)
@@ -102,6 +103,6 @@ def run(runBackTest=False, split = False, name = False, load = True):
     return r2
     
     ''''''
-run(name = 'test_multi-vector04',load=True)
+run(name = 'test_multi-vector05',load=False)
 # print(f'r2: {r2}')
 

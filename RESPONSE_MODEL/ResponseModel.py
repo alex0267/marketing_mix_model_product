@@ -126,7 +126,8 @@ class ResponseModel:
             'control': control,
             'y': targetVar
         }
-        print(targetVar)
+        
+        
         
         dictTPSummary = pd.DataFrame()
         dictCTRLSummary = pd.DataFrame()
