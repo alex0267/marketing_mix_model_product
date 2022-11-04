@@ -126,7 +126,7 @@ class ResponseModel:
             'control': control,
             'y': targetVar
         }
-        
+        print(targetVar)
         
         dictTPSummary = pd.DataFrame()
         dictCTRLSummary = pd.DataFrame()
@@ -228,6 +228,15 @@ class ResponseModel:
 
         return 0
 
+    def transform(self, df):
+        
+        # tran_df = pd.DataFrame(df.iloc[:,:70].mean())
+        tran_df = pd.DataFrame(df.mean())
+        tran_df.to_excel('estimatedParametersMean.xlsx')
+  
+
+        return tran_df
+
     def runModel(self, name, load=True):
         '''
         Run stan model with created dictionary and save results
@@ -238,9 +247,11 @@ class ResponseModel:
             fit = posterior.sample(num_chains=4, num_samples=1000)
             self.extractFrame = fit.to_frame()
             self.extractFrame.to_csv(f'MODEL_SAVINGS/extract{name}.csv')
+            self.transform(self.extractFrame)
 
         else:
             self.extractFrame = pd.read_csv(f'MODEL_SAVINGS/extract{name}.csv')
+            self.transform(self.extractFrame)
             
         
         return 0
