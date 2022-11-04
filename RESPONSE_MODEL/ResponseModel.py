@@ -245,7 +245,7 @@ class ResponseModel:
 
         if(load==False):
             posterior = stan.build(self.stanCode, data=self.stanDict)
-            fit = posterior.sample(num_chains=4, num_samples=1000)
+            fit = posterior.sample(num_chains=1, num_samples=1,num_warmup=0)
             self.extractFrame = fit.to_frame()
             self.extractFrame.to_csv(f'MODEL_SAVINGS/extract{name}.csv')
             self.transform(self.extractFrame)

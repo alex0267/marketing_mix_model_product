@@ -125,7 +125,7 @@ transformed parameters {
     matrix[1,N] alex_transformed;
     
     for (nn in 1:N) {
-        tom_transformed[1,nn] = transform(tom[1], N,nn, max_lag,decay[1], shape[1],scale[1],touchpointThresholds[1],touchpointNorms[1]);
+        tom_transformed[1,nn] = transform(tom[1], N,nn, max_lag,0.4, 1.5,1.1,touchpointThresholds[1],touchpointNorms[1]);
         laura_transformed[1,nn] = transform(laura[1], N,nn, max_lag,decay[2], shape[2],scale[2],touchpointThresholds[2],touchpointNorms[2]);
         lisa_transformed[1,nn] = transform(lisa[1], N,nn, max_lag,decay[3], shape[3],scale[3],touchpointThresholds[3],touchpointNorms[3]);
         mary_transformed[1,nn] = transform(mary[1], N,nn, max_lag,decay[4], shape[4],scale[4],touchpointThresholds[4],touchpointNorms[4]);
@@ -133,6 +133,7 @@ transformed parameters {
         marc_transformed[1,nn] = transform(marc[1], N,nn, max_lag,decay[6], shape[6],scale[6],touchpointThresholds[6],touchpointNorms[6]);
         alex_transformed[1,nn] = transform(alex[1], N,nn, max_lag,decay[7], shape[7],scale[7],touchpointThresholds[7],touchpointNorms[7]);
     }
+    print(tom_transformed);
 }
 // -----------------------------------    MODEL    -----------------------------------
 model {

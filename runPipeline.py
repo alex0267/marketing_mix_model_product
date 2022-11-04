@@ -66,8 +66,6 @@ def run(runBackTest=False, split = False, name = False, load = True):
     
     #model savings
 
-
-
     #off trade
     #fast_duck_V1_12
     #gold_plane_V1_12
