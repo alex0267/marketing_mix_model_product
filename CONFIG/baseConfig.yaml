@@ -4,7 +4,7 @@ SET_MASTER: False
 #Brands in scope
 BRANDS:
   - fast_duck
-  # - gold_plane
+  - gold_plane
   # - precious_liquid
 
 # for predious_liquid - get rid of laura & alex
@@ -32,6 +32,9 @@ SEASONALITY_VARIABLES_BASE:
  - is_october
  - is_november
  - is_december
+
+
+SEASONALITY_VARIABLES_EVENTS:
  - is_last_week
 
 #  - christmas

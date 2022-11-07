@@ -77,7 +77,8 @@ data {
   matrix[B,N] covid;
   // the vector of sales
   matrix [B,N] volume;
-  matrix [N,num_seasons] seasonality;
+  matrix [N,num_seasons] seasonality_raw;
+  matrix[B,N] is_last_week;
   real control [B,N,num_control] ;
   // threshold values
   vector [num_touchpoints] touchpointThresholds;
@@ -92,7 +93,7 @@ parameters {
   vector [B] intercept;
   
   // the beta coefficients
-  vector[num_seasons] beta_seasonality;
+  matrix[B,num_seasons] beta_seasonality_raw;
   
   vector<lower=0>[B] beta_tom;
   vector<lower=0>[B]beta_laura;
@@ -106,6 +107,7 @@ parameters {
   vector<lower=0>[B] beta_distribution;
   vector<lower=0>[B] beta_off_trade_visibility;
   vector[B] beta_covid;
+  vector[B] beta_is_last_week;
   // the decay and peak parameter for the adstock transformation of
   // each touchpoints - (peak only relevant for specific adstock type)
   vector<lower=0,upper=1>[num_touchpoints] decay;
@@ -116,6 +118,14 @@ parameters {
 }
 // -----------------------------------    TRANSFORMATION    -----------------------------------
 transformed parameters {
+
+    // Buiding beta_seasonality such that 12th column is the sum of the 11th first columns
+    //for (b in 1:B){
+    //    beta_seasonality[b] = append_col(beta_seasonality_raw[b], -sum(beta_seasonality_raw[b]));
+    //    seasonality_effect[b] = (reindex_matrix_cols(seasonality, keep_data) * beta_seasonality[b]')';
+    //}
+
+
     matrix[1,N] tom_transformed;
     matrix[1,N] laura_transformed;
     matrix[1,N] lisa_transformed;
@@ -153,13 +163,16 @@ model {
   beta_promotion ~ normal(0, 1);
   beta_off_trade_visibility ~ normal(0, 1);
   beta_covid ~ normal(0, 1);
+  beta_is_last_week ~ normal(0, 1);
 
   for (i in 1 : num_touchpoints) {
     shape[i] ~ gamma(4,4);
     scale[i] ~ beta(2, 2);
   }
-  for (i in 1 : num_seasons) {
-    beta_seasonality[i] ~ normal(0, 1);
+  for (i in 1 : B) {
+      for (n in 1:num_seasons){
+        beta_seasonality_raw[i,n] ~ normal(0, 1);
+        }
   }
   
   sigma ~ normal(0, 1);
@@ -176,7 +189,8 @@ model {
                 to_vector(promotion[1]) * beta_promotion[1] +
                 to_vector(off_trade_visibility[1]) * beta_off_trade_visibility[1] +
                 to_vector(covid[1]) * beta_covid[1] +
-                seasonality*beta_seasonality,
+                seasonality_raw * to_vector(beta_seasonality_raw[1]) +
+                to_vector(is_last_week[1]) * beta_is_last_week[1],
                 sigma[1]);
 }
 

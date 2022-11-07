@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 import HELPER_FUNCTIONS.getIndex
+import os
 
 class ResponseCurves:
     '''
@@ -43,13 +44,15 @@ class ResponseCurves:
             plt.plot(self.spendings[(subset, touchpoint)].values(),self.deltaSales[(subset, touchpoint)].values(), label=touchpoint)
             plt.legend()
 
-
-        plt.savefig(f'BUSINESS_OUTPUT/RESPONSE_CURVE_PLOTS/responseCurve_{subset}_{self.name}.png')
+        
+        plt.savefig(f'BUSINESS_OUTPUT/RESPONSE_CURVE_PLOTS/{self.name}/responseCurve_{subset}.png')
         plt.clf()
         return 0
 
     
     def run(self):
+        
+        os.mkdir(f'BUSINESS_OUTPUT/RESPONSE_CURVE_PLOTS/{self.name}')
 
         #Execute calculation for different scopes (years individ. & all together)
         for subset in self.outputConfig['RESPONSE_CURVE_PERIODS']:

@@ -60,7 +60,7 @@ class ResponseModel:
 
             array.append(element)
 
-        #add trailing 0's to account for adstock overlap
+        #add trailing 0's at touchpoints to account for adstock calculation overlap (calculating first weeks needs 0 weeks before first week)
         array = np.array(array)
         if(column in (self.configurations['TOUCHPOINTS'])):
             array = np.concatenate((np.zeros((len(self.configurations['BRANDS']),self.responseModelConfig['MAX_LAG']-1)),array),axis=1)
@@ -92,9 +92,8 @@ class ResponseModel:
         off_trade_visibility = self.createArrayPerBrand('off_trade_visibility')
         control = self.createArrayPerBrand(self.configurations['CONTROL_VARIABLES_BASE'])
         season = self.createArrayPerBrand(self.configurations['SEASONALITY_VARIABLES_BASE'])
+        is_last_week = self.createArrayPerBrand('is_last_week')
         targetVar = self.createArrayPerBrand(self.configurations['TARGET'])
-
-        # print(season.shape)
         
 
         self.stanDict = {
@@ -117,12 +116,12 @@ class ResponseModel:
             'touchpointNorms': self.touchpointNorms,
             'touchpointThresholds': [self.responseModelConfig['SHAPE_THRESHOLD_VALUE'][tp] for tp in self.configurations['TOUCHPOINTS']],
             'num_seasons': len(self.configurations['SEASONALITY_VARIABLES_BASE']),
-            'seasonality': season[0],
+            'seasonality_raw': season[0],
+            'is_last_week': is_last_week,
             'num_control': len(self.configurations['CONTROL_VARIABLES_BASE']),
             'control': control,
             'volume': targetVar
-        }
-        
+        }        
         
         
         dictTPSummary = pd.DataFrame()
@@ -159,7 +158,7 @@ class ResponseModel:
             #FOR NOW OK BUT NEED TO BE CHANGED WHEN SEASONALITY APPROACH IS CHANGED
             beta_seasonality=[]
             for s, season in enumerate(self.configurations['SEASONALITY_VARIABLES_BASE'],start = 1):
-                beta_seasonality.append(self.extractFrame[f'beta_seasonality.{s}'].mean(axis=0))
+                beta_seasonality.append(self.extractFrame[f'beta_seasonality_raw.{i}.{s}'].mean(axis=0))
             
             #we add a list as a dict object to facilitate beta extraction
             brandEstimationsDict[f'seasonality_beta'] = beta_seasonality
