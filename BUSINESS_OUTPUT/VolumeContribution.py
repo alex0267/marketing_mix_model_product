@@ -35,7 +35,9 @@ class VolumeContribution:
         #collect all relative contribution after error correction
         self.relativeContributions = {}
 
-    def calculateVolumeContribution(self):
+        self.runPipeline()
+
+    def calculateVolumeContribution(self,brand):
         '''
         The Volume contribution is calculated via the uplift simulations.
         Each influence factor (touchpoints, control variables, baseline) is added to a table 
@@ -52,16 +54,16 @@ class VolumeContribution:
             #include volume contribution of each touchpoint
             for touchpoint in self.responseModel.configurations['TOUCHPOINTS']:
 
-                deltaToZeroSimulations[touchpoint] = self.upliftSimulation.deltaCurrentToZero[(subset,touchpoint)]
+                deltaToZeroSimulations[touchpoint] = self.upliftSimulation.deltaCurrentToZero[(brand,subset,touchpoint)]
 
             #include volume contribution of each touchpoint
             for control in self.responseModel.configurations['CONTROL_VARIABLES_BASE']:
 
-                deltaToZeroSimulations[control] = self.upliftSimulation.deltaControlToNeutral[(subset,control)]
+                deltaToZeroSimulations[control] = self.upliftSimulation.deltaControlToNeutral[(brand,subset,control)]
 
 
             #include basesales
-            deltaToZeroSimulations['baseline'] = self.upliftSimulation.deltaBaseline[subset]
+            deltaToZeroSimulations['baseline'] = self.upliftSimulation.deltaBaseline[(brand,subset)]
 
             #include sum - the variable to predict
             deltaToZeroSimulations['total_predict'] = deltaToZeroSimulations.sum(axis=1)
@@ -70,14 +72,14 @@ class VolumeContribution:
             deltaToZeroSimulations['total_target'] = self.responseModel.filteredFeature_df['TARGET_VOL_SO']
 
             #add the subset simulation table to the collection
-            self.deltaToZeroDict[subset] = deltaToZeroSimulations
+            self.deltaToZeroDict[(brand,subset)] = deltaToZeroSimulations
 
             #print the 'all weeks' delta to zero simulation (as it comes last) as a checking table
             # deltaToZeroSimulations.to_csv('test_delta.csv')
         
         return 0
 
-    def correctContributionError(self):
+    def correctContributionError(self,brand):
         '''
         Since the sum of all simulated deltaContributions is not equal to the true target value,
         each factor will be adjusted with the relative delta error.
@@ -88,26 +90,26 @@ class VolumeContribution:
 
             
             #calculate error as (1+ (true_target-target_prediction)/target_prediction)
-            error = (1+((self.deltaToZeroDict[subset]['total_target'] - self.deltaToZeroDict[subset]['total_predict'])/self.deltaToZeroDict[subset]['total_predict']))
+            error = (1+((self.deltaToZeroDict[(brand,subset)]['total_target'] - self.deltaToZeroDict[(brand,subset)]['total_predict'])/self.deltaToZeroDict[(brand,subset)]['total_predict']))
             
             #multiply error with the predicted contribution for each factor
 
             #include touchpoints
             for touchpoint in self.responseModel.configurations['TOUCHPOINTS']:
-                deltaToZeroCorrected[touchpoint] = error*self.deltaToZeroDict[subset][touchpoint]
+                deltaToZeroCorrected[touchpoint] = error*self.deltaToZeroDict[(brand,subset)][touchpoint]
 
             for control in self.responseModel.configurations['CONTROL_VARIABLES_BASE']:
-                deltaToZeroCorrected[control] = error*self.deltaToZeroDict[subset][control]
+                deltaToZeroCorrected[control] = error*self.deltaToZeroDict[(brand,subset)][control]
 
             #include basesales
-            deltaToZeroCorrected['baseline'] = error*self.deltaToZeroDict[subset]['baseline']
+            deltaToZeroCorrected['baseline'] = error*self.deltaToZeroDict[(brand,subset)]['baseline']
 
 
             #add the subset simulation table to the collection
-            self.absoluteContributionCorrected[subset] = deltaToZeroCorrected
+            self.absoluteContributionCorrected[(brand,subset)] = deltaToZeroCorrected
             
 
-    def calculateRelativeContribution(self):
+    def calculateRelativeContribution(self,brand):
         '''
         Calculate relative contribution for each subset based on the error corrected results
         '''
@@ -116,6 +118,13 @@ class VolumeContribution:
             relativeContribution=pd.DataFrame()
 
             for item in self.outputConfig['CONTRIBUTORS']:
-                relativeContribution[item] = self.absoluteContributionCorrected[subset][item]/self.absoluteContributionCorrected[subset].sum(axis=1)
-            self.relativeContributions[subset] = relativeContribution
+                relativeContribution[item] = self.absoluteContributionCorrected[(brand,subset)][item]/self.absoluteContributionCorrected[(brand,subset)].sum(axis=1)
+            self.relativeContributions[(brand,subset)] = relativeContribution
+
+    def runPipeline(self):
+       
+        for brand in self.responseModel.configurations['BRANDS']:
+            self.calculateVolumeContribution(brand)
+            self.correctContributionError(brand)
+            self.calculateRelativeContribution(brand)
 

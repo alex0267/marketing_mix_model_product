@@ -82,6 +82,8 @@ def run(runBackTest=False, split = False, name = False, load = True):
     # test_multi-vector03 - first successful run, but results are wrong
     # test_multi-vector04 - now changed the adstock to beginning - still wrong
     # test_multi-vector05 - WORKING - ON LEVEL WITH BEFORE VECTORIZATION
+    # test_multi-vector05 - ready for multi brand - all vectorized
+    # test_multi-vector08 - multi brand
     
     responseModel.runModel(name =name, load=load)
     responseModel.extractParameters(printOut=False)
@@ -101,6 +103,6 @@ def run(runBackTest=False, split = False, name = False, load = True):
     return r2
     
     ''''''
-run(name = 'test_multi-vector07',load=True)
+run(name = 'test_multi-vector08',load=True)
 # print(f'r2: {r2}')
 

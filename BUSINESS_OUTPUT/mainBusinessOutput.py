@@ -19,11 +19,9 @@ def createBusinessOutputs(responseModel, outputConfig, price_df,name):
                                                                                         responseModel = responseModel,
                                                                                         outputConfig = outputConfig)
     
-    volumeContribution.calculateVolumeContribution()
-    volumeContribution.correctContributionError()
-    volumeContribution.calculateRelativeContribution()
 
-    BUSINESS_OUTPUT.plotContribution.plotContribution(volumeContribution,name)
+
+    BUSINESS_OUTPUT.plotContribution.plotContribution(volumeContribution,responseModel.configurations,name)
 
 
     #Generate response curves based on uplifts
@@ -33,7 +31,7 @@ def createBusinessOutputs(responseModel, outputConfig, price_df,name):
                                                                            outputConfig = outputConfig,
                                                                            price_df = price_df,
                                                                            name = name)
-
+    '''
     #Calculate ROS based on volume contribution
     ROS = BUSINESS_OUTPUT.ROSCalculation.ROSCalculation(responseModel = responseModel,
                                                        volumeContribution = volumeContribution,
@@ -44,11 +42,12 @@ def createBusinessOutputs(responseModel, outputConfig, price_df,name):
     r2 = BUSINESS_OUTPUT.calculateError.calculateError(responseModel = responseModel,
                                                        volumeContribution = volumeContribution)
     
+    
     #Generate summary based on volumeContribution and ROS
     BUSINESS_OUTPUT.extractSummary.extractSummary(responseModel = responseModel,
                                                   volumeContribution = volumeContribution,
                                                   ROS_Calculation = ROS, 
                                                   outputConfig = outputConfig,
                                                   name = name)
-    ''''''
+    '''
     return r2

@@ -50,17 +50,17 @@ class UpliftSimulation:
         '''
 
         #get indexes of data for respective time frame
-        ind, cont = HELPER_FUNCTIONS.getIndex.getIndex(indexColumns = self.responseModel.index_df,scope='YEAR' , subset=subset)
+        ind, cont = HELPER_FUNCTIONS.getIndex.getIndex(indexColumns = filteredFeature_df,scope='YEAR' , subset=subset)
 
 
         #extract the control dataframe window that needs to be changed    
-        originalControlWindow = self.responseModel.filteredFeature_df[self.responseModel.configurations['CONTROL_VARIABLES_BASE']][controlVariable].iloc[ind]
+        originalControlWindow = filteredFeature_df[self.responseModel.configurations['CONTROL_VARIABLES_BASE']][controlVariable].iloc[ind]
 
         #change control variable window to neutral position depending on control variable definition
         changedControl = BUSINESS_OUTPUT.changeControlVariable.changeControlVariable(originalControlWindow, controlVariable)
 
         #merge control variable window with the full window        
-        zeroControl = pd.DataFrame(self.responseModel.filteredFeature_df[self.responseModel.configurations['CONTROL_VARIABLES_BASE']].copy())
+        zeroControl = pd.DataFrame(filteredFeature_df[self.responseModel.configurations['CONTROL_VARIABLES_BASE']].copy())
 
         #if control variables are changed, each variable has to be changed individually
         if isinstance(controlVariable, list):
@@ -80,16 +80,15 @@ class UpliftSimulation:
         '''
 
         #get indexes of data for respective time frame
-        ind, cont = HELPER_FUNCTIONS.getIndex.getIndex(indexColumns = self.responseModel.index_df,scope='YEAR' , subset=subset)
+        ind, cont = HELPER_FUNCTIONS.getIndex.getIndex(indexColumns = filteredFeature_df,scope='YEAR' , subset=subset)
         
-
-        originalSpendingsInWindow = self.responseModel.filteredFeature_df[self.responseModel.configurations['TOUCHPOINTS']][touchpoint].iloc[ind]
+        originalSpendingsInWindow = filteredFeature_df[self.responseModel.configurations['TOUCHPOINTS']][touchpoint].iloc[ind]
 
         #apply change
         changedSpendings = originalSpendingsInWindow*lift
 
         #change entire dataframe according to change
-        spendings = self.responseModel.filteredFeature_df[self.responseModel.configurations['TOUCHPOINTS']].copy()
+        spendings = filteredFeature_df[self.responseModel.configurations['TOUCHPOINTS']].copy()
         
         #merge the changed section with the rest of the data
 
@@ -106,22 +105,22 @@ class UpliftSimulation:
         '''take the changed spendings and simulate the sales based on the estimated parameters'''
 
         #use the existing control_df values if no changed are specified
-        if spendings_df is None: spendings_df = self.responseModel.filteredFeature_df[self.responseModel.configurations['TOUCHPOINTS']].copy()
-        if control_df is None: control_df = self.responseModel.filteredFeature_df[self.responseModel.configurations['CONTROL_VARIABLES_BASE']].copy()
+        if spendings_df is None: spendings_df = filteredFeature_df[self.responseModel.configurations['TOUCHPOINTS']].copy()
+        if control_df is None: control_df = filteredFeature_df[self.responseModel.configurations['CONTROL_VARIABLES_BASE']].copy()
 
         #extract sales predictions from changed spendingsFrame
         factor_df, y_pred = BUSINESS_OUTPUT.applyParameters.applyParametersToData(raw_data = spendings_df,
-                                                            original_spendings = self.responseModel.feature_df[self.responseModel.configurations['TOUCHPOINTS']].copy(),
+                                                            original_spendings = feature_df[self.responseModel.configurations['TOUCHPOINTS']].copy(),
                                                             parameters = parameters,
                                                             configurations= self.responseModel.configurations,
                                                             responseModelConfig = self.responseModel.responseModelConfig,
                                                             scope = self.responseModel.configurations['TOUCHPOINTS'],
-                                                            seasonality_df = self.responseModel.filteredFeature_df[self.responseModel.configurations['SEASONALITY_VARIABLES_BASE']],
+                                                            seasonality_df = filteredFeature_df[self.responseModel.configurations['SEASONALITY_VARIABLES_BASE']],
                                                             control_df = control_df)
         
         #prediction is equal to the (normalized prediction -1)*raw_sales.max()
         #we are taking the feature_df since the max value must be based on the entire dataset, not just the weeks applied
-        prediction = (y_pred-1)*self.responseModel.feature_df['TARGET_VOL_SO'].max()
+        prediction = (y_pred-1)*feature_df['TARGET_VOL_SO'].max()
             
         return prediction
 
@@ -148,25 +147,28 @@ class UpliftSimulation:
 
                     
                     #extract weekly changed spendings and predictions for each spending lift, touchpoint and subset combination
-                    self.spendings[(subset,touchpoint,lift)] = spendings
-                    self.prediction[(subset,touchpoint,lift)] = prediction
+                    self.spendings[(brand, subset,touchpoint,lift)] = spendings
+                    self.prediction[(brand, subset,touchpoint,lift)] = prediction
 
                     
                 #extraction of uplifts for result comparison
-                
+                '''
+                #R2 BACKTEST OUT OF ORDER DUE TO MULTI BRAND CHANGES
                 meansPerPrediction, meanOfTotalPrediction, weeklyPrediction, spends = PYTEST.extractUplifts.extractUplifts(self.spendings,self.prediction, subset, touchpoint,self.outputConfig['SPEND_UPLIFT_TO_TEST'])
                 meansPerPredictionCollect = pd.concat([meansPerPredictionCollect, meansPerPrediction],axis=0)
                 meanOfTotalPredictionCollect = pd.concat([meanOfTotalPredictionCollect, meanOfTotalPrediction],axis=0)
                 weeklyPredictionCollect = pd.concat([weeklyPredictionCollect, weeklyPrediction],axis=0)
                 spendsCollect.append(spends)
+                '''
 
 
                 #calculate the calculateDeltaCurrentToZero as the difference between uplift(1) and uplift(0)
                 #for each touchpoint
 
-                self.deltaCurrentToZero[(subset,touchpoint)] = self.prediction[(subset,touchpoint,1.0)]-self.prediction[(subset,touchpoint,0.0)] 
+                self.deltaCurrentToZero[(brand,subset,touchpoint)] = self.prediction[(brand, subset,touchpoint,1.0)]-self.prediction[(brand, subset,touchpoint,0.0)] 
         
-
+        '''
+        #R2 BACKTEST OUT OF ORDER DUE TO MULTI BRAND CHANGES
         meansPerPredictionCollect = meansPerPredictionCollect.rename(columns={0:'index',1:'predict'})
         meanOfTotalPredictionCollect = meanOfTotalPredictionCollect.rename(columns={0:'index',1:'predict'})
         
@@ -174,10 +176,10 @@ class UpliftSimulation:
                     (meanOfTotalPredictionCollect, 'meanOfTotalPredictionCollect'),
                     (weeklyPredictionCollect, 'weeklyPredictionCollect')] 
         
-        
+
         PYTEST.extractUplifts.setPredictData(datasets, self.responseModel.configurations['SET_MASTER'])
         PYTEST.extractUplifts.setSpendingsData((spendsCollect, 'spendsCollect'), self.responseModel.configurations['SET_MASTER'])
-
+        '''
     def runBaselineExtract(self,parameters,filteredFeature_df, feature_df,brand):
         '''
         Run the uplift simulation pipeline according to the configurations
@@ -204,7 +206,7 @@ class UpliftSimulation:
             #CurrentSpendingsPredict = self.simulateSales(CurrentSpendings)
             #-> this part is not necessary since setting all to 0 already gives us the rest
 
-            self.deltaBaseline[subset] = ZeroSpendingsPredict
+            self.deltaBaseline[(brand,subset)] = ZeroSpendingsPredict
 
     def runControlExtract(self, parameters,filteredFeature_df, feature_df,brand):
         #Execute calculation for different scopes (years individ. & all together)
@@ -223,14 +225,14 @@ class UpliftSimulation:
 
                 #calculate the calculateDeltaControlToNeutral as the difference between the neutral control position and the current control position
                 #for control variable
-                self.deltaControlToNeutral[(subset,control)] =  currentSpendingsPredict - neutralPrediction
+                self.deltaControlToNeutral[(brand,subset,control)] =  currentSpendingsPredict - neutralPrediction
 
     def runPipeline(self):
 
         for brand in self.responseModel.configurations['BRANDS']:
 
-            filteredFeature_df = self.responseModel.filteredFeature_df[self.responseModel.filteredFeature_df['BRAND']==brand]
-            feature_df = self.responseModel.feature_df[self.responseModel.feature_df['BRAND']==brand]
+            filteredFeature_df = self.responseModel.filteredFeature_df[self.responseModel.filteredFeature_df['BRAND']==brand].reset_index()
+            feature_df = self.responseModel.feature_df[self.responseModel.feature_df['BRAND']==brand].reset_index()
 
             parameters = self.responseModel.parameters[brand]
 

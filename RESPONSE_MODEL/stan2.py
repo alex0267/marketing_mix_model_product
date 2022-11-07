@@ -126,22 +126,24 @@ transformed parameters {
     //}
 
 
-    matrix[1,N] tom_transformed;
-    matrix[1,N] laura_transformed;
-    matrix[1,N] lisa_transformed;
-    matrix[1,N] mary_transformed;
-    matrix[1,N] fiona_transformed;
-    matrix[1,N] marc_transformed;
-    matrix[1,N] alex_transformed;
+    matrix[B,N] tom_transformed;
+    matrix[B,N] laura_transformed;
+    matrix[B,N] lisa_transformed;
+    matrix[B,N] mary_transformed;
+    matrix[B,N] fiona_transformed;
+    matrix[B,N] marc_transformed;
+    matrix[B,N] alex_transformed;
     
-    for (nn in 1:N) {
-        tom_transformed[1,nn] = transform(tom[1], N,nn, max_lag,decay[1], shape[1],scale[1],touchpointThresholds[1],touchpointNorms[1]);
-        laura_transformed[1,nn] = transform(laura[1], N,nn, max_lag,decay[2], shape[2],scale[2],touchpointThresholds[2],touchpointNorms[2]);
-        lisa_transformed[1,nn] = transform(lisa[1], N,nn, max_lag,decay[3], shape[3],scale[3],touchpointThresholds[3],touchpointNorms[3]);
-        mary_transformed[1,nn] = transform(mary[1], N,nn, max_lag,decay[4], shape[4],scale[4],touchpointThresholds[4],touchpointNorms[4]);
-        fiona_transformed[1,nn] = transform(fiona[1], N,nn, max_lag,decay[5], shape[5],scale[5],touchpointThresholds[5],touchpointNorms[5]);
-        marc_transformed[1,nn] = transform(marc[1], N,nn, max_lag,decay[6], shape[6],scale[6],touchpointThresholds[6],touchpointNorms[6]);
-        alex_transformed[1,nn] = transform(alex[1], N,nn, max_lag,decay[7], shape[7],scale[7],touchpointThresholds[7],touchpointNorms[7]);
+    for (b in 1 : B) {
+        for (nn in 1:N) {
+            tom_transformed[b,nn] = transform(tom[b], N,nn, max_lag,decay[1], shape[1],scale[1],touchpointThresholds[1],touchpointNorms[1]);
+            laura_transformed[b,nn] = transform(laura[b], N,nn, max_lag,decay[2], shape[2],scale[2],touchpointThresholds[2],touchpointNorms[2]);
+            lisa_transformed[b,nn] = transform(lisa[b], N,nn, max_lag,decay[3], shape[3],scale[3],touchpointThresholds[3],touchpointNorms[3]);
+            mary_transformed[b,nn] = transform(mary[b], N,nn, max_lag,decay[4], shape[4],scale[4],touchpointThresholds[4],touchpointNorms[4]);
+            fiona_transformed[b,nn] = transform(fiona[b], N,nn, max_lag,decay[5], shape[5],scale[5],touchpointThresholds[5],touchpointNorms[5]);
+            marc_transformed[b,nn] = transform(marc[b], N,nn, max_lag,decay[6], shape[6],scale[6],touchpointThresholds[6],touchpointNorms[6]);
+            alex_transformed[b,nn] = transform(alex[b], N,nn, max_lag,decay[7], shape[7],scale[7],touchpointThresholds[7],touchpointNorms[7]);
+        }
     }
     
 }
@@ -176,22 +178,25 @@ model {
   }
   
   sigma ~ normal(0, 1);
-  volume[1] ~ normal(intercept[1] + 
-                to_vector(tom_transformed[1]) * beta_tom[1] +
-                to_vector(laura_transformed[1]) * beta_laura[1] +
-                to_vector(lisa_transformed[1]) * beta_lisa[1] +
-                to_vector(mary_transformed[1]) * beta_mary[1] +
-                to_vector(fiona_transformed[1]) * beta_fiona[1] +
-                to_vector(marc_transformed[1]) * beta_marc[1] +
-                to_vector(alex_transformed[1]) * beta_alex[1] +
-                to_vector(epros[1]) * beta_epros[1] +
-                to_vector(distribution[1]) * beta_distribution[1] +
-                to_vector(promotion[1]) * beta_promotion[1] +
-                to_vector(off_trade_visibility[1]) * beta_off_trade_visibility[1] +
-                to_vector(covid[1]) * beta_covid[1] +
-                seasonality_raw * to_vector(beta_seasonality_raw[1]) +
-                to_vector(is_last_week[1]) * beta_is_last_week[1],
-                sigma[1]);
+
+  for (b in 1 : B) {
+    volume[b] ~ normal(intercept[b] + 
+                    to_vector(tom_transformed[b]) * beta_tom[b] +
+                    to_vector(laura_transformed[b]) * beta_laura[b] +
+                    to_vector(lisa_transformed[b]) * beta_lisa[b] +
+                    to_vector(mary_transformed[b]) * beta_mary[b] +
+                    to_vector(fiona_transformed[b]) * beta_fiona[b] +
+                    to_vector(marc_transformed[b]) * beta_marc[b] +
+                    to_vector(alex_transformed[b]) * beta_alex[b] +
+                    to_vector(epros[b]) * beta_epros[b] +
+                    to_vector(distribution[b]) * beta_distribution[b] +
+                    to_vector(promotion[b]) * beta_promotion[b] +
+                    to_vector(off_trade_visibility[b]) * beta_off_trade_visibility[b] +
+                    to_vector(covid[b]) * beta_covid[b] +
+                    seasonality_raw * to_vector(beta_seasonality_raw[b]) +
+                    to_vector(is_last_week[b]) * beta_is_last_week[b],
+                    sigma[b]);
+    }
 }
 
 
