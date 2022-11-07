@@ -59,9 +59,9 @@ data {
   int<lower=0> num_control;
   // the maximum duration of lag effect, in weeks
   int<lower=1> max_lag;
-  // the number of media channels
+  // the number of touchpoints
   int<lower=0> num_touchpoints;
-  // matrices of media variables
+  // matrices of touchpoints variables
   matrix[B,N+max_lag-1] tom;
   matrix[B,N+max_lag-1] laura;
   matrix[B,N+max_lag-1] lisa;
@@ -76,43 +76,43 @@ data {
   matrix[B,N] off_trade_visibility;
   matrix[B,N] covid;
   // the vector of sales
-  matrix [B,N] y;
+  matrix [B,N] volume;
   matrix [N,num_seasons] seasonality;
   real control [B,N,num_control] ;
   // threshold values
   vector [num_touchpoints] touchpointThresholds;
-  // list of mean values of media (raw data)
+  // list of mean values of touchpoints (raw data)
   vector [num_touchpoints] touchpointNorms;
 }
 // -----------------------------------    PARAMETERS    -----------------------------------
 parameters {
   // residual variance
-  real<lower=0> noise_var;
+  vector<lower=0>[B] sigma;
   // the intercept
-  real tau;
+  vector [B] intercept;
   
   // the beta coefficients
   vector[num_seasons] beta_seasonality;
   
-  real<lower=0> beta_tom;
-  real<lower=0> beta_laura;
-  real<lower=0> beta_lisa;
-  real<lower=0> beta_mary;
-  real<lower=0> beta_fiona;
-  real<lower=0> beta_marc;
-  real<lower=0> beta_alex;
-  real beta_epros;
-  real beta_promotion;
-  real beta_distribution;
-  real beta_off_trade_visibility;
-  real beta_covid;
+  vector<lower=0>[B] beta_tom;
+  vector<lower=0>[B]beta_laura;
+  vector<lower=0>[B] beta_lisa;
+  vector<lower=0>[B] beta_mary;
+  vector<lower=0>[B] beta_fiona;
+  vector<lower=0>[B] beta_marc;
+  vector<lower=0>[B] beta_alex;
+  vector<lower=0> [B] beta_epros;
+  vector[B] beta_promotion;
+  vector<lower=0>[B] beta_distribution;
+  vector<lower=0>[B] beta_off_trade_visibility;
+  vector[B] beta_covid;
   // the decay and peak parameter for the adstock transformation of
-  // each media - (peak only relevant for specific adstock type)
+  // each touchpoints - (peak only relevant for specific adstock type)
   vector<lower=0,upper=1>[num_touchpoints] decay;
   vector<lower=0,upper=ceil(max_lag/2)>[num_touchpoints] peak;
   //Shape parameters - distributed, impression-oriented spendings
   vector<lower=0>[num_touchpoints] shape;
-  real<lower=0, upper=1> scale[num_touchpoints];
+  vector<lower=0, upper=1> [num_touchpoints] scale ;
 }
 // -----------------------------------    TRANSFORMATION    -----------------------------------
 transformed parameters {
@@ -139,7 +139,7 @@ transformed parameters {
 model {
   decay ~ normal(0.5,0.3);
   peak ~ uniform(0, ceil(max_lag/2));
-  tau ~ normal(0, 5);
+  intercept ~ normal(0, 10);
   beta_tom ~ normal(0, 1);
   beta_laura ~ normal(0, 1);
   beta_lisa ~ normal(0, 1);
@@ -162,26 +162,23 @@ model {
     beta_seasonality[i] ~ normal(0, 1);
   }
   
-  noise_var ~ inv_gamma(0.05, 0.05 * 0.01);
-  y[1] ~ normal(tau + 
-                to_vector(tom_transformed[1]) * beta_tom +
-                to_vector(laura_transformed[1]) * beta_laura +
-                to_vector(lisa_transformed[1]) * beta_lisa +
-                to_vector(mary_transformed[1]) * beta_mary +
-                to_vector(fiona_transformed[1]) * beta_fiona +
-                to_vector(marc_transformed[1]) * beta_marc +
-                to_vector(alex_transformed[1]) * beta_alex +
-                to_vector(epros[1]) * beta_epros +
-                to_vector(distribution[1]) * beta_distribution +
-                to_vector(promotion[1]) * beta_promotion +
-                to_vector(off_trade_visibility[1]) * beta_off_trade_visibility +
-                to_vector(covid[1]) * beta_covid +
+  sigma ~ normal(0, 1);
+  volume[1] ~ normal(intercept[1] + 
+                to_vector(tom_transformed[1]) * beta_tom[1] +
+                to_vector(laura_transformed[1]) * beta_laura[1] +
+                to_vector(lisa_transformed[1]) * beta_lisa[1] +
+                to_vector(mary_transformed[1]) * beta_mary[1] +
+                to_vector(fiona_transformed[1]) * beta_fiona[1] +
+                to_vector(marc_transformed[1]) * beta_marc[1] +
+                to_vector(alex_transformed[1]) * beta_alex[1] +
+                to_vector(epros[1]) * beta_epros[1] +
+                to_vector(distribution[1]) * beta_distribution[1] +
+                to_vector(promotion[1]) * beta_promotion[1] +
+                to_vector(off_trade_visibility[1]) * beta_off_trade_visibility[1] +
+                to_vector(covid[1]) * beta_covid[1] +
                 seasonality*beta_seasonality,
-                sqrt(noise_var));
+                sigma[1]);
 }
-
-
-
 
 
 

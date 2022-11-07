@@ -39,14 +39,9 @@ class UpliftSimulation:
         #generate control variable influence
         self.deltaControlToNeutral={}
 
-        #execute simulation of touchpoint lifts and calculate delta
-        self.runTouchpointLift()
+        self.runPipeline()
 
-        #execute simulation of no touchpoint spendings to simulate the influence of the pure baseline
-        self.runBaselineExtract()
 
-        #execute simulation of neutral control level to simulate influence of control variables
-        self.runControlExtract()
 
     def changeControl(self,controlVariable, subset):
         '''
@@ -110,24 +105,22 @@ class UpliftSimulation:
 
         return spendings
         
-    def simulateSales(self,spendings=None,control_df=None):
+    def simulateSales(self,parameters, spendings_df=None,control_df=None):
         '''take the changed spendings and simulate the sales based on the estimated parameters'''
 
         #use the existing control_df values if no changed are specified
-        if spendings is None: spendings = self.responseModel.filteredFeature_df[self.responseModel.configurations['TOUCHPOINTS']].copy()
+        if spendings_df is None: spendings_df = self.responseModel.filteredFeature_df[self.responseModel.configurations['TOUCHPOINTS']].copy()
         if control_df is None: control_df = self.responseModel.filteredFeature_df[self.responseModel.configurations['CONTROL_VARIABLES_BASE']].copy()
 
         #extract sales predictions from changed spendingsFrame
-        factor_df, y_pred = BUSINESS_OUTPUT.applyParameters.applyParametersToData(raw_data = spendings,
+        factor_df, y_pred = BUSINESS_OUTPUT.applyParameters.applyParametersToData(raw_data = spendings_df,
                                                             original_spendings = self.responseModel.feature_df[self.responseModel.configurations['TOUCHPOINTS']].copy(),
-                                                            parameters = self.responseModel.parameters,
+                                                            parameters = parameters,
                                                             configurations= self.responseModel.configurations,
                                                             responseModelConfig = self.responseModel.responseModelConfig,
                                                             scope = self.responseModel.configurations['TOUCHPOINTS'],
                                                             seasonality_df = self.responseModel.filteredFeature_df[self.responseModel.configurations['SEASONALITY_VARIABLES_BASE']],
-                                                            beta_seasonality= self.responseModel.beta_seasonality,
-                                                            control_df = control_df,
-                                                            beta_control = self.responseModel.beta_control)
+                                                            control_df = control_df)
         
         #prediction is equal to the (normalized prediction -1)*raw_sales.max()
         #we are taking the feature_df since the max value must be based on the entire dataset, not just the weeks applied
@@ -135,7 +128,7 @@ class UpliftSimulation:
             
         return prediction
 
-    def runTouchpointLift(self):
+    def runTouchpointLift(self, parameters):
         '''
         Run the uplift simulation pipeline according to the configurations
         Scope : touchpoints
@@ -154,7 +147,7 @@ class UpliftSimulation:
                     spendings = self.changeSpendings(touchpoint = touchpoint, lift=lift, subset=subset)
 
                     #predict induced sales based on changed spendings with estimated parameters
-                    prediction = self.simulateSales(spendings=spendings)
+                    prediction = self.simulateSales(parameters = parameters, spendings_df=spendings)
 
                     
                     #extract weekly changed spendings and predictions for each spending lift, touchpoint and subset combination
@@ -188,7 +181,7 @@ class UpliftSimulation:
         PYTEST.extractUplifts.setPredictData(datasets, self.responseModel.configurations['SET_MASTER'])
         PYTEST.extractUplifts.setSpendingsData((spendsCollect, 'spendsCollect'), self.responseModel.configurations['SET_MASTER'])
 
-    def runBaselineExtract(self):
+    def runBaselineExtract(self,parameters):
         '''
         Run the uplift simulation pipeline according to the configurations
         The target is to extract the baseline by simulating all touchpoints spendings to 0
@@ -199,13 +192,14 @@ class UpliftSimulation:
         #should include also the control variables such as promotion, distribution, ...
         #seasonality however stays part of the baseline
         touchpoints = [x for x in self.responseModel.configurations['TOUCHPOINTS']]
-        controlVariable = [x for x in self.responseModel.configurations['CONTROL_VARIABLES_BASE']]
+        controlVariables = [x for x in self.responseModel.configurations['CONTROL_VARIABLES_BASE']]
         for subset in self.outputConfig['CHANGE_PERIODS']:
 
             #simulate zero spendings to get baseline (ALL spendings and control variables)
             ZeroSpendings = self.changeSpendings(touchpoint = touchpoints, lift=0.0, subset=subset)
-            ZeroControl = self.changeControl(controlVariable = controlVariable, subset = subset)
-            ZeroSpendingsPredict = self.simulateSales(ZeroSpendings, ZeroControl)
+            #In this case all control variables have to be put on neutral level since we want to extract baseline
+            ZeroControl = self.changeControl(controlVariable = controlVariables, subset = subset)
+            ZeroSpendingsPredict = self.simulateSales(parameters=parameters, spendings_df = ZeroSpendings, control_df = ZeroControl)
             
             #simulate one spendings - could actually be replaced with a single lift=1 prediction for all (including RunTouchPointLift)
             #However, not foreseen in the current structure
@@ -215,7 +209,7 @@ class UpliftSimulation:
 
             self.deltaBaseline[subset] = ZeroSpendingsPredict
 
-    def runControlExtract(self):
+    def runControlExtract(self, parameters):
         #Execute calculation for different scopes (years individ. & all together)
         for subset in self.outputConfig['CHANGE_PERIODS']:
             #Simulate sales for each touchpoint and lift level
@@ -224,12 +218,28 @@ class UpliftSimulation:
                 control_df = self.changeControl(controlVariable = [control], subset=subset)
 
                 #predict induced sales based on changed control variable
-                neutralPrediction = self.simulateSales(control_df=control_df)
+                neutralPrediction = self.simulateSales(parameters = parameters, control_df=control_df)
 
                 #predict the spendings with no changes to anything
-                currentSpendingsPredict = self.simulateSales()
+                currentSpendingsPredict = self.simulateSales(parameters = parameters)
 
 
                 #calculate the calculateDeltaControlToNeutral as the difference between the neutral control position and the current control position
                 #for control variable
                 self.deltaControlToNeutral[(subset,control)] =  currentSpendingsPredict - neutralPrediction
+
+    def runPipeline(self):
+
+        for brand in self.responseModel.configurations['BRANDS']:
+            parameters = self.responseModel.parameters[brand]
+
+            #execute simulation of touchpoint lifts and calculate delta
+            self.runTouchpointLift(parameters)
+
+            #execute simulation of no touchpoint spendings to simulate the influence of the pure baseline
+            self.runBaselineExtract(parameters)
+
+            #execute simulation of neutral control level to simulate influence of control variables
+            self.runControlExtract(parameters)
+
+        return 0

@@ -72,12 +72,12 @@ def adstock_transform(media, touchpoints, parameters,responseModelConfig):
         
         #CASE: adstock spendings come from data with impressions-oriented spendings (distributed)
         if(responseModelConfig['ADSTOCK_FUNCTION_TYPE'][touchpoint] == 'impression_spendings'):
-            L, D = parameters[f'{touchpoint}_adstock']['L'], parameters[f'{touchpoint}_adstock']['D']
+            L, D = parameters[f'{touchpoint}_max_lag'], parameters[f'{touchpoint}_decay']
             adstocked = apply_adstock_to_impression_spendings(media[touchpoint], L, D)
 
         #CASE: adstock spendings come from data with direct spendings
         elif(responseModelConfig['ADSTOCK_FUNCTION_TYPE'][touchpoint] == 'direct_spendings'):
-            L,P, D = parameters[f'{touchpoint}_adstock']['L'], parameters[f'{touchpoint}_adstock']['P'],parameters[f'{touchpoint}_adstock']['D']
+            L,P, D = parameters[f'{touchpoint}_max_lag'], parameters[f'{touchpoint}_peak'],parameters[f'{touchpoint}_decay']
             adstocked = apply_adstock_to_direct_spendings(media[touchpoint], L,P, D)
 
         else:

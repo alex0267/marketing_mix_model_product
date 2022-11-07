@@ -28,14 +28,10 @@ class ResponseModel:
                 
         #easy access variables
         self.num_touchpoints = None
-        self.beta = []
-        self.beta_seasonality = []
-        self.beta_control = []
 
         #contains the output estimated variables
         self.extractFrame = None  #contains the raw bayesian estimations
         self.parameters = None  #contains the summarized estimated parameters
-        self.controlParameters = None
 
         #Define stan dictionary used for the stan model
         self.stanDict = None
@@ -78,7 +74,7 @@ class ResponseModel:
         '''
         create dictionary as input data for the stan model
         '''
-        num_touchpoints = len(self.configurations['TOUCHPOINTS'])
+        self.num_touchpoints = len(self.configurations['TOUCHPOINTS'])
         touchpointSpend_df = self.normalizedFilteredFeature_df[self.configurations['TOUCHPOINTS']]
 
         #the arrays have to be appended to account for the adstock overlap (last elements of series need to be adstocked as well)
@@ -105,7 +101,7 @@ class ResponseModel:
             'N': len(targetVar[0]),
             'B' : len(self.configurations['BRANDS']),
             'max_lag': self.responseModelConfig['MAX_LAG'], 
-            'num_touchpoints': num_touchpoints,
+            'num_touchpoints': self.num_touchpoints,
             'tom': tom,
             'laura':laura,
             'lisa':lisa,
@@ -124,7 +120,7 @@ class ResponseModel:
             'seasonality': season[0],
             'num_control': len(self.configurations['CONTROL_VARIABLES_BASE']),
             'control': control,
-            'y': targetVar
+            'volume': targetVar
         }
         
         
@@ -151,83 +147,43 @@ class ResponseModel:
         '''
         #pd.DataFrame(self.extractFrame.mean(axis=0)).to_csv('extractFrame.csv')
         self.parameters = {}
-        self.num_touchpoints = self.stanDict['num_touchpoints']
 
-        #Collect general model parameters and summarize in dictionary
-        self.parameters['tau'] = self.extractFrame[f'tau'].mean(axis=0)
-        self.parameters['noise_var'] = self.extractFrame['noise_var'].mean(axis=0)
-        
-        #self.extractFrame.mean().to_csv('estimatedParameters.csv')
-        #print(self.extractFrame.mean())
+        for i,brand in enumerate(self.configurations['BRANDS'],start = 1):
 
-        #Create seasonality variable
-        for i, season in enumerate(self.configurations['SEASONALITY_VARIABLES_BASE'],start = 1):
-            #append to general parameters list
-            self.parameters[f'{season}_beta'] = self.extractFrame[f'beta_seasonality.{i}'].mean(axis=0)
-            #append to easy access beta_seasonality list
-            self.beta_seasonality.append(self.extractFrame[f'beta_seasonality.{i}'].mean(axis=0))
-        
-        #Create control variable
-        for i, control in enumerate(self.configurations['CONTROL_VARIABLES_BASE'],start = 1):
-            #append to general parameters list
-            #self.parameters[f'{control}_beta'] = self.extractFrame[f'beta_control.{i}'].mean(axis=0)
-            self.parameters[f'{control}_beta'] = self.extractFrame[f'beta_{control}'].mean(axis=0)
-            #append to easy access beta_control list
-            #self.beta_control.append(self.extractFrame[f'beta_control.{i}'].mean(axis=0))
-            self.beta_control.append(self.extractFrame[f'beta_{control}'].mean(axis=0))
+            brandEstimationsDict = {}
+            self.parameters[brand] = brandEstimationsDict
 
-        for i, touchpoint in enumerate(self.configurations['TOUCHPOINTS'],start = 1):
+            brandEstimationsDict['intercept'] = self.extractFrame[f'intercept.{i}'].mean(axis=0)
+            brandEstimationsDict['sigma'] = self.extractFrame[f'sigma.{i}'].mean(axis=0)
 
-            peak = self.extractFrame[f'peak.{i}'].mean(axis=0)
-            decay = self.extractFrame[f'decay.{i}'].mean(axis=0)
-            beta = self.extractFrame[f'beta_{touchpoint}'].mean(axis=0)
+            #FOR NOW OK BUT NEED TO BE CHANGED WHEN SEASONALITY APPROACH IS CHANGED
+            beta_seasonality=[]
+            for s, season in enumerate(self.configurations['SEASONALITY_VARIABLES_BASE'],start = 1):
+                beta_seasonality.append(self.extractFrame[f'beta_seasonality.{s}'].mean(axis=0))
+            
+            #we add a list as a dict object to facilitate beta extraction
+            brandEstimationsDict[f'seasonality_beta'] = beta_seasonality
 
+            beta_control=[]
+            for c, control in enumerate(self.configurations['CONTROL_VARIABLES_BASE'],start = 1):
+                beta_control.append(self.extractFrame[f'beta_{control}.{i}'].mean(axis=0))
+            
+            brandEstimationsDict[f'control_beta'] = beta_control
 
-            #Collect per touchpoint parameters in dictionary
-            self.parameters[f'{touchpoint}_adstock'] = {
-                'L': self.responseModelConfig['MAX_LAG'],
-                #'P': peak,
-                'D': decay
-            }
+            for t, touchpoint in enumerate(self.configurations['TOUCHPOINTS'],start = 1):
 
-
-            shape = self.extractFrame[f'shape.{i}'].mean(axis=0)
-            scale = self.extractFrame[f'scale.{i}'].mean(axis=0)
-
-
-            self.parameters[f'{touchpoint}_shape'] = {
-                'shape': shape,
-                'scale': scale
-            }
-
-            self.parameters[f'{touchpoint}_beta']  = beta
-
-            #definition of easy access variable(s)
-            self.beta.append(beta)
-
-            #if print is True specified, results will be printed here
-            if (printOut == True):
-                print()
-                print(touchpoint+' --------')
-                print()
-                print("beta_2_coefficient")
-                print(f"value:{beta}")
-                print()
-                print("adstock_touchpoint")
-                print(f"value decay:{decay}")
-                #print(f"value peak:{peak}")
-                print()
-                print("shape_touchpoint")
-                print(f"value shape:{shape}")
-                print(f"value scale:{scale}")
-                print()
-
-        if (printOut == True):
-            for control in self.configurations['CONTROL_VARIABLES_BASE']:
-                print(f'beta_{control}: ')
-                print(self.parameters[f'{control}_beta'])
+                brandEstimationsDict[f'{touchpoint}_peak']  = self.extractFrame[f'peak.{t}'].mean(axis=0)
+                brandEstimationsDict[f'{touchpoint}_decay']  = self.extractFrame[f'decay.{t}'].mean(axis=0)
+                #here we insert a non-trained parameter in the dict
+                #It depends on the configurations but since it is the only parameter configured, this facilitates the structure
+                #based on stanDict since to assure max_lag is equal to what is passed to the stan model
+                brandEstimationsDict[f'{touchpoint}_max_lag']  = self.stanDict['max_lag']
+                brandEstimationsDict[f'{touchpoint}_beta']  = self.extractFrame[f'beta_{touchpoint}.{i}'].mean(axis=0)
+                brandEstimationsDict[f'{touchpoint}_shape'] = self.extractFrame[f'shape.{t}'].mean(axis=0)
+                brandEstimationsDict[f'{touchpoint}_scale'] = self.extractFrame[f'scale.{t}'].mean(axis=0)
 
         return 0
+
 
     def transform(self, df):
         

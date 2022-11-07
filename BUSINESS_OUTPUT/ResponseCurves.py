@@ -57,6 +57,7 @@ class ResponseCurves:
 
             #get indexes of data for respective time frame
             ind, cont = HELPER_FUNCTIONS.getIndex.getIndex(indexColumns = self.responseModel.index_df,scope='YEAR' , subset=subset)
+            #required to skip years that are not in scope (for kFold split of R2 backtest)
             if cont == True: continue
             adstock_length = self.responseModel.responseModelConfig['MAX_LAG']
             index = self.responseModel.index_df.index

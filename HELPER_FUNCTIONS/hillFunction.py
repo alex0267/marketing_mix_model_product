@@ -53,7 +53,7 @@ def hill_transform(data, raw_data, scope, parameters, responseModelConfig):
     for i,touchpoint in enumerate(scope):
 
         #Return estimated parameters from dictionary
-        shape,scale = parameters[f'{touchpoint}_shape']['shape'], parameters[f'{touchpoint}_shape']['scale']
+        shape,scale = parameters[f'{touchpoint}_shape'], parameters[f'{touchpoint}_scale']
         threshold = responseModelConfig['SHAPE_THRESHOLD_VALUE'][touchpoint]
         threshold_normalized = HELPER_FUNCTIONS.normalization.normalize_value(threshold, raw_data[touchpoint], responseModelConfig['NORMALIZATION_STEPS_TOUCHPOINTS'][touchpoint], name = touchpoint)
         
