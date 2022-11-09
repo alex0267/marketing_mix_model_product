@@ -62,6 +62,7 @@ def createFeatureDf(configurations, mediaExec_df, sellOut_df, sellOutDistributio
     
     #the media execution table is the basis of the feature_df
     feature_df = mediaExec_df[["YEAR_WEEK", "BRAND", "TOUCHPOINT", "SPEND"]]
+    print(feature_df['BRAND'].unique())
 
     #turn touchpoint variables into columns (each touchpoint one column) with primary key ['YEAR_WEEK','BRAND','TOUCHPOINT'] by SPEND
     #this is how the data will be interpreted
@@ -130,7 +131,6 @@ def run(configurations, responseModelConfig, mediaExec_df, sellOut_df, sellOutDi
     index_df = filteredFeature_df[['YEAR_WEEK','BRAND']]
     index_df['YEAR'] = index_df['YEAR_WEEK'].astype(str).str[:4]
 
-    index_df.to_excel('ind.xlsx')
 
     PYTEST.extractEntryData.extractEntryData(feature_df, 'feature_df', configurations['SET_MASTER'])
     PYTEST.extractEntryData.extractEntryData(normalizedFilteredFeature_df, 'normalizedFilteredFeature_df', configurations['SET_MASTER'])

@@ -101,7 +101,7 @@ class UpliftSimulation:
 
         return spendings
         
-    def simulateSales(self,parameters,filteredFeature_df, feature_df, spendings_df=None,control_df=None):
+    def simulateSales(self,parameters,filteredFeature_df, feature_df, lift=None,brand=None,spendings_df=None,control_df=None):
         '''take the changed spendings and simulate the sales based on the estimated parameters'''
 
         #use the existing control_df values if no changed are specified
@@ -120,7 +120,8 @@ class UpliftSimulation:
         
         #prediction is equal to the (normalized prediction -1)*raw_sales.max()
         #we are taking the feature_df since the max value must be based on the entire dataset, not just the weeks applied
-        prediction = (y_pred-1)*feature_df['TARGET_VOL_SO'].max()
+        prediction = (y_pred-1)*self.responseModel.feature_df['TARGET_VOL_SO'].max()
+
             
         return prediction
 
@@ -143,8 +144,7 @@ class UpliftSimulation:
                     spendings = self.changeSpendings(filteredFeature_df = filteredFeature_df, touchpoint = touchpoint, lift=lift, subset=subset)
 
                     #predict induced sales based on changed spendings with estimated parameters
-                    prediction = self.simulateSales(parameters = parameters,filteredFeature_df=filteredFeature_df, feature_df=feature_df,  spendings_df=spendings)
-
+                    prediction = self.simulateSales(parameters = parameters,filteredFeature_df=filteredFeature_df, feature_df=feature_df,  spendings_df=spendings,lift=lift,brand=brand)
                     
                     #extract weekly changed spendings and predictions for each spending lift, touchpoint and subset combination
                     self.spendings[(brand, subset,touchpoint,lift)] = spendings

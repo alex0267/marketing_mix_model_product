@@ -37,7 +37,7 @@ class VolumeContribution:
 
         self.runPipeline()
 
-    def calculateVolumeContribution(self,brand):
+    def calculateVolumeContribution(self,brand,filteredFeature_df):
         '''
         The Volume contribution is calculated via the uplift simulations.
         Each influence factor (touchpoints, control variables, baseline) is added to a table 
@@ -69,13 +69,11 @@ class VolumeContribution:
             deltaToZeroSimulations['total_predict'] = deltaToZeroSimulations.sum(axis=1)
             
             #include the target
-            deltaToZeroSimulations['total_target'] = self.responseModel.filteredFeature_df['TARGET_VOL_SO']
+            deltaToZeroSimulations['total_target'] = filteredFeature_df['TARGET_VOL_SO']
 
             #add the subset simulation table to the collection
             self.deltaToZeroDict[(brand,subset)] = deltaToZeroSimulations
 
-            #print the 'all weeks' delta to zero simulation (as it comes last) as a checking table
-            # deltaToZeroSimulations.to_csv('test_delta.csv')
         
         return 0
 
@@ -124,7 +122,9 @@ class VolumeContribution:
     def runPipeline(self):
        
         for brand in self.responseModel.configurations['BRANDS']:
-            self.calculateVolumeContribution(brand)
+            filteredFeature_df = self.responseModel.filteredFeature_df[self.responseModel.filteredFeature_df['BRAND']==brand].reset_index()
+
+            self.calculateVolumeContribution(brand,filteredFeature_df)
             self.correctContributionError(brand)
             self.calculateRelativeContribution(brand)
 

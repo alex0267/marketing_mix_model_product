@@ -50,6 +50,7 @@ def run(runBackTest=False, split = False, name = False, load = True):
 
     price_df = filteredFeature_df['AVERAGE_PRICE']
 
+
     
     # Initialize Model instance and Train Bayesian Model 
     responseModel = RESPONSE_MODEL.ResponseModel.ResponseModel(configurations = configurations,
@@ -79,11 +80,12 @@ def run(runBackTest=False, split = False, name = False, load = True):
 
     #first attempt in multi brand vectorized version - all still one brand but brand capability is built in
     #test_multi-vector
-    # test_multi-vector03 - first successful run, but results are wrong
-    # test_multi-vector04 - now changed the adstock to beginning - still wrong
-    # test_multi-vector05 - WORKING - ON LEVEL WITH BEFORE VECTORIZATION
+
     # test_multi-vector05 - ready for multi brand - all vectorized
-    # test_multi-vector08 - multi brand
+    # test_multi-vector08 - multi brand with fast_duck and gold_plane
+    # test_multi-vector11 - multi brand with three brands
+    # test_multi-vector12 - train on ALL brands
+    # test_multi-vector13 - train brand with three brands
     
     responseModel.runModel(name =name, load=load)
     responseModel.extractParameters(printOut=False)
@@ -103,6 +105,6 @@ def run(runBackTest=False, split = False, name = False, load = True):
     return r2
     
     ''''''
-run(name = 'test_multi-vector08',load=True)
+run(name = 'test_multi-vector13',load=False)
 # print(f'r2: {r2}')
 

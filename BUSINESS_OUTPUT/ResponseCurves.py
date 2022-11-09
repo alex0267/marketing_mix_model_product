@@ -51,8 +51,12 @@ class ResponseCurves:
 
     
     def run(self):
-        
-        os.mkdir(f'BUSINESS_OUTPUT/RESPONSE_CURVE_PLOTS/{self.name}')
+
+        #we create a path to gather the outputs per run
+        path = f'BUSINESS_OUTPUT/RESPONSE_CURVE_PLOTS/{self.name}'
+        if not os.path.isdir(path):
+            os.mkdir(path)
+
         for brand in self.responseModel.configurations['BRANDS']:
             filteredFeature_df = self.responseModel.filteredFeature_df[self.responseModel.filteredFeature_df['BRAND']==brand].reset_index()
 

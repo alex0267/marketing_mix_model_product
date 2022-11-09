@@ -12,17 +12,18 @@ def plotYearlyContribution(volumeContribution,brand):
 def plotWeeklyContribution(volumeContribution,filteredFeature_df,brand,name):
     #define X-axis
     len_X = len(filteredFeature_df['YEAR_WEEK'])
-    print(brand)
-    print('len X')
-    print(len_X)
+
 
     #define the contribution factors in the right order
     contributors = pd.DataFrame()
     for item in volumeContribution.outputConfig['CONTRIBUTORS']:
+
+        # if brand == 'gold_plane':
+        # contributors = pd.concat([contributors,volumeContribution.deltaToZeroDict[(brand,'ALL')][item]]*10, axis=1)
         contributors = pd.concat([contributors,volumeContribution.deltaToZeroDict[(brand,'ALL')][item]], axis=1)
+
         
     contributors = contributors.T
-    print(contributors.sum())
 
     X = np.arange(0, len_X, 1) 
 
@@ -38,7 +39,12 @@ def plotWeeklyContribution(volumeContribution,filteredFeature_df,brand,name):
 
 
 def plotContribution(volumeContribution, configurations, name):
-    os.mkdir(f'PLOTS/{name}')
+    
+    #we create a path to gather the outputs per run
+    path = f'PLOTS/{name}'
+    if not os.path.isdir(path):
+        os.mkdir(path)
+
     for brand in configurations['BRANDS']:
         filteredFeature_df = volumeContribution.responseModel.filteredFeature_df[volumeContribution.responseModel.filteredFeature_df['BRAND']==brand].reset_index()
 

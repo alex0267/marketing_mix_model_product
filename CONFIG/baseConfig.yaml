@@ -3,9 +3,19 @@
 SET_MASTER: False
 #Brands in scope
 BRANDS:
+  # - angry_cat
   - fast_duck
   - gold_plane
-  # - precious_liquid
+  # - gracious_road
+  # - heavy_feather
+  # - ideal_mouse
+  # - lully
+  # - moistured_bird
+  - precious_liquid
+  # - red_ballon
+  # - silver_coin
+  # - viable_line
+  # - visitor
 
 # for predious_liquid - get rid of laura & alex
 TOUCHPOINTS:

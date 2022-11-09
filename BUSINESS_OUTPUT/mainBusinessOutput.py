@@ -50,4 +50,5 @@ def createBusinessOutputs(responseModel, outputConfig, price_df,name):
                                                   outputConfig = outputConfig,
                                                   name = name)
     '''
+    r2 = 0
     return r2
