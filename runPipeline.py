@@ -85,7 +85,7 @@ def run(runBackTest=False, split = False, name = False, load = True):
     # test_multi-vector08 - multi brand with fast_duck and gold_plane
     # test_multi-vector11 - multi brand with three brands
     # test_multi-vector12 - train on ALL brands
-    # test_multi-vector13 - train brand with three brands
+    # test_multi-vector13 - train brand with five brands - this time normalized by max target per brand
     
     responseModel.runModel(name =name, load=load)
     responseModel.extractParameters(printOut=False)

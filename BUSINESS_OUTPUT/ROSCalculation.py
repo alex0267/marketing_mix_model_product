@@ -34,7 +34,6 @@ class ROSCalculation:
 
     def calculateROS(self):
 
-
         #calculate ROS based on 'ALL'
         for subset in self.outputConfig['CHANGE_PERIODS']:
             #execute a ROS calculation for all subsets when scope is ALL

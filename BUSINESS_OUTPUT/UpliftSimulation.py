@@ -120,7 +120,7 @@ class UpliftSimulation:
         
         #prediction is equal to the (normalized prediction -1)*raw_sales.max()
         #we are taking the feature_df since the max value must be based on the entire dataset, not just the weeks applied
-        prediction = (y_pred-1)*self.responseModel.feature_df['TARGET_VOL_SO'].max()
+        prediction = (y_pred-1)*feature_df['TARGET_VOL_SO'].max()
 
             
         return prediction

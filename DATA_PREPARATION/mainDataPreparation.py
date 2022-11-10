@@ -50,10 +50,16 @@ def normalizeFeatureDf(configurations, feature_df):
 
     #normalization via saturation parameters according to configurations
     feature_df[configurations['TOUCHPOINTS']], touchpoint_norms = HELPER_FUNCTIONS.normalization.normalize_feature(feature_df[configurations['TOUCHPOINTS']],feature_df[configurations['TOUCHPOINTS']], configurations['NORMALIZATION_STEPS_TOUCHPOINTS'])
-    #normalization via max, logp1 according to configurations
-    feature_df[configurations['TARGET']], target_df_norm = HELPER_FUNCTIONS.normalization.normalize_feature(feature_df[configurations['TARGET']],feature_df[configurations['TARGET']], configurations['NORMALIZATION_STEPS_TARGET'])
+    
+    norm_df = pd.DataFrame()
+    for brand in configurations['BRANDS']:
+        filtFeature_df = feature_df[feature_df['BRAND']==brand]
+        #normalization via max, logp1 according to configurations
+        filtFeature_df[configurations['TARGET']], target_df_norm = HELPER_FUNCTIONS.normalization.normalize_feature(filtFeature_df[configurations['TARGET']],filtFeature_df[configurations['TARGET']], configurations['NORMALIZATION_STEPS_TARGET'])
+        norm_df = pd.concat([norm_df, filtFeature_df],axis=0)
 
-    return feature_df
+    norm_df = norm_df.reset_index()
+    return norm_df
 
 def createFeatureDf(configurations, mediaExec_df, sellOut_df, sellOutDistribution_df, sellOutCompetition_df, covid_df, uniqueWeeks_df):
     '''
@@ -62,7 +68,6 @@ def createFeatureDf(configurations, mediaExec_df, sellOut_df, sellOutDistributio
     
     #the media execution table is the basis of the feature_df
     feature_df = mediaExec_df[["YEAR_WEEK", "BRAND", "TOUCHPOINT", "SPEND"]]
-    print(feature_df['BRAND'].unique())
 
     #turn touchpoint variables into columns (each touchpoint one column) with primary key ['YEAR_WEEK','BRAND','TOUCHPOINT'] by SPEND
     #this is how the data will be interpreted
@@ -119,6 +124,7 @@ def run(configurations, responseModelConfig, mediaExec_df, sellOut_df, sellOutDi
     feature_df = createFeatureDf(configurations, mediaExec_df, sellOut_df, sellOutDistribution_df, sellOutCompetition_df, covid_df, uniqueWeeks_df)
     
     feature_df = filterByBrands(feature_df.copy(),configurations)
+
 
     normalizedFeature_df = normalizeFeatureDf(configurations, feature_df.copy())
 
