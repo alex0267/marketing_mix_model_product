@@ -48,9 +48,10 @@ def run(runBackTest=False, split = False, name = False, load = True):
 
 
 
-    price_df = filteredFeature_df['AVERAGE_PRICE']
+    price_df = filteredFeature_df[['BRAND','AVERAGE_PRICE']]
+   
 
-
+    
     
     # Initialize Model instance and Train Bayesian Model 
     responseModel = RESPONSE_MODEL.ResponseModel.ResponseModel(configurations = configurations,
@@ -86,6 +87,8 @@ def run(runBackTest=False, split = False, name = False, load = True):
     # test_multi-vector11 - multi brand with three brands
     # test_multi-vector12 - train on ALL brands
     # test_multi-vector13 - train brand with five brands - this time normalized by max target per brand
+    #test_multi-single_angry_cat
+    #test_multi-single_gracious_road
     
     responseModel.runModel(name =name, load=load)
     responseModel.extractParameters(printOut=False)
@@ -101,10 +104,10 @@ def run(runBackTest=False, split = False, name = False, load = True):
     #run tests
     #print('running tests ...')
     #PYTEST.mainComparisonTests.runComparisonTests() 
-
+    print(f'r2 collection: {r2}')
     return r2
     
-    ''''''
-run(name = 'test_multi-vector13',load=False)
+    
+run(name = 'test_multi-single_gracious_road',load=False)
 # print(f'r2: {r2}')
 

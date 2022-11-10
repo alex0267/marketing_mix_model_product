@@ -27,12 +27,14 @@ class ROSCalculation:
 
         #get price dict
         self.price_df = price_df
-        self.prices_ALL = None
+        self.prices_ALL = {}
 
         #implement calculation
-        self.calculateROS()
+        self.runROSCalculation()
 
-    def calculateROS(self):
+    def calculateROS(self,brand,index_df, filteredFeature_df):
+
+        price_df = self.price_df[self.price_df['BRAND']==brand]['AVERAGE_PRICE'].reset_index()
 
         #calculate ROS based on 'ALL'
         for subset in self.outputConfig['CHANGE_PERIODS']:
@@ -45,25 +47,34 @@ class ROSCalculation:
             for scope in scopes:
 
                 #get indexes of data for respective time frame
-                ind, cont = HELPER_FUNCTIONS.getIndex.getIndex(indexColumns = self.responseModel.index_df,scope='YEAR' , subset=scope)
+                ind, cont = HELPER_FUNCTIONS.getIndex.getIndex(indexColumns = index_df,scope='YEAR' , subset=scope)
                 if cont == True: continue
 
                 for touchpoint in self.responseModel.configurations['TOUCHPOINTS']:
                     
-                    totalVolumeContribution = (self.volumeContribution.absoluteContributionCorrected[scope][touchpoint].iloc[ind])
+                    totalVolumeContribution = (self.volumeContribution.absoluteContributionCorrected[(brand,scope)][touchpoint].iloc[ind])
                     
-                    prices = self.price_df.iloc[ind]
+                    
+                    prices = price_df['AVERAGE_PRICE'].iloc[ind]
                     
 
                     valueContribution = prices*totalVolumeContribution.values
 
-                    totalSpendings = self.responseModel.filteredFeature_df[self.responseModel.configurations['TOUCHPOINTS']][touchpoint].iloc[ind].reset_index(drop = True)
+                    totalSpendings = filteredFeature_df[self.responseModel.configurations['TOUCHPOINTS']][touchpoint].iloc[ind].reset_index(drop = True)
 
                     if (subset=='ALL' and scope == 'ALL'):
-                        self.prices_ALL = prices
-                        self.ROS_Weekly[touchpoint] = valueContribution/totalSpendings
+                        self.prices_ALL[brand] = prices
+                        self.ROS_Weekly[(brand,touchpoint)] = valueContribution/totalSpendings
 
                     ratio = (valueContribution.sum()/totalSpendings.sum())
 
 
-                    self.ROS[(subset,scope, touchpoint)] = ratio
+                    self.ROS[(brand,subset,scope, touchpoint)] = ratio
+
+    def runROSCalculation(self):
+        for brand in self.responseModel.configurations['BRANDS']:
+            index_df = self.responseModel.index_df[self.responseModel.index_df['BRAND']==brand].reset_index()
+            filteredFeature_df = self.responseModel.filteredFeature_df[self.responseModel.filteredFeature_df['BRAND']==brand].reset_index()
+            self.calculateROS(brand,index_df,filteredFeature_df)
+
+        return 0

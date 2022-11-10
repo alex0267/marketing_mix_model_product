@@ -59,6 +59,8 @@ class ResponseCurves:
 
         for brand in self.responseModel.configurations['BRANDS']:
             filteredFeature_df = self.responseModel.filteredFeature_df[self.responseModel.filteredFeature_df['BRAND']==brand].reset_index()
+            
+            price_df = self.price_df[self.price_df['BRAND']==brand]['AVERAGE_PRICE'].reset_index()
 
             #Execute calculation for different scopes (years individ. & all together)
             for subset in self.outputConfig['RESPONSE_CURVE_PERIODS']:
@@ -68,6 +70,7 @@ class ResponseCurves:
                 
                 #get indexes of data for respective time frame
                 ind, cont = HELPER_FUNCTIONS.getIndex.getIndex(indexColumns = filteredFeature_df,scope='YEAR' , subset=subset)
+
 
 
                 
@@ -103,9 +106,9 @@ class ResponseCurves:
                         #Still need to add the adstock length
                         vol = self.simulatedSales[(brand,subset, touchpoint, lift)].iloc[ind] - salesNoSpends
 
-                        prices = self.price_df.iloc[ind]
+                        prices = price_df.iloc[ind]
 
-                        sales = (prices*vol)
+                        sales = (prices['AVERAGE_PRICE']*vol)
                         deltaSales[lift] = sum(sales)
 
                     self.spendings[(brand,subset, touchpoint)]= spendings

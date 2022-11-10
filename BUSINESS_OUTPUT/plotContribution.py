@@ -21,8 +21,8 @@ def plotWeeklyContribution(volumeContribution,filteredFeature_df,brand,name):
         # if brand == 'gold_plane':
         # contributors = pd.concat([contributors,volumeContribution.deltaToZeroDict[(brand,'ALL')][item]]*10, axis=1)
         contributors = pd.concat([contributors,volumeContribution.deltaToZeroDict[(brand,'ALL')][item]], axis=1)
+            
 
-        
     contributors = contributors.T
 
     X = np.arange(0, len_X, 1) 

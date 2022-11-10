@@ -3,15 +3,15 @@
 SET_MASTER: False
 #Brands in scope
 BRANDS:
-  - angry_cat
-  - fast_duck
-  - gold_plane
+  # - angry_cat
+  # - fast_duck
+  # - gold_plane
   - gracious_road
+  # - precious_liquid
   # - heavy_feather
   # - ideal_mouse
   # - lully
   # - moistured_bird
-  - precious_liquid
   # - red_ballon
   # - silver_coin
   # - viable_line

@@ -31,7 +31,7 @@ def createBusinessOutputs(responseModel, outputConfig, price_df,name):
                                                                            outputConfig = outputConfig,
                                                                            price_df = price_df,
                                                                            name = name)
-    '''
+    
     #Calculate ROS based on volume contribution
     ROS = BUSINESS_OUTPUT.ROSCalculation.ROSCalculation(responseModel = responseModel,
                                                        volumeContribution = volumeContribution,
@@ -51,4 +51,5 @@ def createBusinessOutputs(responseModel, outputConfig, price_df,name):
                                                   name = name)
     '''
     r2 = 0
+    '''
     return r2
