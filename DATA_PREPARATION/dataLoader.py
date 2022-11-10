@@ -78,6 +78,9 @@ def loadData(configurations):
     #covid proxy
     covid_df = pd.read_csv('DATA/FRA_COVID_MEASURES.csv')
 
+    #net sales for uplift and ROI calculation
+    netSales_df = pd.read_excel('DATA/FRA_SELL_IN_MAPPING.xlsx')
+
     #list of unique weeks that are subject to event & seasonality engineering
     uniqueWeeks_df = pd.DataFrame(mediaExec_df['YEAR_WEEK'].unique())
     uniqueWeeks_df = uniqueWeeks_df.rename(columns={0:'YEAR_WEEK'})
@@ -86,4 +89,4 @@ def loadData(configurations):
 
 
     
-    return mediaExec_df, sellOut_df, sellOutDistribution_df, sellOutCompetition_df, covid_df, uniqueWeeks_df, filteredUniqueWeeks_df
+    return mediaExec_df, sellOut_df, sellOutDistribution_df, sellOutCompetition_df, covid_df, uniqueWeeks_df, filteredUniqueWeeks_df,netSales_df

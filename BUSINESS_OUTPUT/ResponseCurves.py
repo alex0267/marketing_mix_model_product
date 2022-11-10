@@ -49,6 +49,12 @@ class ResponseCurves:
         plt.clf()
         return 0
 
+    def matchVolWithPrice(self):
+
+
+
+        sales = (prices['AVERAGE_PRICE']*vol)
+        return 0
     
     def run(self):
 
@@ -60,7 +66,6 @@ class ResponseCurves:
         for brand in self.responseModel.configurations['BRANDS']:
             filteredFeature_df = self.responseModel.filteredFeature_df[self.responseModel.filteredFeature_df['BRAND']==brand].reset_index()
             
-            price_df = self.price_df[self.price_df['BRAND']==brand]['AVERAGE_PRICE'].reset_index()
 
             #Execute calculation for different scopes (years individ. & all together)
             for subset in self.outputConfig['RESPONSE_CURVE_PERIODS']:
@@ -105,10 +110,9 @@ class ResponseCurves:
 
                         #Still need to add the adstock length
                         vol = self.simulatedSales[(brand,subset, touchpoint, lift)].iloc[ind] - salesNoSpends
+                        print(vol)
+                        sales = self.matchVolWithPrice(vol, self.price_df, brand)
 
-                        prices = price_df.iloc[ind]
-
-                        sales = (prices['AVERAGE_PRICE']*vol)
                         deltaSales[lift] = sum(sales)
 
                     self.spendings[(brand,subset, touchpoint)]= spendings

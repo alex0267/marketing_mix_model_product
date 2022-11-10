@@ -31,11 +31,11 @@ def run(runBackTest=False, split = False, name = False, load = True):
                 outputConfig = yaml.safe_load(file)
     
     
-    mediaExec_df, sellOut_df, sellOutDistribution_df, sellOutCompetition_df, covid_df, uniqueWeeks_df, filteredUniqueWeeks_df = DATA_PREPARATION.dataLoader.loadData(configurations)
+    mediaExec_df, sellOut_df, sellOutDistribution_df, sellOutCompetition_df, covid_df, uniqueWeeks_df, filteredUniqueWeeks_df,netSales_df = DATA_PREPARATION.dataLoader.loadData(configurations)
 
 
     #Create features and prepare data
-    feature_df, filteredFeature_df, normalizedFeature_df, normalizedFilteredFeature_df, index_df = DATA_PREPARATION.mainDataPreparation.run(configurations = configurations,
+    feature_df, filteredFeature_df, normalizedFeature_df, normalizedFilteredFeature_df, index_df, netPrice_df = DATA_PREPARATION.mainDataPreparation.run(configurations = configurations,
                                                                                                                     responseModelConfig =  responseModelConfig,
                                                                                                                     mediaExec_df = mediaExec_df.copy(),
                                                                                                                     sellOut_df = sellOut_df.copy(),
@@ -43,11 +43,12 @@ def run(runBackTest=False, split = False, name = False, load = True):
                                                                                                                     sellOutCompetition_df = sellOutCompetition_df.copy(),
                                                                                                                     covid_df = covid_df.copy(),
                                                                                                                     uniqueWeeks_df = uniqueWeeks_df.copy(),
+                                                                                                                    netSales_df = netSales_df.copy(),
                                                                                                                     runBackTest = runBackTest,
                                                                                                                     split = split)
 
 
-
+    
     price_df = filteredFeature_df[['BRAND','AVERAGE_PRICE']]
    
 
@@ -98,7 +99,7 @@ def run(runBackTest=False, split = False, name = False, load = True):
     #calculate contribution decomposition via estimated parameters and original spendings/sales
     r2 = BUSINESS_OUTPUT.mainBusinessOutput.createBusinessOutputs(responseModel = responseModel, 
                                                                   outputConfig = outputConfig,
-                                                                  price_df = price_df,
+                                                                  price_df = netPrice_df,
                                                                   name = outputName)
     
     #run tests
@@ -107,7 +108,7 @@ def run(runBackTest=False, split = False, name = False, load = True):
     print(f'r2 collection: {r2}')
     return r2
     
-    
-run(name = 'test_multi-single_gracious_road',load=False)
+    ''''''
+run(name = 'test_multi-vector13',load=True)
 # print(f'r2: {r2}')
 

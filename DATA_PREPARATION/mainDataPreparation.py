@@ -103,7 +103,19 @@ def createFeatureDf(configurations, mediaExec_df, sellOut_df, sellOutDistributio
 
     return feature_df
 
-def run(configurations, responseModelConfig, mediaExec_df, sellOut_df, sellOutDistribution_df, sellOutCompetition_df, covid_df, uniqueWeeks_df, runBackTest,split):
+def createNetPriceDf(netPrice_df,configurations):
+
+    netPrice_df = netPrice_df[netPrice_df['BRAND'].isin(configurations['BRANDS'])]
+    netPrice_df = netPrice_df[netPrice_df['SALES_CHANNEL']=='off_trade'].reset_index()
+    netPrice_df['PRICE'] = netPrice_df['NET_SALES']/netPrice_df['VOLUME_IN_L']
+    netPrice_df = netPrice_df[['FISCAL_YEAR', 'BRAND','PRICE']]
+
+    return netPrice_df
+
+
+
+
+def run(configurations, responseModelConfig, mediaExec_df, sellOut_df, sellOutDistribution_df, sellOutCompetition_df, covid_df, uniqueWeeks_df, netSales_df, runBackTest,split):
     '''
     input:
     Company-specific dataframes
@@ -120,6 +132,9 @@ def run(configurations, responseModelConfig, mediaExec_df, sellOut_df, sellOutDi
      - normalized_filtered_feature_df - for training
 
     '''
+
+    netPrice_df = createNetPriceDf(netSales_df,configurations)
+    
 
     feature_df = createFeatureDf(configurations, mediaExec_df, sellOut_df, sellOutDistribution_df, sellOutCompetition_df, covid_df, uniqueWeeks_df)
     
@@ -141,4 +156,4 @@ def run(configurations, responseModelConfig, mediaExec_df, sellOut_df, sellOutDi
     PYTEST.extractEntryData.extractEntryData(feature_df, 'feature_df', configurations['SET_MASTER'])
     PYTEST.extractEntryData.extractEntryData(normalizedFilteredFeature_df, 'normalizedFilteredFeature_df', configurations['SET_MASTER'])
 
-    return feature_df, filteredFeature_df, normalizedFeature_df, normalizedFilteredFeature_df, index_df
+    return feature_df, filteredFeature_df, normalizedFeature_df, normalizedFilteredFeature_df, index_df, netPrice_df
