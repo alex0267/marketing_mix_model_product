@@ -34,7 +34,7 @@ class ROSCalculation:
 
     def calculateROS(self,brand,index_df, filteredFeature_df):
 
-        price_df = self.price_df[self.price_df['BRAND']==brand]['AVERAGE_PRICE'].reset_index()
+        price_df = self.price_df[self.price_df['BRAND']==brand]['NET_PRICE'].reset_index()
 
         #calculate ROS based on 'ALL'
         for subset in self.outputConfig['CHANGE_PERIODS']:
@@ -53,11 +53,9 @@ class ROSCalculation:
                 for touchpoint in self.responseModel.configurations['TOUCHPOINTS']:
                     
                     totalVolumeContribution = (self.volumeContribution.absoluteContributionCorrected[(brand,scope)][touchpoint].iloc[ind])
+                                    
+                    prices = price_df['NET_PRICE'].iloc[ind]
                     
-                    
-                    prices = price_df['AVERAGE_PRICE'].iloc[ind]
-                    
-
                     valueContribution = prices*totalVolumeContribution.values
 
                     totalSpendings = filteredFeature_df[self.responseModel.configurations['TOUCHPOINTS']][touchpoint].iloc[ind].reset_index(drop = True)

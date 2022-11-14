@@ -89,6 +89,7 @@ class UpliftSimulation:
 
         #change entire dataframe according to change
         spendings = filteredFeature_df[self.responseModel.configurations['TOUCHPOINTS']].copy()
+
         
         #merge the changed section with the rest of the data
 
@@ -98,6 +99,18 @@ class UpliftSimulation:
                 spendings[tp].loc[changedSpendings.index] = changedSpendings[tp]
         else:
             spendings[touchpoint].loc[changedSpendings.index] = changedSpendings[:]
+
+        # if (touchpoint == 'tom' and lift == 0.0 and str(subset) == '2019'):
+            # print('SPENDINGS')
+            # with pd.option_context('display.max_rows', None, 'display.max_columns', None):
+                # print(spendings)
+
+                # print('')
+                # print("changedSpendings")
+                # print(changedSpendings)
+                # print('')
+                # print(originalSpendingsInWindow)
+
 
         return spendings
         

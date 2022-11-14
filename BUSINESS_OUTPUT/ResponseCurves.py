@@ -49,14 +49,10 @@ class ResponseCurves:
         plt.clf()
         return 0
 
-    def matchVolWithPrice(self):
-
-
-
-        sales = (prices['AVERAGE_PRICE']*vol)
-        return 0
     
     def run(self):
+
+        analyzeRC_df= []
 
         #we create a path to gather the outputs per run
         path = f'BUSINESS_OUTPUT/RESPONSE_CURVE_PLOTS/{self.name}'
@@ -65,6 +61,7 @@ class ResponseCurves:
 
         for brand in self.responseModel.configurations['BRANDS']:
             filteredFeature_df = self.responseModel.filteredFeature_df[self.responseModel.filteredFeature_df['BRAND']==brand].reset_index()
+            price_df = self.price_df[self.price_df['BRAND']==brand]['NET_PRICE'].reset_index()
             
 
             #Execute calculation for different scopes (years individ. & all together)
@@ -72,12 +69,8 @@ class ResponseCurves:
                 #Simulate sales for each touchpoint and lift level
                 
                 
-                
                 #get indexes of data for respective time frame
                 ind, cont = HELPER_FUNCTIONS.getIndex.getIndex(indexColumns = filteredFeature_df,scope='YEAR' , subset=subset)
-
-
-
                 
                 
                 #required to skip years that are not in scope (for kFold split of R2 backtest)
@@ -86,6 +79,7 @@ class ResponseCurves:
                 index = filteredFeature_df.index
 
                 #define extended_length as the max index + the maximum adstock length to increase size of frame in scope
+                '''
                 extended_index = ind[-1]+1 + adstock_length
                 
                 #if the end of the list is not reached -> extend list elements to include max length of adstock
@@ -93,7 +87,7 @@ class ResponseCurves:
                     rangeList = [*range(ind[-1]+1, extended_index,1)]
                     ind.extend(rangeList)
                     
-
+                '''
                 for touchpoint in self.responseModel.configurations['TOUCHPOINTS']:
                     spendings = {}
                     deltaSales = {}
@@ -110,14 +104,25 @@ class ResponseCurves:
 
                         #Still need to add the adstock length
                         vol = self.simulatedSales[(brand,subset, touchpoint, lift)].iloc[ind] - salesNoSpends
-                        print(vol)
-                        sales = self.matchVolWithPrice(vol, self.price_df, brand)
+                        
+                        prices = price_df['NET_PRICE'].iloc[ind]
+
+                        sales = vol*prices
 
                         deltaSales[lift] = sum(sales)
 
                     self.spendings[(brand,subset, touchpoint)]= spendings
                     self.deltaSales[(brand,subset, touchpoint)] = deltaSales
 
+                    for (k,v), (k2,v2) in zip(spendings.items(), deltaSales.items()):
+                        analyzeRC_df.append([brand,subset,touchpoint,v,v2])
+                    
+
                 self.createResponseCurves(brand,subset)
+
+        analyzeRC_df = pd.DataFrame(analyzeRC_df)
+
+        analyzeRC_df.to_excel('analyseRC_df.xlsx')
+
                         
 

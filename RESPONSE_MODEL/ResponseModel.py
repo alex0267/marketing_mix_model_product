@@ -121,7 +121,7 @@ class ResponseModel:
             'num_control': len(self.configurations['CONTROL_VARIABLES_BASE']),
             'control': control,
             'volume': targetVar
-        }        
+        }      
         
         
         dictTPSummary = pd.DataFrame()

@@ -11,9 +11,9 @@ def extractSummary(responseModel, volumeContribution,ROS_Calculation, outputConf
     '''
     resultSummary = pd.DataFrame()
     for brand in responseModel.configurations['BRANDS']:
-        print(brand)
+        
         filteredFeature_df = responseModel.filteredFeature_df[responseModel.filteredFeature_df['BRAND']==brand].reset_index()
-        print(filteredFeature_df)
+        
 
         responseModelInit_df = pd.DataFrame()
 
@@ -45,6 +45,6 @@ def extractSummary(responseModel, volumeContribution,ROS_Calculation, outputConf
 
         resultSummary = pd.concat([resultSummary,responseModelInit_df], axis=0)
 
-        #print(responseModelInit_df)
+       
 
     resultSummary.to_excel(f'OUTPUT_DF/resultSummary_df_{name}.xlsx')

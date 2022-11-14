@@ -49,9 +49,8 @@ def run(runBackTest=False, split = False, name = False, load = True):
 
 
     
-    price_df = filteredFeature_df[['BRAND','AVERAGE_PRICE']]
    
-
+    
     
     
     # Initialize Model instance and Train Bayesian Model 
@@ -63,7 +62,7 @@ def run(runBackTest=False, split = False, name = False, load = True):
                                                         normalizedFilteredFeature_df = normalizedFilteredFeature_df,
                                                         index_df = index_df,
                                                         stanCode = RESPONSE_MODEL.stan2.stanCode)
-
+    
     #checkpoint test
     #PYTEST.mainComparisonTests.compareEntryData()
     
@@ -81,15 +80,13 @@ def run(runBackTest=False, split = False, name = False, load = True):
 
 
     #first attempt in multi brand vectorized version - all still one brand but brand capability is built in
-    #test_multi-vector
 
-    # test_multi-vector05 - ready for multi brand - all vectorized
-    # test_multi-vector08 - multi brand with fast_duck and gold_plane
-    # test_multi-vector11 - multi brand with three brands
     # test_multi-vector12 - train on ALL brands
     # test_multi-vector13 - train brand with five brands - this time normalized by max target per brand
     #test_multi-single_angry_cat
     #test_multi-single_gracious_road
+    #test_multi-vector14 - all brands
+    #test_multi-vector_7_brands
     
     responseModel.runModel(name =name, load=load)
     responseModel.extractParameters(printOut=False)
@@ -108,7 +105,8 @@ def run(runBackTest=False, split = False, name = False, load = True):
     print(f'r2 collection: {r2}')
     return r2
     
+    
     ''''''
-run(name = 'test_multi-vector13',load=True)
+run(name = 'test_multi-vector_7_brands',load=False)
 # print(f'r2: {r2}')
 

@@ -103,14 +103,22 @@ def createFeatureDf(configurations, mediaExec_df, sellOut_df, sellOutDistributio
 
     return feature_df
 
-def createNetPriceDf(netPrice_df,configurations):
+def createNetPriceDf(netPrice_df,configurations, filteredFeature_df):
 
     netPrice_df = netPrice_df[netPrice_df['BRAND'].isin(configurations['BRANDS'])]
     netPrice_df = netPrice_df[netPrice_df['SALES_CHANNEL']=='off_trade'].reset_index()
-    netPrice_df['PRICE'] = netPrice_df['NET_SALES']/netPrice_df['VOLUME_IN_L']
-    netPrice_df = netPrice_df[['FISCAL_YEAR', 'BRAND','PRICE']]
+    netPrice_df['NET_PRICE'] = netPrice_df['NET_SALES']/netPrice_df['VOLUME_IN_L']
+    netPrice_df = netPrice_df[['FISCAL_YEAR', 'BRAND','NET_PRICE']]
 
-    return netPrice_df
+    scope = pd.DataFrame()
+    scope['BRAND'] = filteredFeature_df['BRAND'].astype(str)
+    scope['YEAR'] = (filteredFeature_df['YEAR_WEEK'].astype(str).str[:4]).astype(int)
+
+
+    df = scope.merge(netPrice_df, left_on=['YEAR','BRAND'], right_on=['FISCAL_YEAR','BRAND'],how='inner')
+   
+    
+    return df[['BRAND','YEAR','NET_PRICE']]
 
 
 
@@ -133,7 +141,7 @@ def run(configurations, responseModelConfig, mediaExec_df, sellOut_df, sellOutDi
 
     '''
 
-    netPrice_df = createNetPriceDf(netSales_df,configurations)
+    
     
 
     feature_df = createFeatureDf(configurations, mediaExec_df, sellOut_df, sellOutDistribution_df, sellOutCompetition_df, covid_df, uniqueWeeks_df)
@@ -148,9 +156,15 @@ def run(configurations, responseModelConfig, mediaExec_df, sellOut_df, sellOutDi
     filteredFeature_df = filterByWeeks(feature_df.copy(),uniqueWeeks_df, configurations, runBackTest, split)
     normalizedFilteredFeature_df = filterByWeeks(normalizedFeature_df.copy(), uniqueWeeks_df,configurations,runBackTest, split)
 
+    filteredFeature_df.to_excel('OUTPUT_DF/filteredFeature_df.xlsx')
+    normalizedFilteredFeature_df.to_excel('OUTPUT_DF/normalizedFilteredFeature_df.xlsx')
+
+    netPrice_df = createNetPriceDf(netSales_df,configurations, filteredFeature_df)
+
     #index dataframe to filter other frames based on brand or year specifications (necessary for output generation)
     index_df = filteredFeature_df[['YEAR_WEEK','BRAND']]
     index_df['YEAR'] = index_df['YEAR_WEEK'].astype(str).str[:4]
+    
 
 
     PYTEST.extractEntryData.extractEntryData(feature_df, 'feature_df', configurations['SET_MASTER'])
