@@ -3,13 +3,13 @@
 SET_MASTER: False
 #Brands in scope
 BRANDS:
-  - angry_cat
+  # - angry_cat
   - fast_duck
-  - gold_plane
-  - gracious_road
-  - precious_liquid
-  - heavy_feather
-  - ideal_mouse
+  # - gold_plane
+  # - gracious_road
+  # - precious_liquid
+  # - heavy_feather
+  # - ideal_mouse
   # - lully
   # - moistured_bird
   # - red_ballon
@@ -63,9 +63,9 @@ PRICE_PERIOD_1_END: 201905
 PRICE_PERIOD_2_END: 202113
 
 #define dataset start and end(inclusive)
-DATA_START: 201827
+DATA_START: 201901
 # DATA_START: 201901
-DATA_END: 202126
+DATA_END: 202152
 
 NORMALIZATION_STEPS_CONTROL:
   #promotion: logp1
@@ -104,6 +104,8 @@ NORMALIZATION_STEPS_TOUCHPOINTS:
 
 #defining normalization steps of touchpoints
 #the normalization steps will follow the order below:
+
+#currently max across brands is replaced by max according to BRAND
 NORMALIZATION_STEPS_TARGET: ['max_across_brands', 'logp1']
 
 

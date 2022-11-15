@@ -49,10 +49,6 @@ def run(runBackTest=False, split = False, name = False, load = True):
 
 
     
-   
-    
-    
-    
     # Initialize Model instance and Train Bayesian Model 
     responseModel = RESPONSE_MODEL.ResponseModel.ResponseModel(configurations = configurations,
                                                         responseModelConfig= responseModelConfig,
@@ -87,6 +83,11 @@ def run(runBackTest=False, split = False, name = False, load = True):
     #test_multi-single_gracious_road
     #test_multi-vector14 - all brands
     #test_multi-vector_7_brands
+
+    #CAL group relates to new dataset used
+
+    #test_multi-vector_CAL_ALL
+    #test_multi-vector_CAL_fast_duck
     
     responseModel.runModel(name =name, load=load)
     responseModel.extractParameters(printOut=False)
@@ -107,6 +108,5 @@ def run(runBackTest=False, split = False, name = False, load = True):
     
     
     ''''''
-run(name = 'test_multi-vector_7_brands',load=False)
+run(name = 'test_multi-vector_CAL_fast_duck',load=False)
 # print(f'r2: {r2}')
-

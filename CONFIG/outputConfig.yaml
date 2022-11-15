@@ -1,6 +1,6 @@
 #here we define the starting weeks to test - since we are working with simulated data, we use the week index
 #in the original, this must be converted to years
-CHANGE_PERIODS: [2018,2019,2020,2021, ALL]
+CHANGE_PERIODS: [2019,2020,2021, ALL]
 RESPONSE_CURVE_PERIODS: [2019,2020,2021]
 
 #define back test parameters
