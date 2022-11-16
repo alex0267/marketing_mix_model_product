@@ -1,5 +1,5 @@
 
-from tkinter import S
+
 import DATA_PREPARATION.seasonality
 import DATA_PREPARATION.promotion
 import DATA_PREPARATION.distribution

@@ -2,6 +2,7 @@
 #if false -> test mode
 SET_MASTER: False
 #Brands in scope
+
 BRANDS:
   # - angry_cat
   - fast_duck

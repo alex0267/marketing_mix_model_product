@@ -114,9 +114,10 @@ class ResponseModel:
             'off_trade_visibility':off_trade_visibility,
             'covid':covid,
             'touchpointNorms': self.touchpointNorms,
+            'shape_shift': [self.responseModelConfig['SHAPE_SHIFT_PRIOR'][tp] for tp in self.configurations['TOUCHPOINTS']],
             'touchpointThresholds': [self.responseModelConfig['SHAPE_THRESHOLD_VALUE'][tp] for tp in self.configurations['TOUCHPOINTS']],
             'num_seasons': len(self.configurations['SEASONALITY_VARIABLES_BASE']),
-            'seasonality_raw': season[0],
+            'seasonality': season[0],
             'is_last_week': is_last_week,
             'num_control': len(self.configurations['CONTROL_VARIABLES_BASE']),
             'control': control,
@@ -158,7 +159,7 @@ class ResponseModel:
             #FOR NOW OK BUT NEED TO BE CHANGED WHEN SEASONALITY APPROACH IS CHANGED
             beta_seasonality=[]
             for s, season in enumerate(self.configurations['SEASONALITY_VARIABLES_BASE'],start = 1):
-                beta_seasonality.append(self.extractFrame[f'beta_seasonality_raw.{i}.{s}'].mean(axis=0))
+                beta_seasonality.append(self.extractFrame[f'beta_seasonality.{i}.{s}'].mean(axis=0))
             
             #we add a list as a dict object to facilitate beta extraction
             brandEstimationsDict[f'seasonality_beta'] = beta_seasonality

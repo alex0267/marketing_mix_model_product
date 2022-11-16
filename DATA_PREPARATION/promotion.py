@@ -1,4 +1,4 @@
-from typing import Optional
+
 import pandas as pd
 
 from DATA_PREPARATION.genericFeatures import create_feature_as_gap_to_brand_reference_level

@@ -77,13 +77,16 @@ data {
   matrix[B,N] covid;
   // the vector of sales
   matrix [B,N] volume;
-  matrix [N,num_seasons] seasonality_raw;
+  matrix [N,12] seasonality;
   matrix[B,N] is_last_week;
   real control [B,N,num_control] ;
   // threshold values
   vector [num_touchpoints] touchpointThresholds;
   // list of mean values of touchpoints (raw data)
   vector [num_touchpoints] touchpointNorms;
+  //shape shift values to adapt S/C-curve
+  vector [num_touchpoints] shape_shift;
+  
 }
 // -----------------------------------    PARAMETERS    -----------------------------------
 parameters {
@@ -93,7 +96,7 @@ parameters {
   vector [B] intercept;
   
   // the beta coefficients
-  matrix[B,num_seasons] beta_seasonality_raw;
+  matrix[B,11] beta_seasonality_raw;
   
   vector<lower=0>[B] beta_tom;
   vector<lower=0>[B]beta_laura;
@@ -113,17 +116,20 @@ parameters {
   vector<lower=0,upper=1>[num_touchpoints] decay;
   vector<lower=0,upper=ceil(max_lag/2)>[num_touchpoints] peak;
   //Shape parameters - distributed, impression-oriented spendings
-  vector<lower=0>[num_touchpoints] shape;
+  vector<lower=0>[num_touchpoints] shape_raw;
   vector<lower=0, upper=1> [num_touchpoints] scale ;
 }
 // -----------------------------------    TRANSFORMATION    -----------------------------------
 transformed parameters {
+    matrix[B, 12] beta_seasonality;
+
+    //shape offset as prior
+    vector[num_touchpoints] shape = shape_raw;
 
     // Buiding beta_seasonality such that 12th column is the sum of the 11th first columns
-    //for (b in 1:B){
-    //    beta_seasonality[b] = append_col(beta_seasonality_raw[b], -sum(beta_seasonality_raw[b]));
-    //    seasonality_effect[b] = (reindex_matrix_cols(seasonality, keep_data) * beta_seasonality[b]')';
-    //}
+    for (b in 1:B){
+        beta_seasonality[b] = append_col(beta_seasonality_raw[b], -sum(beta_seasonality_raw[b]));
+    }
 
 
     matrix[B,N] tom_transformed;
@@ -168,34 +174,40 @@ model {
   beta_is_last_week ~ normal(0, 1);
 
   for (i in 1 : num_touchpoints) {
-    shape[i] ~ gamma(4,4);
+    shape_raw[i] ~ gamma(4,4);
     scale[i] ~ beta(2, 2);
   }
-  for (i in 1 : B) {
-      for (n in 1:num_seasons){
-        beta_seasonality_raw[i,n] ~ normal(0, 1);
-        }
-  }
+
+  // --- Seasonality ---
+  for (b in 1:B){
+    beta_seasonality_raw[b] ~ normal(0, 1);
+    }
+
+//for (i in 1 : B) {
+//    for (n in 1:num_seasons){
+//        beta_seasonality_raw[i,n] ~ normal(0, 1);
+//        }
+//  }
   
   sigma ~ normal(0, 1);
 
   for (b in 1 : B) {
     volume[b] ~ normal(intercept[b] + 
-                    to_vector(tom_transformed[b]) * beta_tom[b] +
-                    to_vector(laura_transformed[b]) * beta_laura[b] +
-                    to_vector(lisa_transformed[b]) * beta_lisa[b] +
-                    to_vector(mary_transformed[b]) * beta_mary[b] +
-                    to_vector(fiona_transformed[b]) * beta_fiona[b] +
-                    to_vector(marc_transformed[b]) * beta_marc[b] +
-                    to_vector(alex_transformed[b]) * beta_alex[b] +
-                    to_vector(epros[b]) * beta_epros[b] +
-                    to_vector(distribution[b]) * beta_distribution[b] +
-                    to_vector(promotion[b]) * beta_promotion[b] +
-                    to_vector(off_trade_visibility[b]) * beta_off_trade_visibility[b] +
-                    to_vector(covid[b]) * beta_covid[b] +
-                    seasonality_raw * to_vector(beta_seasonality_raw[b]) +
-                    to_vector(is_last_week[b]) * beta_is_last_week[b],
-                    sigma[b]);
+                        to_vector(tom_transformed[b]) * beta_tom[b] +
+                        to_vector(laura_transformed[b]) * beta_laura[b] +
+                        to_vector(lisa_transformed[b]) * beta_lisa[b] +
+                        to_vector(mary_transformed[b]) * beta_mary[b] +
+                        to_vector(fiona_transformed[b]) * beta_fiona[b] +
+                        to_vector(marc_transformed[b]) * beta_marc[b] +
+                        to_vector(alex_transformed[b]) * beta_alex[b] +
+                        to_vector(epros[b]) * beta_epros[b] +
+                        to_vector(distribution[b]) * beta_distribution[b] +
+                        to_vector(promotion[b]) * beta_promotion[b] +
+                        to_vector(off_trade_visibility[b]) * beta_off_trade_visibility[b] +
+                        to_vector(covid[b]) * beta_covid[b] +
+                        (seasonality)* to_vector(beta_seasonality[b]) +
+                        to_vector(is_last_week[b]) * beta_is_last_week[b],
+                        sigma[b]);
     }
 }
 

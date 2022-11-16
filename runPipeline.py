@@ -88,6 +88,8 @@ def run(runBackTest=False, split = False, name = False, load = True):
 
     #test_multi-vector_CAL_ALL
     #test_multi-vector_CAL_fast_duck
+    #test_multi-vector_CAL_ALL_8_adstock_7
+    #test_multi-vector_CAL_ALL_8_adstock_SHIFT_fast_duck
     
     responseModel.runModel(name =name, load=load)
     responseModel.extractParameters(printOut=False)
@@ -108,5 +110,4 @@ def run(runBackTest=False, split = False, name = False, load = True):
     
     
     ''''''
-run(name = 'test_multi-vector_CAL_fast_duck',load=False)
-# print(f'r2: {r2}')
+run(name = 'test_rng_2',load=True)
