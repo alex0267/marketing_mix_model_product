@@ -73,17 +73,17 @@ SHAPE_THRESHOLD_VALUE:
   laura: 7000
   lisa: 5000
   mary: 3500
-  jack: 3500
+  # jack: 3500
   fiona: 5000
   marc: 50000
   alex: 15000
 
 SHAPE_SATURATION_VALUE:
-  tom: 83000
-  laura: 90000
-  lisa: 120000
-  mary: 100000
-  jack: 90000
-  fiona: 150000
-  marc: 1000000
-  alex: 350000
+  tom: 55000
+  laura: 60000
+  lisa: 50000
+  mary: 72500
+  # jack: 90000
+  fiona: 118347
+  marc: 741429
+  alex: 159942

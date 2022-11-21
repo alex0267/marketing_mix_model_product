@@ -24,7 +24,7 @@ def calculatePrice(sell_out_df, configurations):
             # print(price_df[price_df['BRAND']==brand])
 
             subset = price_df[price_df['BRAND']==brand]
-            subset = subset[price_df['YEAR']==year]
+            subset = subset[subset['YEAR']==year]
             
             subset['AVERAGE_PRICE'] = subset['PRICE'].mean()
             priceFrame = pd.concat([priceFrame, subset],axis=0)

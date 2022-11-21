@@ -133,9 +133,7 @@ class ResponseModel:
             if key in self.configurations['CONTROL_VARIABLES_BASE'] :
                 dictCTRLSummary[key] = self.stanDict[key][0]
 
-        dictTPSummary.to_excel('TP_summary.xlsx')
-        dictCTRLSummary.to_excel('CTRL_summary.xlsx')
-        # print(dictCTRLSummary)
+
         
         PYTEST.extractEntryData.extractEntryData(self.stanDict, 'stanDict', self.configurations['SET_MASTER'])
         
@@ -185,16 +183,16 @@ class ResponseModel:
         return 0
 
 
-    def transform(self, df):
+    def transform(self, df, outputName):
         
         # tran_df = pd.DataFrame(df.iloc[:,:70].mean())
         tran_df = pd.DataFrame(df.mean())
-        tran_df.to_excel('estimatedParametersMean.xlsx')
+        tran_df.to_excel(f'OUTPUT/{outputName}/estimatedParametersMean.xlsx')
   
 
         return tran_df
 
-    def runModel(self, name, load=True):
+    def runModel(self, name,outputName, load=True):
         '''
         Run stan model with created dictionary and save results
         '''
@@ -205,11 +203,11 @@ class ResponseModel:
             fit = posterior.sample(num_chains=4, num_samples=1000)
             self.extractFrame = fit.to_frame()
             self.extractFrame.to_csv(f'MODEL_SAVINGS/extract{name}.csv')
-            self.transform(self.extractFrame)
+            self.transform(self.extractFrame, outputName)
 
         else:
             self.extractFrame = pd.read_csv(f'MODEL_SAVINGS/extract{name}.csv')
-            self.transform(self.extractFrame)
+            self.transform(self.extractFrame, outputName)
             
         
         return 0
