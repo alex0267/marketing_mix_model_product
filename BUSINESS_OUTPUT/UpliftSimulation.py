@@ -54,13 +54,13 @@ class UpliftSimulation:
 
 
         #extract the control dataframe window that needs to be changed    
-        originalControlWindow = filteredFeature_df[self.responseModel.configurations['CONTROL_VARIABLES_BASE']][controlVariable].iloc[ind]
+        originalControlWindow = filteredFeature_df[self.responseModel.baseConfig['CONTROL_VARIABLES_BASE']][controlVariable].iloc[ind]
 
         #change control variable window to neutral position depending on control variable definition
         changedControl = BUSINESS_OUTPUT.changeControlVariable.changeControlVariable(originalControlWindow, controlVariable)
 
         #merge control variable window with the full window        
-        zeroControl = pd.DataFrame(filteredFeature_df[self.responseModel.configurations['CONTROL_VARIABLES_BASE']].copy())
+        zeroControl = pd.DataFrame(filteredFeature_df[self.responseModel.baseConfig['CONTROL_VARIABLES_BASE']].copy())
 
         #if control variables are changed, each variable has to be changed individually
         if isinstance(controlVariable, list):
@@ -82,13 +82,13 @@ class UpliftSimulation:
         #get indexes of data for respective time frame
         ind, cont = HELPER_FUNCTIONS.getIndex.getIndex(indexColumns = filteredFeature_df,scope='YEAR' , subset=subset)
         
-        originalSpendingsInWindow = filteredFeature_df[self.responseModel.configurations['TOUCHPOINTS']][touchpoint].iloc[ind]
+        originalSpendingsInWindow = filteredFeature_df[self.responseModel.baseConfig['TOUCHPOINTS']][touchpoint].iloc[ind]
 
         #apply change
         changedSpendings = originalSpendingsInWindow*lift
 
         #change entire dataframe according to change
-        spendings = filteredFeature_df[self.responseModel.configurations['TOUCHPOINTS']].copy()
+        spendings = filteredFeature_df[self.responseModel.baseConfig['TOUCHPOINTS']].copy()
 
         
         #merge the changed section with the rest of the data
@@ -118,17 +118,17 @@ class UpliftSimulation:
         '''take the changed spendings and simulate the sales based on the estimated parameters'''
 
         #use the existing control_df values if no changed are specified
-        if spendings_df is None: spendings_df = filteredFeature_df[self.responseModel.configurations['TOUCHPOINTS']].copy()
-        if control_df is None: control_df = filteredFeature_df[self.responseModel.configurations['CONTROL_VARIABLES_BASE']].copy()
+        if spendings_df is None: spendings_df = filteredFeature_df[self.responseModel.baseConfig['TOUCHPOINTS']].copy()
+        if control_df is None: control_df = filteredFeature_df[self.responseModel.baseConfig['CONTROL_VARIABLES_BASE']].copy()
 
         #extract sales predictions from changed spendingsFrame
         factor_df, y_pred = BUSINESS_OUTPUT.applyParameters.applyParametersToData(raw_data = spendings_df,
-                                                            original_spendings = feature_df[self.responseModel.configurations['TOUCHPOINTS']].copy(),
+                                                            original_spendings = feature_df[self.responseModel.baseConfig['TOUCHPOINTS']].copy(),
                                                             parameters = parameters,
-                                                            configurations= self.responseModel.configurations,
+                                                            baseConfig= self.responseModel.baseConfig,
                                                             responseModelConfig = self.responseModel.responseModelConfig,
-                                                            scope = self.responseModel.configurations['TOUCHPOINTS'],
-                                                            seasonality_df = filteredFeature_df[self.responseModel.configurations['SEASONALITY_VARIABLES_BASE']],
+                                                            scope = self.responseModel.baseConfig['TOUCHPOINTS'],
+                                                            seasonality_df = filteredFeature_df[self.responseModel.baseConfig['SEASONALITY_VARIABLES_BASE']],
                                                             control_df = control_df)
         
         #prediction is equal to the (normalized prediction -1)*raw_sales.max()
@@ -150,7 +150,7 @@ class UpliftSimulation:
         #Execute calculation for different scopes (years individ. & all together)
         for subset in self.outputConfig['CHANGE_PERIODS']:
             #Simulate sales for each touchpoint and lift level
-            for touchpoint in self.responseModel.configurations['TOUCHPOINTS']:
+            for touchpoint in self.responseModel.baseConfig['TOUCHPOINTS']:
                 for lift in self.outputConfig['SPEND_UPLIFT_TO_TEST']:
 
                     #change spendings according to lift level and simulate the sales based on estimated parameters
@@ -190,8 +190,8 @@ class UpliftSimulation:
                     (weeklyPredictionCollect, 'weeklyPredictionCollect')] 
         
 
-        PYTEST.extractUplifts.setPredictData(datasets, self.responseModel.configurations['SET_MASTER'])
-        PYTEST.extractUplifts.setSpendingsData((spendsCollect, 'spendsCollect'), self.responseModel.configurations['SET_MASTER'])
+        PYTEST.extractUplifts.setPredictData(datasets, self.responseModel.baseConfig['SET_MASTER'])
+        PYTEST.extractUplifts.setSpendingsData((spendsCollect, 'spendsCollect'), self.responseModel.baseConfig['SET_MASTER'])
         '''
     def runBaselineExtract(self,parameters,filteredFeature_df, feature_df,brand):
         '''
@@ -203,8 +203,8 @@ class UpliftSimulation:
         #merge all touchpoints (all influencers that have to be ommited from the baseline)
         #should include also the control variables such as promotion, distribution, ...
         #seasonality however stays part of the baseline
-        touchpoints = [x for x in self.responseModel.configurations['TOUCHPOINTS']]
-        controlVariables = [x for x in self.responseModel.configurations['CONTROL_VARIABLES_BASE']]
+        touchpoints = [x for x in self.responseModel.baseConfig['TOUCHPOINTS']]
+        controlVariables = [x for x in self.responseModel.baseConfig['CONTROL_VARIABLES_BASE']]
         for subset in self.outputConfig['CHANGE_PERIODS']:
 
             #simulate zero spendings to get baseline (ALL spendings and control variables)
@@ -225,7 +225,7 @@ class UpliftSimulation:
         #Execute calculation for different scopes (years individ. & all together)
         for subset in self.outputConfig['CHANGE_PERIODS']:
             #Simulate sales for each touchpoint and lift level
-            for control in self.responseModel.configurations['CONTROL_VARIABLES_BASE']:
+            for control in self.responseModel.baseConfig['CONTROL_VARIABLES_BASE']:
                 
                 control_df = self.changeControl(filteredFeature_df = filteredFeature_df,controlVariable = [control], subset=subset)
 
@@ -242,7 +242,7 @@ class UpliftSimulation:
 
     def runPipeline(self):
 
-        for brand in self.responseModel.configurations['BRANDS']:
+        for brand in self.responseModel.baseConfig['BRANDS']:
 
             filteredFeature_df = self.responseModel.filteredFeature_df[self.responseModel.filteredFeature_df['BRAND']==brand].reset_index()
             feature_df = self.responseModel.feature_df[self.responseModel.feature_df['BRAND']==brand].reset_index()

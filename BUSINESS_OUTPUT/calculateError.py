@@ -5,7 +5,7 @@ import sklearn.metrics
 
 def calculateError(responseModel, volumeContribution):
     r2_collection=[]
-    for brand in responseModel.configurations['BRANDS']:
+    for brand in responseModel.baseConfig['BRANDS']:
         filteredFeature_df = responseModel.filteredFeature_df[responseModel.filteredFeature_df['BRAND']==brand]
         #take prediction as weekly prediction without error correction
         prediction = volumeContribution.deltaToZeroDict[(brand,'ALL')]['total_predict']

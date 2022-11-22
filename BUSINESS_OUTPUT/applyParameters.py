@@ -6,7 +6,7 @@ import HELPER_FUNCTIONS.hillFunction
 
 #use the estimated parameters to combine with model to calculate sales prediction
 
-def applyParametersToData(raw_data,original_spendings, parameters, configurations, responseModelConfig, scope, seasonality_df, control_df):
+def applyParametersToData(raw_data,original_spendings, parameters, baseConfig, responseModelConfig, scope, seasonality_df, control_df):
 
 
     media_adstocked = HELPER_FUNCTIONS.adstockFunctions.adstock_transform(media = raw_data[scope],
@@ -15,11 +15,11 @@ def applyParametersToData(raw_data,original_spendings, parameters, configuration
                                                                          responseModelConfig = responseModelConfig)
 
 
-    #media_shaped = media_adstocked
     media_shaped = HELPER_FUNCTIONS.hillFunction.hill_transform(data = media_adstocked,
                                                         raw_data = original_spendings,
                                                         scope=scope, 
                                                         parameters=parameters, 
+                                                        baseConfig = baseConfig,
                                                         responseModelConfig=responseModelConfig)
 
     
@@ -31,7 +31,7 @@ def applyParametersToData(raw_data,original_spendings, parameters, configuration
     #calculation of x**Beta for the media variables and the control model variables (= basesales)
     #we take the media_impressions (mean transformed)^Beta_i
     
-    factor_df = pd.DataFrame(columns=scope+['intercept']+configurations['SEASONALITY_VARIABLES_BASE']+configurations['CONTROL_VARIABLES_BASE'])
+    factor_df = pd.DataFrame(columns=scope+['intercept']+baseConfig['SEASONALITY_VARIABLES_BASE']+baseConfig['CONTROL_VARIABLES_BASE'])
    
     for touchpoint in scope:
         factor_df[touchpoint] = media_shaped[touchpoint] ** parameters[f'{touchpoint}_beta']

@@ -27,7 +27,7 @@ functions {
     real Shape(real t, real H, real S) {
         return ((t^S) / (H^S+t^S));
     }
-    real transform(row_vector spendings, int N,int nn, int max_lag, real decay, real shape, real scale, real threshold, real touchpointNorm){
+    real transform(row_vector spendings, int N,int nn, int max_lag, real decay, real shape, real scale, real threshold){
         real shaped_touchoint;
         real adstocked_spendings;
         real shaped_touchpoint;
@@ -40,7 +40,7 @@ functions {
             lag_weights[max_lag-lag] = pow(decay, lag);
         }
         adstocked_spendings = Adstock(spendings[nn:nn+max_lag-1], lag_weights);
-        shaped_touchpoint = shape_with_threshold(adstocked_spendings,shape, scale, threshold/touchpointNorm);
+        shaped_touchpoint = shape_with_threshold(adstocked_spendings,shape, scale, threshold);
         touchpoint_transformed = log1p(shaped_touchpoint);
         
         
@@ -82,8 +82,6 @@ data {
   real control [B,N,num_control] ;
   // threshold values
   vector [num_touchpoints] touchpointThresholds;
-  // list of mean values of touchpoints (raw data)
-  vector [num_touchpoints] touchpointNorms;
   //shape shift values to adapt S/C-curve
   vector [num_touchpoints] shape_shift;
   
@@ -142,13 +140,13 @@ transformed parameters {
     
     for (b in 1 : B) {
         for (nn in 1:N) {
-            tom_transformed[b,nn] = transform(tom[b], N,nn, max_lag,decay[1], shape[1],scale[1],touchpointThresholds[1],touchpointNorms[1]);
-            laura_transformed[b,nn] = transform(laura[b], N,nn, max_lag,decay[2], shape[2],scale[2],touchpointThresholds[2],touchpointNorms[2]);
-            lisa_transformed[b,nn] = transform(lisa[b], N,nn, max_lag,decay[3], shape[3],scale[3],touchpointThresholds[3],touchpointNorms[3]);
-            mary_transformed[b,nn] = transform(mary[b], N,nn, max_lag,decay[4], shape[4],scale[4],touchpointThresholds[4],touchpointNorms[4]);
-            fiona_transformed[b,nn] = transform(fiona[b], N,nn, max_lag,decay[5], shape[5],scale[5],touchpointThresholds[5],touchpointNorms[5]);
-            marc_transformed[b,nn] = transform(marc[b], N,nn, max_lag,decay[6], shape[6],scale[6],touchpointThresholds[6],touchpointNorms[6]);
-            alex_transformed[b,nn] = transform(alex[b], N,nn, max_lag,decay[7], shape[7],scale[7],touchpointThresholds[7],touchpointNorms[7]);
+            tom_transformed[b,nn] = transform(tom[b], N,nn, max_lag,decay[1], shape[1],scale[1],touchpointThresholds[1]);
+            laura_transformed[b,nn] = transform(laura[b], N,nn, max_lag,decay[2], shape[2],scale[2],touchpointThresholds[2]);
+            lisa_transformed[b,nn] = transform(lisa[b], N,nn, max_lag,decay[3], shape[3],scale[3],touchpointThresholds[3]);
+            mary_transformed[b,nn] = transform(mary[b], N,nn, max_lag,decay[4], shape[4],scale[4],touchpointThresholds[4]);
+            fiona_transformed[b,nn] = transform(fiona[b], N,nn, max_lag,decay[5], shape[5],scale[5],touchpointThresholds[5]);
+            marc_transformed[b,nn] = transform(marc[b], N,nn, max_lag,decay[6], shape[6],scale[6],touchpointThresholds[6]);
+            alex_transformed[b,nn] = transform(alex[b], N,nn, max_lag,decay[7], shape[7],scale[7],touchpointThresholds[7]);
         }
     }
     
@@ -183,11 +181,6 @@ model {
     beta_seasonality_raw[b] ~ normal(0, 1);
     }
 
-//for (i in 1 : B) {
-//    for (n in 1:num_seasons){
-//        beta_seasonality_raw[i,n] ~ normal(0, 1);
-//        }
-//  }
   
   sigma ~ normal(0, 1);
 

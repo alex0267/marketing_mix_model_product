@@ -52,12 +52,12 @@ class VolumeContribution:
             deltaToZeroSimulations=pd.DataFrame()
             
             #include volume contribution of each touchpoint
-            for touchpoint in self.responseModel.configurations['TOUCHPOINTS']:
+            for touchpoint in self.responseModel.baseConfig['TOUCHPOINTS']:
 
                 deltaToZeroSimulations[touchpoint] = self.upliftSimulation.deltaCurrentToZero[(brand,subset,touchpoint)]
 
             #include volume contribution of each touchpoint
-            for control in self.responseModel.configurations['CONTROL_VARIABLES_BASE']:
+            for control in self.responseModel.baseConfig['CONTROL_VARIABLES_BASE']:
 
                 deltaToZeroSimulations[control] = self.upliftSimulation.deltaControlToNeutral[(brand,subset,control)]
 
@@ -93,10 +93,10 @@ class VolumeContribution:
             #multiply error with the predicted contribution for each factor
 
             #include touchpoints
-            for touchpoint in self.responseModel.configurations['TOUCHPOINTS']:
+            for touchpoint in self.responseModel.baseConfig['TOUCHPOINTS']:
                 deltaToZeroCorrected[touchpoint] = error*self.deltaToZeroDict[(brand,subset)][touchpoint]
 
-            for control in self.responseModel.configurations['CONTROL_VARIABLES_BASE']:
+            for control in self.responseModel.baseConfig['CONTROL_VARIABLES_BASE']:
                 deltaToZeroCorrected[control] = error*self.deltaToZeroDict[(brand,subset)][control]
 
             #include basesales
@@ -121,7 +121,7 @@ class VolumeContribution:
 
     def runPipeline(self):
        
-        for brand in self.responseModel.configurations['BRANDS']:
+        for brand in self.responseModel.baseConfig['BRANDS']:
             filteredFeature_df = self.responseModel.filteredFeature_df[self.responseModel.filteredFeature_df['BRAND']==brand].reset_index()
 
             self.calculateVolumeContribution(brand,filteredFeature_df)
