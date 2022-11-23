@@ -1,4 +1,19 @@
-MAX_LAG: 4
+MAX_LAG: 8
+
+SHAPE_SHIFT_PRIOR:
+  tom: 1
+  laura: 1
+  lisa: 1
+  mary: 1
+  fiona: 1
+  marc: 1
+  alex: 0
+
+# _stan_shape_shift_prior_print: 1
+# _stan_shape_shift_prior_ooh: 1
+# _stan_shape_shift_prior_digital_other: 1
+# _stan_shape_shift_prior_digital_vol: 1
+# _stan_shape_shift_prior_digital_social_media: 1
 
 NORMALIZATION_STEPS_CONTROL:
   #promotion: logp1

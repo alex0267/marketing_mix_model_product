@@ -1,5 +1,4 @@
-import warnings
-warnings.simplefilter(action='ignore', category=UserWarning)
+
 
 import pandas as pd
 pd.options.mode.chained_assignment = None
