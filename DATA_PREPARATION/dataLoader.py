@@ -71,7 +71,6 @@ def loadData(configurations):
     #not all tables have data in 2022 -> filter until last week of 2021 (202152)
     sellOut_df['YEAR'] = sellOut_df['YEAR_WEEK'].astype(str).str[:4]
     sellOut_df = sellOut_df[sellOut_df['YEAR'].isin(['2019','2020','2021'])]
-    print(sellOut_df)
     
     #touchpoint spendings data
     mediaExec_df = pd.read_excel('DATA/CALENDAR_YEAR/FRA_SPEND_MEDIA_EXECUTION_MAPPING.xlsx')

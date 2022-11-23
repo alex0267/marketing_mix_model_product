@@ -2,6 +2,6 @@
 #it is not advised to choose a number which is evenly dividable by the number of years in scope
 NUMBER_OF_FOLDS: 5
 
-
+#Not functional
 START_PERIOD: 201901
 END_PERIOD: 202007
