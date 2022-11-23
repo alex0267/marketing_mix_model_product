@@ -1,5 +1,4 @@
 
-
 import DATA_PREPARATION.seasonality
 import DATA_PREPARATION.promotion
 import DATA_PREPARATION.distribution
@@ -39,10 +38,10 @@ def filterByWeeks(feature_df,uniqueWeeks_df, baseConfig, runBackTest, split):
     filteredWeeks = uniqueWeeks_df[(uniqueWeeks_df['YEAR_WEEK']== baseConfig['DATA_START']).idxmax():].reset_index()
     filteredWeeks = filteredWeeks[:(filteredWeeks['YEAR_WEEK'] == baseConfig['DATA_END']).idxmax()+1] 
 
-    feature_df = feature_df[(feature_df['YEAR_WEEK'].isin(filteredWeeks['YEAR_WEEK']))].reset_index()
+    feature_df = feature_df[(feature_df['YEAR_WEEK'].isin(filteredWeeks['YEAR_WEEK']))].reset_index(drop=True)
     
     if (runBackTest == True):
-        feature_df = feature_df[(feature_df['YEAR_WEEK'].isin(split))].reset_index()
+        feature_df = feature_df[(feature_df['YEAR_WEEK'].isin(split))].reset_index(drop=True)
 
     return feature_df
 

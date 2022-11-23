@@ -31,8 +31,12 @@ def run(runBackTest=False, split = False, name = False, load = True):
                 outputConfig = yaml.safe_load(file)
     
     
-    outputName = f'{name}_{str(load)}'
-
+    
+    if runBackTest==True:
+        outputName = f'BACKTEST/{name}_{str(load)}'
+    else:
+        outputName = f'{name}_{str(load)}'
+    
     path = f'OUTPUT/{outputName}'
     if not os.path.isdir(path):
         os.mkdir(path)
@@ -55,7 +59,6 @@ def run(runBackTest=False, split = False, name = False, load = True):
                                                                                                                     split = split,
                                                                                                                     name = outputName)
 
-    
 
     # Initialize Model instance and Train Bayesian Model 
     responseModel = RESPONSE_MODEL.ResponseModel.ResponseModel(baseConfig = baseConfig,
@@ -93,7 +96,8 @@ def run(runBackTest=False, split = False, name = False, load = True):
     #PYTEST.mainComparisonTests.runComparisonTests() 
     print(f'r2 collection: {r2}')
     return r2
-    
+    ''''''
+    #return 0
     
     
     ''''''

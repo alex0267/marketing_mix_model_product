@@ -83,9 +83,9 @@ data {
   // threshold values
   vector [num_touchpoints] touchpointThresholds;
   //shape shift values to adapt S/C-curve
-  vector [num_touchpoints] shape_shift;
-  
+  vector [num_touchpoints] shape_shift;  
 }
+
 // -----------------------------------    PARAMETERS    -----------------------------------
 parameters {
   // residual variance
@@ -97,7 +97,7 @@ parameters {
   matrix[B,11] beta_seasonality_raw;
   
   vector<lower=0>[B] beta_tom;
-  vector<lower=0>[B]beta_laura;
+  vector<lower=0>[B] beta_laura;
   vector<lower=0>[B] beta_lisa;
   vector<lower=0>[B] beta_mary;
   vector<lower=0>[B] beta_fiona;
@@ -115,7 +115,7 @@ parameters {
   vector<lower=0,upper=ceil(max_lag/2)>[num_touchpoints] peak;
   //Shape parameters - distributed, impression-oriented spendings
   vector<lower=0>[num_touchpoints] shape_raw;
-  vector<lower=0, upper=1> [num_touchpoints] scale ;
+  vector<lower=0, upper=1> [num_touchpoints] scale;
 }
 // -----------------------------------    TRANSFORMATION    -----------------------------------
 transformed parameters {

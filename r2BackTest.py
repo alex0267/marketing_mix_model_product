@@ -50,14 +50,14 @@ def runBackTest():
 
         #Define configurations to be used
         with open('CONFIG/baseConfig.yaml', 'r') as file:
-                configurations = yaml.safe_load(file)
+                baseConfig = yaml.safe_load(file)
 
         with open('CONFIG/testConfig.yaml', 'r') as file:
                 testConfig = yaml.safe_load(file)
 
         
 
-        mediaExec_df, sellOut_df, sellOutDistribution_df, sellOutCompetition_df, covid_df, uniqueWeeks_df, filteredUniqueWeeks_df = loadData(configurations)
+        mediaExec_df, sellOut_df, sellOutDistribution_df, sellOutCompetition_df, covid_df, uniqueWeeks_df, filteredUniqueWeeks_df,netSales_df = loadData(baseConfig)
 
         #filteredUniqueWeeks is not split directly via KFold since otherwise splits are taken at random throughout the dataset
         #we require windows since we are dealing with a time series
@@ -66,25 +66,34 @@ def runBackTest():
         kf = KFold(n_splits=testConfig['NUMBER_OF_FOLDS'], shuffle=True, random_state=3)
 
         nrFold = 0
-        results_dict={}
 
+        crossVal_df = []
         for train_index, test_index in (kf.split(splits)):
                 nrFold = nrFold +1
-                
-
+                     
                 train_split = split_df(filteredUniqueWeeks_df,train_index,splits)
+          
 
-                r2 = runPipeline.run(runBackTest = True, split = train_split, name = f'r2_Backtest_fold_NO_COVID_{nrFold}', load = False)
-                print(f'TRAIN - r2_Backtest_fold_NO_COVID_{nrFold}: {r2}')
-                results_dict[f'TRAIN - r2_Backtest_fold_NO_COVID_{nrFold}'] = r2
+                r2_train = runPipeline.run(runBackTest = True, split = train_split, name = f'r2_Backtest_fold_NO_COVID_{nrFold}', load = False)
+
+                for i,brand in enumerate(baseConfig['BRANDS']):
+                        crossVal_df.append([brand,'train',nrFold,r2_train[i]])
+
+                # print(f'TRAIN - r2_Backtest_fold_NO_COVID_{nrFold}: {r2}')
+                # results_dict[f'TRAIN - r2_Backtest_fold_NO_COVID_{nrFold}'] = r2
                 
                 test_split = split_df(filteredUniqueWeeks_df,test_index,splits)
 
-                r2 = runPipeline.run(runBackTest = True, split = test_split, name = f'r2_Backtest_fold_NO_COVID_{nrFold}', load = True)
-                print(f'TEST - r2_Backtest_fold_NO_COVID_{nrFold}: {r2}')
-                results_dict[f'TEST - r2_Backtest_fold_NO_COVID_{nrFold}'] = r2
+                r2_test = runPipeline.run(runBackTest = True, split = test_split, name = f'r2_Backtest_fold_NO_COVID_{nrFold}', load = True)
 
-        print(results_dict)
+                for i,brand in enumerate(baseConfig['BRANDS']):
+                        crossVal_df.append([brand,'test',nrFold,r2_test[i]])
+                # print(f'TEST - r2_Backtest_fold_NO_COVID_{nrFold}: {r2}')
+                # results_dict[f'TEST - r2_Backtest_fold_NO_COVID_{nrFold}'] = r2
+                
+        crossVal_df = pd.DataFrame(crossVal_df).rename(columns={0:'BRAND',1:'mode',3:'fold',4:'r2'})
+        print(crossVal_df)
+        crossVal_df.to_excel('OUTPUT/BACKTEST/crossVal_df.xlsx')
 
  
 

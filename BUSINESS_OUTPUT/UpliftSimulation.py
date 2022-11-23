@@ -166,7 +166,7 @@ class UpliftSimulation:
                     
                 #extraction of uplifts for result comparison
                 '''
-                #R2 BACKTEST OUT OF ORDER DUE TO MULTI BRAND CHANGES
+                #DATA SIMILARITY TESTING OUT OF ORDER DUE TO MULTI BRAND CHANGES
                 meansPerPrediction, meanOfTotalPrediction, weeklyPrediction, spends = PYTEST.extractUplifts.extractUplifts(self.spendings,self.prediction, subset, touchpoint,self.outputConfig['SPEND_UPLIFT_TO_TEST'])
                 meansPerPredictionCollect = pd.concat([meansPerPredictionCollect, meansPerPrediction],axis=0)
                 meanOfTotalPredictionCollect = pd.concat([meanOfTotalPredictionCollect, meanOfTotalPrediction],axis=0)
@@ -181,7 +181,7 @@ class UpliftSimulation:
                 self.deltaCurrentToZero[(brand,subset,touchpoint)] = self.prediction[(brand, subset,touchpoint,1.0)]-self.prediction[(brand, subset,touchpoint,0.0)] 
         
         '''
-        #R2 BACKTEST OUT OF ORDER DUE TO MULTI BRAND CHANGES
+        #DATA SIMILARITY TESTING OUT OF ORDER DUE TO MULTI BRAND CHANGES
         meansPerPredictionCollect = meansPerPredictionCollect.rename(columns={0:'index',1:'predict'})
         meanOfTotalPredictionCollect = meanOfTotalPredictionCollect.rename(columns={0:'index',1:'predict'})
         
