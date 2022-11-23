@@ -5,8 +5,22 @@ import BUSINESS_OUTPUT.extractSummary
 import BUSINESS_OUTPUT.ROSCalculation
 import BUSINESS_OUTPUT.calculateError
 import BUSINESS_OUTPUT.plotContribution
+import os
+import sys
+
+
+def createOutputFolder(responseModel, name):
+    path = f'OUTPUT/{name}'
+    if not os.path.isdir(path):
+        os.mkdir(path)
+
+    responseModel.filteredFeature_df.to_excel(f'OUTPUT/{name}/filteredFeature_df.xlsx')
+    responseModel.normalizedFilteredFeature_df.to_excel(f'OUTPUT/{name}/normalizedFilteredFeature_df.xlsx')
+        
 
 def createBusinessOutputs(responseModel, outputConfig, price_df,name):
+
+    createOutputFolder(responseModel, name)
 
     #Decompose absolute contribution by touchpoint
     
@@ -18,7 +32,6 @@ def createBusinessOutputs(responseModel, outputConfig, price_df,name):
     volumeContribution = BUSINESS_OUTPUT.VolumeContribution.VolumeContribution(upliftSimulation = upliftSimulation, 
                                                                                         responseModel = responseModel,
                                                                                         outputConfig = outputConfig)
-    
 
 
     BUSINESS_OUTPUT.plotContribution.plotContribution(volumeContribution,responseModel.configurations,name)
@@ -36,12 +49,12 @@ def createBusinessOutputs(responseModel, outputConfig, price_df,name):
     ROS = BUSINESS_OUTPUT.ROSCalculation.ROSCalculation(responseModel = responseModel,
                                                        volumeContribution = volumeContribution,
                                                        outputConfig = outputConfig,
-                                                       price_df = price_df)
+                                                       price_df = price_df,
+                                                       name = name)
     
     #Calculate error based on volume Contribution
     r2 = BUSINESS_OUTPUT.calculateError.calculateError(responseModel = responseModel,
                                                        volumeContribution = volumeContribution)
-    
     
     #Generate summary based on volumeContribution and ROS
     BUSINESS_OUTPUT.extractSummary.extractSummary(responseModel = responseModel,
@@ -49,7 +62,5 @@ def createBusinessOutputs(responseModel, outputConfig, price_df,name):
                                                   ROS_Calculation = ROS, 
                                                   outputConfig = outputConfig,
                                                   name = name)
-    '''
-    r2 = 0
-    '''
+
     return r2

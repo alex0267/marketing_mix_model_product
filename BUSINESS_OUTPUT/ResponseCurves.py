@@ -45,7 +45,7 @@ class ResponseCurves:
             plt.legend()
 
         
-        plt.savefig(f'BUSINESS_OUTPUT/RESPONSE_CURVE_PLOTS/{self.name}/responseCurve_{brand}_{subset}.png')
+        plt.savefig(f'OUTPUT/{self.name}/RESPONSE_CURVE_PLOTS/responseCurve_{brand}_{subset}.png')
         plt.clf()
         return 0
 
@@ -55,7 +55,7 @@ class ResponseCurves:
         analyzeRC_df= []
 
         #we create a path to gather the outputs per run
-        path = f'BUSINESS_OUTPUT/RESPONSE_CURVE_PLOTS/{self.name}'
+        path = f'OUTPUT/{self.name}/RESPONSE_CURVE_PLOTS'
         if not os.path.isdir(path):
             os.mkdir(path)
 
@@ -122,7 +122,7 @@ class ResponseCurves:
 
         analyzeRC_df = pd.DataFrame(analyzeRC_df)
 
-        analyzeRC_df.to_excel('analyseRC_df.xlsx')
+        analyzeRC_df.to_excel(f'OUTPUT/{self.name}/analyseRC_df.xlsx')
 
                         
 

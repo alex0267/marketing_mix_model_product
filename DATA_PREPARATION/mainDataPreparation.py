@@ -81,6 +81,13 @@ def createFeatureDf(configurations, mediaExec_df, sellOut_df, sellOutDistributio
 
     promotion_df = DATA_PREPARATION.promotion.compute_price_discount_feature(sellOut_df.copy(),sellOutDistribution_df.copy(),configurations, quantile_reference=0.9)
     feature_df = feature_df.merge(promotion_df[["YEAR_WEEK","BRAND","promotion"]], on=["YEAR_WEEK","BRAND"])
+    # promotion_df = pd.read_excel('DATA/CALENDAR_YEAR/comparePromotion.xlsx')
+    # promotion_df = promotion_df.replace(['lillet', 'suze','pastis_51','ricard','beefeater','havana_club','absolut','ballantines','chivas_regal','c_campbell','jameson_irish_whisky','aberlour','mumm_champagne'],
+    #                                     ['ideal_mouse', 'angry_cat','lully','fast_duck','red_ballon','gold_plane','moistured_bird','visitor','gracious_road','viable_line','silver_coin','heavy_feather','precious_liquid']
+    #                                           )
+
+    # feature_df = feature_df.merge(promotion_df[["YEAR_WEEK","BRAND","PR"]], on=["YEAR_WEEK","BRAND"])
+    
     
     distribution_df = DATA_PREPARATION.distribution.construct_distribution_feature(sell_out_distribution_df = sellOutDistribution_df.copy(),
                                                                                   configurations = configurations,
@@ -156,8 +163,6 @@ def run(configurations, responseModelConfig, mediaExec_df, sellOut_df, sellOutDi
     filteredFeature_df = filterByWeeks(feature_df.copy(),uniqueWeeks_df, configurations, runBackTest, split)
     normalizedFilteredFeature_df = filterByWeeks(normalizedFeature_df.copy(), uniqueWeeks_df,configurations,runBackTest, split)
 
-    filteredFeature_df.to_excel('OUTPUT_DF/filteredFeature_df.xlsx')
-    normalizedFilteredFeature_df.to_excel('OUTPUT_DF/normalizedFilteredFeature_df.xlsx')
 
     netPrice_df = createNetPriceDf(netSales_df,configurations, filteredFeature_df)
 

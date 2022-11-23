@@ -1,7 +1,6 @@
 import DATA_PREPARATION.mainDataPreparation
 import RESPONSE_MODEL.ResponseModel
-import RESPONSE_MODEL.stanFile
-import RESPONSE_MODEL.stan2
+import RESPONSE_MODEL.stanModel
 import BUSINESS_OUTPUT.mainBusinessOutput
 import DATA_PREPARATION.dataLoader
 import PYTEST.mainComparisonTests
@@ -47,8 +46,8 @@ def run(runBackTest=False, split = False, name = False, load = True):
                                                                                                                     runBackTest = runBackTest,
                                                                                                                     split = split)
 
-
     
+
     # Initialize Model instance and Train Bayesian Model 
     responseModel = RESPONSE_MODEL.ResponseModel.ResponseModel(configurations = configurations,
                                                         responseModelConfig= responseModelConfig,
@@ -57,7 +56,7 @@ def run(runBackTest=False, split = False, name = False, load = True):
                                                         normalizedFeature_df = normalizedFeature_df,
                                                         normalizedFilteredFeature_df = normalizedFilteredFeature_df,
                                                         index_df = index_df,
-                                                        stanCode = RESPONSE_MODEL.stan2.stanCode)
+                                                        stanCode = RESPONSE_MODEL.stanModel.stanCode)
     
     #checkpoint test
     #PYTEST.mainComparisonTests.compareEntryData()
@@ -90,12 +89,17 @@ def run(runBackTest=False, split = False, name = False, load = True):
     #test_multi-vector_CAL_fast_duck
     #test_multi-vector_CAL_ALL_8_adstock_7
     #test_multi-vector_CAL_ALL_8_adstock_SHIFT_fast_duck
-    
-    responseModel.runModel(name =name, load=load)
-    responseModel.extractParameters(printOut=False)
-    
+    #CAL_NEW_FEAT_7
+    #CAL_7_BRANDS_NEW_SATURATIONS
+    #CAL_7_BRANDS_NEW_SATURATIONS_NO_SHIFT
+
     outputName = f'{name}_{str(load)}'
     
+    responseModel.runModel(name =name,outputName = outputName, load=load)
+    responseModel.extractParameters(printOut=False)
+    
+    
+    '''
     #calculate contribution decomposition via estimated parameters and original spendings/sales
     r2 = BUSINESS_OUTPUT.mainBusinessOutput.createBusinessOutputs(responseModel = responseModel, 
                                                                   outputConfig = outputConfig,
@@ -109,5 +113,5 @@ def run(runBackTest=False, split = False, name = False, load = True):
     return r2
     
     
-    ''''''
-run(name = 'test_rng_2',load=True)
+    '''
+run(name = 'CAL_7_BRANDS_NEW_SATURATIONS_NO_SHIFT',load=True)

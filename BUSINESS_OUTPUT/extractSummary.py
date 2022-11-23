@@ -47,4 +47,4 @@ def extractSummary(responseModel, volumeContribution,ROS_Calculation, outputConf
 
        
 
-    resultSummary.to_excel(f'OUTPUT_DF/resultSummary_df_{name}.xlsx')
+    resultSummary.to_excel(f'OUTPUT/{name}/resultSummary_df.xlsx')

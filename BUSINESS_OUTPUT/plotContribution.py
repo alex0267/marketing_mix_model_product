@@ -34,14 +34,14 @@ def plotWeeklyContribution(volumeContribution,filteredFeature_df,brand,name):
     plt.plot(filteredFeature_df['TARGET_VOL_SO'], color='black')
     plt.title('Volume Contribution by contributor')
     plt.axis('tight')
-    plt.savefig(f'PLOTS/{name}/Contribution_Stacked_Area_Plot_{brand}.png', bbox_extra_artists=(lgd,), bbox_inches='tight')
+    plt.savefig(f'OUTPUT/{name}/CONTRIBUTION/Contribution_Stacked_Area_Plot_{brand}.png', bbox_extra_artists=(lgd,), bbox_inches='tight')
     plt.clf()
 
 
 def plotContribution(volumeContribution, configurations, name):
     
     #we create a path to gather the outputs per run
-    path = f'PLOTS/{name}'
+    path = f'OUTPUT/{name}/CONTRIBUTION'
     if not os.path.isdir(path):
         os.mkdir(path)
 
