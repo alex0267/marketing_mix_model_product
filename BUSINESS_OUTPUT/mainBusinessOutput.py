@@ -34,7 +34,7 @@ def createBusinessOutputs(responseModel, outputConfig, price_df,name):
                                                                                         outputConfig = outputConfig)
 
 
-    BUSINESS_OUTPUT.plotContribution.plotContribution(volumeContribution,responseModel.configurations,name)
+    BUSINESS_OUTPUT.plotContribution.plotContribution(volumeContribution,responseModel.baseConfig,name)
 
 
     #Generate response curves based on uplifts

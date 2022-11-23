@@ -55,7 +55,7 @@ class ROSCalculation:
                 ind, cont = HELPER_FUNCTIONS.getIndex.getIndex(indexColumns = index_df,scope='YEAR' , subset=scope)
                 if cont == True: continue
 
-                for touchpoint in self.responseModel.configurations['TOUCHPOINTS']:
+                for touchpoint in self.responseModel.baseConfig['TOUCHPOINTS']:
                     
                     totalVolumeContribution = (self.volumeContribution.absoluteContributionCorrected[(brand,scope)][touchpoint].iloc[ind])
                                     
@@ -63,7 +63,7 @@ class ROSCalculation:
                     
                     valueContribution = prices*totalVolumeContribution.values
 
-                    totalSpendings = filteredFeature_df[self.responseModel.configurations['TOUCHPOINTS']][touchpoint].iloc[ind].reset_index(drop = True)
+                    totalSpendings = filteredFeature_df[self.responseModel.baseConfig['TOUCHPOINTS']][touchpoint].iloc[ind].reset_index(drop = True)
 
                     if (subset=='ALL' and scope == 'ALL'):
                         self.prices_ALL[brand] = prices
@@ -79,7 +79,7 @@ class ROSCalculation:
 
     def runROSCalculation(self):
         ROS_df = []
-        for brand in self.responseModel.configurations['BRANDS']:
+        for brand in self.responseModel.baseConfig['BRANDS']:
             index_df = self.responseModel.index_df[self.responseModel.index_df['BRAND']==brand].reset_index()
             filteredFeature_df = self.responseModel.filteredFeature_df[self.responseModel.filteredFeature_df['BRAND']==brand].reset_index()
             ROS_df.append(self.calculateROS(brand,index_df,filteredFeature_df))

@@ -38,14 +38,14 @@ def plotWeeklyContribution(volumeContribution,filteredFeature_df,brand,name):
     plt.clf()
 
 
-def plotContribution(volumeContribution, configurations, name):
+def plotContribution(volumeContribution, baseConfig, name):
     
     #we create a path to gather the outputs per run
     path = f'OUTPUT/{name}/CONTRIBUTION'
     if not os.path.isdir(path):
         os.mkdir(path)
 
-    for brand in configurations['BRANDS']:
+    for brand in baseConfig['BRANDS']:
         filteredFeature_df = volumeContribution.responseModel.filteredFeature_df[volumeContribution.responseModel.filteredFeature_df['BRAND']==brand].reset_index()
 
         plotWeeklyContribution(volumeContribution,filteredFeature_df,brand,name)

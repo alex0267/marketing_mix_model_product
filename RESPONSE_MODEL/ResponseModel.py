@@ -11,9 +11,9 @@ import json
 #Also contains the functions to estimate and extract parameters
 class ResponseModel:
 
-    def __init__(self,configurations, responseModelConfig, feature_df, filteredFeature_df, normalizedFeature_df, normalizedFilteredFeature_df, index_df, stanCode):
+    def __init__(self,baseConfig, responseModelConfig, feature_df, filteredFeature_df, normalizedFeature_df, normalizedFilteredFeature_df, index_df, stanCode):
         #define configurations
-        self.configurations = configurations
+        self.baseConfig = baseConfig
         self.responseModelConfig = responseModelConfig
 
         #data
@@ -24,7 +24,7 @@ class ResponseModel:
         self.index_df = index_df
 
         #define data normalized
-        self.spendings_df_normalized, self.touchpointNorms = HELPER_FUNCTIONS.normalization.normalize_feature(filteredFeature_df[configurations['TOUCHPOINTS']],filteredFeature_df[configurations['TOUCHPOINTS']], self.responseModelConfig['NORMALIZATION_STEPS_TOUCHPOINTS'])
+        self.spendings_df_normalized, self.touchpointNorms = HELPER_FUNCTIONS.normalization.normalize_feature(filteredFeature_df[baseConfig['TOUCHPOINTS']],filteredFeature_df[baseConfig['TOUCHPOINTS']], self.baseConfig['NORMALIZATION_STEPS_TOUCHPOINTS'])
                 
         #easy access variables
         self.num_touchpoints = None
@@ -50,20 +50,20 @@ class ResponseModel:
         '''
 
         array = []
-        for brand in self.configurations['BRANDS']:
+        for brand in self.baseConfig['BRANDS']:
             feature_df = self.normalizedFilteredFeature_df.copy()
             element = feature_df[feature_df['BRAND']== brand][column]
 
             #in case there are no associated spendings for a specific touchpoint, add a 0 column (we need complete dataframes for stan)
             if(len(element) == 0):
-                element =  [0 for x in range(len(feature_df[self.configurations['TOUCHPOINTS']]))]
+                element =  [0 for x in range(len(feature_df[self.baseConfig['TOUCHPOINTS']]))]
 
             array.append(element)
 
         #add trailing 0's at touchpoints to account for adstock calculation overlap (calculating first weeks needs 0 weeks before first week)
         array = np.array(array)
-        if(column in (self.configurations['TOUCHPOINTS'])):
-            array = np.concatenate((np.zeros((len(self.configurations['BRANDS']),self.responseModelConfig['MAX_LAG']-1)),array),axis=1)
+        if(column in (self.baseConfig['TOUCHPOINTS'])):
+            array = np.concatenate((np.zeros((len(self.baseConfig['BRANDS']),self.responseModelConfig['MAX_LAG']-1)),array),axis=1)
             
         
         return array
@@ -74,8 +74,8 @@ class ResponseModel:
         '''
         create dictionary as input data for the stan model
         '''
-        self.num_touchpoints = len(self.configurations['TOUCHPOINTS'])
-        touchpointSpend_df = self.normalizedFilteredFeature_df[self.configurations['TOUCHPOINTS']]
+        self.num_touchpoints = len(self.baseConfig['TOUCHPOINTS'])
+        touchpointSpend_df = self.normalizedFilteredFeature_df[self.baseConfig['TOUCHPOINTS']]
 
         #the arrays have to be appended to account for the adstock overlap (last elements of series need to be adstocked as well)
         tom = self.createArrayPerBrand('tom')
@@ -90,15 +90,23 @@ class ResponseModel:
         distribution = self.createArrayPerBrand('distribution')
         promotion = self.createArrayPerBrand('promotion')
         off_trade_visibility = self.createArrayPerBrand('off_trade_visibility')
-        control = self.createArrayPerBrand(self.configurations['CONTROL_VARIABLES_BASE'])
-        season = self.createArrayPerBrand(self.configurations['SEASONALITY_VARIABLES_BASE'])
+        control = self.createArrayPerBrand(self.baseConfig['CONTROL_VARIABLES_BASE'])
+        season = self.createArrayPerBrand(self.baseConfig['SEASONALITY_VARIABLES_BASE'])
         is_last_week = self.createArrayPerBrand('is_last_week')
-        targetVar = self.createArrayPerBrand(self.configurations['TARGET'])
-        
+        targetVar = self.createArrayPerBrand(self.baseConfig['TARGET'])
+
+
+        #normalize the threshold values according to how their respective touchpoint got normalized (list comprehension)
+        threshold_normalized = [HELPER_FUNCTIONS.normalization.normalize_value(self.responseModelConfig['SHAPE_THRESHOLD_VALUE'][touchpoint],
+                                                                                self.filteredFeature_df[touchpoint], 
+                                                                                self.baseConfig['NORMALIZATION_STEPS_TOUCHPOINTS'][touchpoint],
+                                                                                name = touchpoint)
+                                                                                for touchpoint in self.baseConfig['TOUCHPOINTS']]
+
 
         self.stanDict = {
             'N': len(targetVar[0]),
-            'B' : len(self.configurations['BRANDS']),
+            'B' : len(self.baseConfig['BRANDS']),
             'max_lag': self.responseModelConfig['MAX_LAG'], 
             'num_touchpoints': self.num_touchpoints,
             'tom': tom,
@@ -113,29 +121,28 @@ class ResponseModel:
             'promotion':promotion,
             'off_trade_visibility':off_trade_visibility,
             'covid':covid,
-            'touchpointNorms': self.touchpointNorms,
-            'shape_shift': [self.responseModelConfig['SHAPE_SHIFT_PRIOR'][tp] for tp in self.configurations['TOUCHPOINTS']],
-            'touchpointThresholds': [self.responseModelConfig['SHAPE_THRESHOLD_VALUE'][tp] for tp in self.configurations['TOUCHPOINTS']],
-            'num_seasons': len(self.configurations['SEASONALITY_VARIABLES_BASE']),
+            'shape_shift': [self.responseModelConfig['SHAPE_SHIFT_PRIOR'][tp] for tp in self.baseConfig['TOUCHPOINTS']],
+            'touchpointThresholds': threshold_normalized,
+            'num_seasons': len(self.baseConfig['SEASONALITY_VARIABLES_BASE']),
             'seasonality': season[0],
             'is_last_week': is_last_week,
-            'num_control': len(self.configurations['CONTROL_VARIABLES_BASE']),
+            'num_control': len(self.baseConfig['CONTROL_VARIABLES_BASE']),
             'control': control,
             'volume': targetVar
         }      
         
-        
+        #can be exported to have an overview on the dictionary creation results
         dictTPSummary = pd.DataFrame()
         dictCTRLSummary = pd.DataFrame()
         for key in self.stanDict.keys():
-            if key in self.configurations['TOUCHPOINTS'] :
+            if key in self.baseConfig['TOUCHPOINTS'] :
                 dictTPSummary[key] = self.stanDict[key][0]
-            if key in self.configurations['CONTROL_VARIABLES_BASE'] :
+            if key in self.baseConfig['CONTROL_VARIABLES_BASE'] :
                 dictCTRLSummary[key] = self.stanDict[key][0]
 
 
         
-        PYTEST.extractEntryData.extractEntryData(self.stanDict, 'stanDict', self.configurations['SET_MASTER'])
+        PYTEST.extractEntryData.extractEntryData(self.stanDict, 'stanDict', self.baseConfig['SET_MASTER'])
         
 
     def extractParameters(self, printOut=False):
@@ -146,7 +153,7 @@ class ResponseModel:
         #pd.DataFrame(self.extractFrame.mean(axis=0)).to_csv('extractFrame.csv')
         self.parameters = {}
 
-        for i,brand in enumerate(self.configurations['BRANDS'],start = 1):
+        for i,brand in enumerate(self.baseConfig['BRANDS'],start = 1):
 
             brandEstimationsDict = {}
             self.parameters[brand] = brandEstimationsDict
@@ -156,19 +163,19 @@ class ResponseModel:
 
             #FOR NOW OK BUT NEED TO BE CHANGED WHEN SEASONALITY APPROACH IS CHANGED
             beta_seasonality=[]
-            for s, season in enumerate(self.configurations['SEASONALITY_VARIABLES_BASE'],start = 1):
+            for s, season in enumerate(self.baseConfig['SEASONALITY_VARIABLES_BASE'],start = 1):
                 beta_seasonality.append(self.extractFrame[f'beta_seasonality.{i}.{s}'].mean(axis=0))
             
             #we add a list as a dict object to facilitate beta extraction
             brandEstimationsDict[f'seasonality_beta'] = beta_seasonality
 
             beta_control=[]
-            for c, control in enumerate(self.configurations['CONTROL_VARIABLES_BASE'],start = 1):
+            for c, control in enumerate(self.baseConfig['CONTROL_VARIABLES_BASE'],start = 1):
                 beta_control.append(self.extractFrame[f'beta_{control}.{i}'].mean(axis=0))
             
             brandEstimationsDict[f'control_beta'] = beta_control
 
-            for t, touchpoint in enumerate(self.configurations['TOUCHPOINTS'],start = 1):
+            for t, touchpoint in enumerate(self.baseConfig['TOUCHPOINTS'],start = 1):
 
                 brandEstimationsDict[f'{touchpoint}_peak']  = self.extractFrame[f'peak.{t}'].mean(axis=0)
                 brandEstimationsDict[f'{touchpoint}_decay']  = self.extractFrame[f'decay.{t}'].mean(axis=0)

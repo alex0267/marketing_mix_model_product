@@ -11,12 +11,12 @@ BRANDS:
   - precious_liquid
   - heavy_feather
   - ideal_mouse
-  # - lully
-  # - moistured_bird
-  # - red_ballon
-  # - silver_coin
-  # - viable_line
-  # - visitor
+  - lully
+  - moistured_bird
+  - red_ballon
+  - silver_coin
+  - viable_line
+  - visitor
 
 # for predious_liquid - get rid of laura & alex
 TOUCHPOINTS:

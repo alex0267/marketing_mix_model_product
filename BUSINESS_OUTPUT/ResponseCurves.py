@@ -59,7 +59,7 @@ class ResponseCurves:
         if not os.path.isdir(path):
             os.mkdir(path)
 
-        for brand in self.responseModel.configurations['BRANDS']:
+        for brand in self.responseModel.baseConfig['BRANDS']:
             filteredFeature_df = self.responseModel.filteredFeature_df[self.responseModel.filteredFeature_df['BRAND']==brand].reset_index()
             price_df = self.price_df[self.price_df['BRAND']==brand]['NET_PRICE'].reset_index()
             
@@ -88,7 +88,7 @@ class ResponseCurves:
                     ind.extend(rangeList)
                     
                 '''
-                for touchpoint in self.responseModel.configurations['TOUCHPOINTS']:
+                for touchpoint in self.responseModel.baseConfig['TOUCHPOINTS']:
                     spendings = {}
                     deltaSales = {}
 
@@ -122,7 +122,7 @@ class ResponseCurves:
 
         analyzeRC_df = pd.DataFrame(analyzeRC_df)
 
-        analyzeRC_df.to_excel(f'OUTPUT/{self.name}/analyseRC_df.xlsx')
+        analyzeRC_df.to_excel(f'OUTPUT/{self.name}/ResponseCurves_df.xlsx')
 
                         
 

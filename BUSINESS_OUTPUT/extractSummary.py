@@ -10,7 +10,7 @@ def extractSummary(responseModel, volumeContribution,ROS_Calculation, outputConf
     - ROS
     '''
     resultSummary = pd.DataFrame()
-    for brand in responseModel.configurations['BRANDS']:
+    for brand in responseModel.baseConfig['BRANDS']:
         
         filteredFeature_df = responseModel.filteredFeature_df[responseModel.filteredFeature_df['BRAND']==brand].reset_index()
         
@@ -20,8 +20,8 @@ def extractSummary(responseModel, volumeContribution,ROS_Calculation, outputConf
         for item in outputConfig['CONTRIBUTORS']:
 
             #iterate through touchpoints and add spendings and ROS (touchpoint specific information)
-            if item in responseModel.configurations['TOUCHPOINTS']:
-                spendings = filteredFeature_df[responseModel.configurations['TOUCHPOINTS']][item].rename('spendings')
+            if item in responseModel.baseConfig['TOUCHPOINTS']:
+                spendings = filteredFeature_df[responseModel.baseConfig['TOUCHPOINTS']][item].rename('spendings')
                 ROS = ROS_Calculation.ROS_Weekly[(brand,item)]
                 ROS.replace([np.inf, -np.inf], 0, inplace=True)
 

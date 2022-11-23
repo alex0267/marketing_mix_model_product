@@ -1,61 +1,5 @@
 MAX_LAG: 8
 
-SHAPE_SHIFT_PRIOR:
-  tom: 1
-  laura: 1
-  lisa: 1
-  mary: 1
-  fiona: 1
-  marc: 1
-  alex: 0
-
-# _stan_shape_shift_prior_print: 1
-# _stan_shape_shift_prior_ooh: 1
-# _stan_shape_shift_prior_digital_other: 1
-# _stan_shape_shift_prior_digital_vol: 1
-# _stan_shape_shift_prior_digital_social_media: 1
-
-NORMALIZATION_STEPS_CONTROL:
-  #promotion: logp1
-  # epros: logp1
-  # covid: minus_mean
-
-  # covid_index:
-  #   - minus_mean
-  #   - std
-  #relative_gap_to_90th_price_off
-  #   - log
-  #   - minus_mean
-  #   - std
-  # discount_price_comp_to_pr_off:
-  #   - log
-  #   - minus_mean
-  #   - std
-  # off_trade_visibility:
-  #   - max
-  #   - log
-  # promo_epros:
-  #   - max
-  #   - log
-
-
-#defining normalization steps of touchpoints
-NORMALIZATION_STEPS_TOUCHPOINTS:
-  tom: ['custom_normalization']
-  laura: ['custom_normalization']
-  lisa: ['custom_normalization']
-  mary: ['custom_normalization']
-  jack: ['custom_normalization']
-  fiona: ['custom_normalization']
-  marc: ['custom_normalization']
-  alex: ['custom_normalization']
-
-#defining normalization steps of touchpoints
-#the normalization steps will follow the order below:
-NORMALIZATION_STEPS_TARGET:
-  TARGET_VOL_SO: ['max_across_brands', 'logp1']
-
-
 #not functional yet
 ADSTOCK_FUNCTION_TYPE:
   tom: 'impression_spendings'
@@ -67,13 +11,21 @@ ADSTOCK_FUNCTION_TYPE:
   marc: 'impression_spendings'
   alex: 'impression_spendings'
 
+SHAPE_SHIFT_PRIOR:
+  tom: 1
+  laura: 1
+  lisa: 1
+  mary: 1
+  fiona: 1
+  marc: 0
+  alex: 0
+
 
 SHAPE_THRESHOLD_VALUE:
   tom: 7000
   laura: 7000
   lisa: 5000
   mary: 3500
-  # jack: 3500
   fiona: 5000
   marc: 50000
   alex: 15000
@@ -83,7 +35,6 @@ SHAPE_SATURATION_VALUE:
   laura: 60000
   lisa: 50000
   mary: 72500
-  # jack: 90000
   fiona: 118347
   marc: 741429
   alex: 159942

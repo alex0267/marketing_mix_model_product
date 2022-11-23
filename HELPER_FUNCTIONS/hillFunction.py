@@ -47,7 +47,7 @@ def hill_function_old(adstocked_spending, S, H):
 
 #Definition of conversion process from Adstocked_media to Shaped_media
 #After estimation transformation
-def hill_transform(data, raw_data, scope, parameters, responseModelConfig):
+def hill_transform(data, raw_data, scope, parameters, baseConfig, responseModelConfig):
 
     media_shaped = pd.DataFrame()
     for i,touchpoint in enumerate(scope):
@@ -55,13 +55,13 @@ def hill_transform(data, raw_data, scope, parameters, responseModelConfig):
         #Return estimated parameters from dictionary
         shape,scale = parameters[f'{touchpoint}_shape'], parameters[f'{touchpoint}_scale']
         threshold = responseModelConfig['SHAPE_THRESHOLD_VALUE'][touchpoint]
-        threshold_normalized = HELPER_FUNCTIONS.normalization.normalize_value(threshold, raw_data[touchpoint], responseModelConfig['NORMALIZATION_STEPS_TOUCHPOINTS'][touchpoint], name = touchpoint)
+        threshold_normalized = HELPER_FUNCTIONS.normalization.normalize_value(threshold, raw_data[touchpoint], baseConfig['NORMALIZATION_STEPS_TOUCHPOINTS'][touchpoint], name = touchpoint)
         
 
         #normalize data
         data_normalized, data_norm = HELPER_FUNCTIONS.normalization.normalize_feature(feature_df = data[touchpoint],
                                                                            norm_data = raw_data[touchpoint],
-                                                                           normalization_steps = responseModelConfig['NORMALIZATION_STEPS_TOUCHPOINTS'][touchpoint], 
+                                                                           normalization_steps = baseConfig['NORMALIZATION_STEPS_TOUCHPOINTS'][touchpoint], 
                                                                            responseModelConfig = responseModelConfig)
 
         #shape transformation of normalized data

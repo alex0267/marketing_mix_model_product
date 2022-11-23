@@ -7,6 +7,7 @@ import PYTEST.mainComparisonTests
 
 import yaml
 import pandas as pd
+import os
 
 
 def run(runBackTest=False, split = False, name = False, load = True):
@@ -21,7 +22,7 @@ def run(runBackTest=False, split = False, name = False, load = True):
 
     #Define configurations to be used
     with open('CONFIG/baseConfig.yaml', 'r') as file:
-                configurations = yaml.safe_load(file)
+                baseConfig = yaml.safe_load(file)
 
     with open('CONFIG/responseModelConfig.yaml', 'r') as file:
                 responseModelConfig = yaml.safe_load(file)
@@ -30,11 +31,18 @@ def run(runBackTest=False, split = False, name = False, load = True):
                 outputConfig = yaml.safe_load(file)
     
     
-    mediaExec_df, sellOut_df, sellOutDistribution_df, sellOutCompetition_df, covid_df, uniqueWeeks_df, filteredUniqueWeeks_df,netSales_df = DATA_PREPARATION.dataLoader.loadData(configurations)
+    outputName = f'{name}_{str(load)}'
+
+    path = f'OUTPUT/{outputName}'
+    if not os.path.isdir(path):
+        os.mkdir(path)
+    
+    
+    mediaExec_df, sellOut_df, sellOutDistribution_df, sellOutCompetition_df, covid_df, uniqueWeeks_df, filteredUniqueWeeks_df,netSales_df = DATA_PREPARATION.dataLoader.loadData(baseConfig)
 
 
     #Create features and prepare data
-    feature_df, filteredFeature_df, normalizedFeature_df, normalizedFilteredFeature_df, index_df, netPrice_df = DATA_PREPARATION.mainDataPreparation.run(configurations = configurations,
+    feature_df, filteredFeature_df, normalizedFeature_df, normalizedFilteredFeature_df, index_df, netPrice_df = DATA_PREPARATION.mainDataPreparation.run(baseConfig = baseConfig,
                                                                                                                     responseModelConfig =  responseModelConfig,
                                                                                                                     mediaExec_df = mediaExec_df.copy(),
                                                                                                                     sellOut_df = sellOut_df.copy(),
@@ -44,12 +52,13 @@ def run(runBackTest=False, split = False, name = False, load = True):
                                                                                                                     uniqueWeeks_df = uniqueWeeks_df.copy(),
                                                                                                                     netSales_df = netSales_df.copy(),
                                                                                                                     runBackTest = runBackTest,
-                                                                                                                    split = split)
+                                                                                                                    split = split,
+                                                                                                                    name = outputName)
 
     
 
     # Initialize Model instance and Train Bayesian Model 
-    responseModel = RESPONSE_MODEL.ResponseModel.ResponseModel(configurations = configurations,
+    responseModel = RESPONSE_MODEL.ResponseModel.ResponseModel(baseConfig = baseConfig,
                                                         responseModelConfig= responseModelConfig,
                                                         feature_df = feature_df,
                                                         filteredFeature_df = filteredFeature_df,
@@ -63,43 +72,16 @@ def run(runBackTest=False, split = False, name = False, load = True):
     
     #model savings
 
-    #off trade
-    #fast_duck_V1_12
-    #gold_plane_V1_12
-    #precious_liquid_V1_12
-
-
-    #fast_duck_V1_TEST_2010 - should also be good version (contains test of mary merged)
-    #fast_duck_V1_TEST_2010_2_SAME - Same for comparison of variability
-    #fast_duck_V1_TEST_2010_3_SAME
-
-
-    #first attempt in multi brand vectorized version - all still one brand but brand capability is built in
-
-    # test_multi-vector12 - train on ALL brands
-    # test_multi-vector13 - train brand with five brands - this time normalized by max target per brand
-    #test_multi-single_angry_cat
-    #test_multi-single_gracious_road
-    #test_multi-vector14 - all brands
-    #test_multi-vector_7_brands
-
-    #CAL group relates to new dataset used
-
-    #test_multi-vector_CAL_ALL
-    #test_multi-vector_CAL_fast_duck
-    #test_multi-vector_CAL_ALL_8_adstock_7
-    #test_multi-vector_CAL_ALL_8_adstock_SHIFT_fast_duck
-    #CAL_NEW_FEAT_7
     #CAL_7_BRANDS_NEW_SATURATIONS
     #CAL_7_BRANDS_NEW_SATURATIONS_NO_SHIFT
+    #ALL_BRANDS_V01
+    
 
-    outputName = f'{name}_{str(load)}'
     
     responseModel.runModel(name =name,outputName = outputName, load=load)
     responseModel.extractParameters(printOut=False)
     
     
-    '''
     #calculate contribution decomposition via estimated parameters and original spendings/sales
     r2 = BUSINESS_OUTPUT.mainBusinessOutput.createBusinessOutputs(responseModel = responseModel, 
                                                                   outputConfig = outputConfig,
@@ -113,5 +95,6 @@ def run(runBackTest=False, split = False, name = False, load = True):
     return r2
     
     
-    '''
-run(name = 'CAL_7_BRANDS_NEW_SATURATIONS_NO_SHIFT',load=True)
+    
+    ''''''
+run(name = 'ALL_BRANDS_V01',load=True)
