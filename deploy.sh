@@ -16,6 +16,7 @@ source venv/bin/activate
 pip install pandas
 pip install numpy
 pip install datetime
+pip install yaml
 pip install pyyaml
 pip install matplotlib
 pip install seaborn
